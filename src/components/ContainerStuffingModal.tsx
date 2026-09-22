@@ -86,43 +86,8 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
     if (!isOpen) return;
 
     const unsubscribe = subscribeContainerItems(
-      async (firebaseItems) => {
-        if (firebaseItems.length > 0) {
-          setCargoItems(firebaseItems);
-        } else {
-          // If Firestore container specs are completely empty, let's pre-populate it with the active productionData POs
-          if (productionData && productionData.length > 0) {
-            const items: CargoItem[] = [];
-            let colorIdx = 0;
-            for (const po of productionData) {
-              for (const design of po.designs) {
-                const item: CargoItem = {
-                  id: `po-${po.po}-${design.batch}`,
-                  name: `${po.po} - ${design.name} (${design.size})`,
-                  lengthCm: 140,
-                  widthCm: 25,
-                  heightCm: 25,
-                  weightKg: 7.5,
-                  qty: design.qty,
-                  color: COLOR_PALETTE[colorIdx % COLOR_PALETTE.length],
-                  isCylinder: design.name.toLowerCase().includes('rug'),
-                  packageType: design.name.toLowerCase().includes('rug') ? 'roll' : 'box',
-                };
-                items.push(item);
-                colorIdx++;
-
-                try {
-                  await saveCargoItemToFirestore(item);
-                } catch (e) {
-                  console.warn('Failed to seed default cargo item to Firestore:', e);
-                }
-              }
-            }
-            setCargoItems(items);
-          } else {
-            setCargoItems([]);
-          }
-        }
+      (firebaseItems) => {
+        setCargoItems(firebaseItems);
       },
       (err) => {
         console.warn('Failed to subscribe to container cargo items:', err);
@@ -132,7 +97,7 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
     return () => {
       unsubscribe();
     };
-  }, [productionData, isOpen]);
+  }, [isOpen]);
 
   // New Item State
   const [newItemName, setNewItemName] = useState<string>('');

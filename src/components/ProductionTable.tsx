@@ -50,7 +50,7 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="bg-slate-900 text-white uppercase tracking-wider font-mono font-bold text-[11px] border-b-2 border-[#E4002B]">
+            <tr className="bg-slate-100 text-slate-800 uppercase tracking-wider font-mono font-bold text-[11px] border-b-2 border-[#E4002B]">
               <th className="py-4 px-4 text-center w-12">{t.view}</th>
               <th className="py-4 px-4">{t.poAndAppRef}</th>
               <th className="py-4 px-4 text-center">{t.designBatches}</th>
@@ -71,7 +71,7 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
 
               return (
                 <tr key={item.po} className={idx % 2 === 0 ? 'bg-white hover:bg-rose-50/30 transition' : 'bg-slate-50/70 hover:bg-rose-50/30 transition'}>
-                  <td className="py-3.5 px-4 text-center">
+                   <td className="py-3.5 px-4 text-center">
                     <button
                       id={`view-po-${item.po}`}
                       onClick={() => onViewDetails(realIndex)}
@@ -82,7 +82,7 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
                     </button>
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className="inline-block px-2.5 py-0.5 bg-slate-900 text-white rounded-md font-bold font-mono text-xs tracking-tight shadow-2xs">
+                    <span className="inline-block px-2.5 py-0.5 bg-slate-100 text-slate-800 border border-slate-200 rounded-md font-bold font-mono text-xs tracking-tight shadow-2xs">
                       {item.po}
                     </span>
                     <span className="text-[11px] text-[#E4002B] font-mono font-extrabold block mt-0.5">{item.appRef}</span>

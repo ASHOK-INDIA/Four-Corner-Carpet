@@ -274,15 +274,15 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
   return (
     <PageFlipModal isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-6xl" id="competitorIntelligenceModal">
       {/* Header */}
-      <div className="px-6 py-4 bg-slate-950 text-white border-b border-rose-700 flex items-center justify-between">
+      <div className="px-6 py-4 bg-slate-50 text-slate-800 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shadow-md">
-            <Globe className="w-5 h-5 text-slate-950" />
+          <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md">
+            <Globe className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-base font-bold tracking-wide">Competitor</h2>
-              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-[10px] font-mono font-bold uppercase">
+              <h2 className="text-base font-bold tracking-wide text-slate-800">Competitor Intelligence</h2>
+              <span className="px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded text-[10px] font-mono font-bold uppercase">
                 DE & Surrounding EU Kids Market
               </span>
             </div>
@@ -298,16 +298,16 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
       </div>
 
       {/* Main Body */}
-      <div className="p-5 lg:p-6 overflow-y-auto custom-scrollbar space-y-6 flex-1 bg-stone-50">
+      <div className="p-5 lg:p-6 overflow-y-auto custom-scrollbar space-y-6 flex-1 bg-slate-50">
         {/* Navigation Tabs Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-stone-100 p-2 rounded-xl border border-rose-700 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center space-x-1.5 overflow-x-auto custom-scrollbar">
             <button
               onClick={() => setActiveTab('trending_rugs')}
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 activeTab === 'trending_rugs'
                   ? 'bg-[#EF3340] text-white shadow-xs'
-                  : 'text-stone-600 hover:bg-stone-200'
+                  : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -318,7 +318,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 activeTab === 'trending_chairs'
                   ? 'bg-[#EF3340] text-white shadow-xs'
-                  : 'text-stone-600 hover:bg-stone-200'
+                  : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
               <ShoppingBag className="w-3.5 h-3.5" />
@@ -329,7 +329,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 activeTab === 'brands'
                   ? 'bg-[#EF3340] text-white shadow-xs'
-                  : 'text-stone-600 hover:bg-stone-200'
+                  : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
               <Globe className="w-3.5 h-3.5" />
@@ -340,7 +340,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 activeTab === 'market_insights'
                   ? 'bg-[#EF3340] text-white shadow-xs'
-                  : 'text-stone-600 hover:bg-stone-200'
+                  : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
@@ -349,33 +349,33 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
           </div>
 
           <div className="text-right px-2">
-            <span className="text-[11px] font-mono text-stone-500 block">Current Live Date:</span>
+            <span className="text-[11px] font-mono text-slate-500 block">Current Live Date:</span>
             <span className="text-xs font-bold font-mono text-[#EF3340]">{currentDateFormatted}</span>
           </div>
         </div>
 
         {/* Filter Toolbar */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-stone-100 p-3.5 rounded-xl border border-rose-700">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
           <div>
-            <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">Search Brand or Product</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Search Brand or Product</label>
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-stone-500 absolute left-3 top-2.5" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search Vertbaudet, Benuta..."
-                className="w-full bg-stone-50 border border-stone-300 rounded-lg pl-8 pr-3 py-1.5 text-xs text-stone-800 focus:outline-none focus:border-[#EF3340]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#EF3340] font-sans"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">Country Region</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Country Region</label>
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
-              className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-1.5 text-xs text-stone-800 cursor-pointer font-bold"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 cursor-pointer font-bold"
             >
               <option value="ALL">All EU Regions</option>
               <option value="DE">🇩🇪 Germany</option>
@@ -387,11 +387,11 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">Product Category</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Product Category</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full bg-stone-50 border border-stone-300 rounded-lg px-3 py-1.5 text-xs text-stone-800 cursor-pointer font-bold"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 cursor-pointer font-bold"
             >
               <option value="ALL">All Categories</option>
               <option value="Rugs">Kids Rugs & Play Mats</option>
@@ -405,7 +405,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
         {activeTab === 'trending_rugs' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-600" /> Top Selling Rugs ({currentDateFormatted})
               </h3>
             </div>
@@ -416,46 +416,46 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
                 return (
                   <div
                     key={brand.id}
-                    className="bg-stone-100 rounded-2xl border border-rose-700 shadow-xs hover:shadow-md transition p-4 space-y-3 flex flex-col justify-between"
+                    className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 space-y-3 flex flex-col justify-between"
                   >
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5 font-mono">
                           <span className="text-base">{brand.flag}</span> {brand.name}
                         </span>
-                        <span className="px-2 py-0.5 bg-stone-200 text-[#EF3340] border border-rose-700 font-mono font-bold text-[10px] rounded-full">
+                        <span className="px-2.5 py-0.5 bg-rose-50 text-[#EF3340] border border-rose-100 font-mono font-bold text-[10px] rounded-full">
                           {brand.growthYoY} YoY
                         </span>
                       </div>
-                      <h4 className="text-xs font-extrabold text-stone-900 leading-snug">{item.title}</h4>
-                      <div className="bg-stone-200 p-2.5 rounded-xl border border-stone-300 text-[11px] space-y-1 font-mono">
+                      <h4 className="text-xs font-extrabold text-slate-800 leading-snug">{item.title}</h4>
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] space-y-1 font-mono">
                         <div className="flex justify-between">
-                          <span className="text-stone-600">Retail Price:</span>
-                          <span className="font-bold text-stone-900">€{item.priceEur.toFixed(2)}</span>
+                          <span className="text-slate-500">Retail Price:</span>
+                          <span className="font-bold text-slate-800">€{item.priceEur.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-stone-600">Material:</span>
-                          <span className="font-bold text-emerald-800 truncate max-w-[150px]">{item.material}</span>
+                          <span className="text-slate-500">Material:</span>
+                          <span className="font-bold text-emerald-700 truncate max-w-[150px]">{item.material}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-stone-600">Est. Sales Vol:</span>
-                          <span className="font-bold text-indigo-800">{item.unitsSoldMonthly.toLocaleString()} units/mo</span>
+                          <span className="text-slate-500">Est. Sales Vol:</span>
+                          <span className="font-bold text-indigo-700">{item.unitsSoldMonthly.toLocaleString()} units/mo</span>
                         </div>
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-stone-500 uppercase block mb-1">Trending Color Palette:</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Trending Color Palette:</span>
                         <div className="flex flex-wrap gap-1">
                           {item.colors.map((color, idx) => (
-                            <span key={idx} className="px-2 py-0.5 bg-stone-200 text-stone-800 border border-stone-300 rounded text-[10px] font-semibold">
+                            <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded text-[10px] font-semibold">
                               {color}
                             </span>
                           ))}
                         </div>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-stone-300 flex items-center justify-between text-[11px]">
-                      <span className="text-amber-700 font-bold font-mono">★ {item.rating} Rating</span>
-                      <span className="text-stone-500 font-mono">{brand.marketShareEstimate}</span>
+                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+                      <span className="text-amber-600 font-bold font-mono">★ {item.rating} Rating</span>
+                      <span className="text-slate-500 font-mono">{brand.marketShareEstimate}</span>
                     </div>
                   </div>
                 );
@@ -468,8 +468,8 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
         {activeTab === 'trending_chairs' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-indigo-700" /> Kids Furniture & Ergonomics
+              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-indigo-600" /> Kids Furniture & Ergonomics
               </h3>
             </div>
 
@@ -479,46 +479,46 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
                 return (
                   <div
                     key={brand.id}
-                    className="bg-stone-100 rounded-2xl border border-rose-700 shadow-xs hover:shadow-md transition p-4 space-y-3 flex flex-col justify-between"
+                    className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 space-y-3 flex flex-col justify-between"
                   >
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5 font-mono">
                           <span className="text-base">{brand.flag}</span> {brand.name}
                         </span>
-                        <span className="px-2 py-0.5 bg-stone-200 text-indigo-800 border border-indigo-700 font-mono font-bold text-[10px] rounded-full">
+                        <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 font-mono font-bold text-[10px] rounded-full">
                           {brand.priceRange}
                         </span>
                       </div>
-                      <h4 className="text-xs font-extrabold text-stone-900 leading-snug">{item.title}</h4>
-                      <div className="bg-stone-200 p-2.5 rounded-xl border border-stone-300 text-[11px] space-y-1 font-mono">
+                      <h4 className="text-xs font-extrabold text-slate-800 leading-snug">{item.title}</h4>
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] space-y-1 font-mono">
                         <div className="flex justify-between">
-                          <span className="text-stone-600">Retail Price:</span>
-                          <span className="font-bold text-stone-900">€{item.priceEur.toFixed(2)}</span>
+                          <span className="text-slate-500">Retail Price:</span>
+                          <span className="font-bold text-slate-800">€{item.priceEur.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-stone-600">Material & Build:</span>
-                          <span className="font-bold text-indigo-800 truncate max-w-[150px]">{item.material}</span>
+                          <span className="text-slate-500">Material & Build:</span>
+                          <span className="font-bold text-indigo-700 truncate max-w-[150px]">{item.material}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-stone-600">Monthly Sales:</span>
-                          <span className="font-bold text-emerald-800">{item.unitsSoldMonthly.toLocaleString()} units</span>
+                          <span className="text-slate-500">Monthly Sales:</span>
+                          <span className="font-bold text-emerald-700">{item.unitsSoldMonthly.toLocaleString()} units</span>
                         </div>
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-stone-500 uppercase block mb-1">Key Selling Points:</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Key Selling Points:</span>
                         <div className="flex flex-wrap gap-1">
                           {brand.keyFeatures.map((feat, idx) => (
-                            <span key={idx} className="px-2 py-0.5 bg-stone-200 text-stone-800 border border-stone-300 rounded text-[10px] font-medium flex items-center gap-1">
-                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-700" /> {feat}
+                            <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded text-[10px] font-medium flex items-center gap-1">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> {feat}
                             </span>
                           ))}
                         </div>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-stone-300 flex items-center justify-between text-[11px]">
-                      <span className="text-amber-700 font-bold font-mono">★ {item.rating}</span>
-                      <span className="text-stone-500 font-mono">{brand.marketShareEstimate}</span>
+                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+                      <span className="text-amber-600 font-bold font-mono">★ {item.rating}</span>
+                      <span className="text-slate-500 font-mono">{brand.marketShareEstimate}</span>
                     </div>
                   </div>
                 );
@@ -530,12 +530,12 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
         {/* TAB 3: BRANDS DIRECTORY */}
         {activeTab === 'brands' && (
           <div className="space-y-4">
-            <h3 className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
               Brands Database ({filteredCompetitors.length} Brands Listed)
             </h3>
-            <div className="border border-rose-700 rounded-2xl overflow-hidden bg-stone-100 shadow-xs">
+            <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
               <table className="w-full text-left text-xs">
-                <thead className="bg-stone-200 text-stone-700 font-semibold border-b border-rose-700">
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                   <tr>
                     <th className="p-3">Brand Name</th>
                     <th className="p-3">Country</th>
@@ -546,26 +546,26 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
                     <th className="p-3">Top Product</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-300 font-sans text-stone-800">
+                <tbody className="divide-y divide-slate-100 font-sans text-slate-700">
                   {filteredCompetitors.map((brand) => (
-                    <tr key={brand.id} className="hover:bg-stone-200 transition">
-                      <td className="p-3 font-bold text-stone-900">{brand.name}</td>
-                      <td className="p-3 font-semibold text-stone-700 flex items-center gap-1.5">
+                    <tr key={brand.id} className="hover:bg-slate-50 transition bg-white">
+                      <td className="p-3 font-bold text-slate-800">{brand.name}</td>
+                      <td className="p-3 font-semibold text-slate-700 flex items-center gap-1.5">
                         <span>{brand.flag}</span> {brand.country}
                       </td>
                       <td className="p-3">
                         <div className="flex flex-wrap gap-1">
                           {brand.categories.map((cat, idx) => (
-                            <span key={idx} className="px-1.5 py-0.5 bg-stone-200 text-stone-700 rounded text-[10px] font-mono">
+                            <span key={idx} className="px-1.5 py-0.5 bg-slate-50 text-slate-600 rounded text-[10px] font-mono border border-slate-200">
                               {cat}
                             </span>
                           ))}
                         </div>
                       </td>
-                      <td className="p-3 font-mono font-bold text-stone-900">{brand.priceRange}</td>
-                      <td className="p-3 font-mono text-indigo-800 font-bold">{brand.salesVolumeIndex.toLocaleString()} units</td>
-                      <td className="p-3 font-mono text-emerald-800 font-bold">{brand.growthYoY}</td>
-                      <td className="p-3 text-stone-700 max-w-xs truncate">{brand.topTrendingItem.title} (€{brand.topTrendingItem.priceEur})</td>
+                      <td className="p-3 font-mono font-bold text-slate-800">{brand.priceRange}</td>
+                      <td className="p-3 font-mono text-indigo-700 font-bold">{brand.salesVolumeIndex.toLocaleString()} units</td>
+                      <td className="p-3 font-mono text-emerald-700 font-bold">{brand.growthYoY}</td>
+                      <td className="p-3 text-slate-600 max-w-xs truncate">{brand.topTrendingItem.title} (€{brand.topTrendingItem.priceEur})</td>
                     </tr>
                   ))}
                 </tbody>
@@ -576,62 +576,62 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
 
         {/* TAB 4: MARKET & PRICE INSIGHTS */}
         {activeTab === 'market_insights' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-stone-100 p-5 rounded-2xl border border-rose-700 shadow-xs space-y-4">
-                <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-2">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 font-mono">
                   <BarChart3 className="w-4 h-4 text-[#EF3340]" /> Material Preference Breakdown
                 </h4>
                 <div className="space-y-3">
                   <div>
-                    <div className="flex justify-between text-xs font-semibold text-stone-700 mb-1">
+                    <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
                       <span>Hand-Tufted Natural New Zealand Wool</span>
-                      <span className="font-mono font-bold text-indigo-800">28% Demand</span>
+                      <span className="font-mono font-bold text-indigo-700">28% Demand</span>
                     </div>
-                    <div className="w-full bg-stone-200 h-2.5 rounded-full overflow-hidden">
-                      <div className="bg-indigo-700 h-full rounded-full" style={{ width: '28%' }}></div>
+                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                      <div className="bg-indigo-600 h-full rounded-full" style={{ width: '28%' }}></div>
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-xs font-semibold text-stone-700 mb-1">
+                    <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
                       <span>Recycled PET Bottle Eco Poly Yarn</span>
-                      <span className="font-mono font-bold text-sky-800">18% Demand</span>
+                      <span className="font-mono font-bold text-sky-700">18% Demand</span>
                     </div>
-                    <div className="w-full bg-stone-200 h-2.5 rounded-full overflow-hidden">
-                      <div className="bg-sky-600 h-full rounded-full" style={{ width: '18%' }}></div>
+                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                      <div className="bg-sky-500 h-full rounded-full" style={{ width: '18%' }}></div>
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-xs font-semibold text-stone-700 mb-1">
+                    <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
                       <span>Natural Jute & Rattan Handwoven</span>
-                      <span className="font-mono font-bold text-amber-800">12% Demand</span>
+                      <span className="font-mono font-bold text-amber-700">12% Demand</span>
                     </div>
-                    <div className="w-full bg-stone-200 h-2.5 rounded-full overflow-hidden">
-                      <div className="bg-amber-600 h-full rounded-full" style={{ width: '12%' }}></div>
+                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                      <div className="bg-amber-500 h-full rounded-full" style={{ width: '12%' }}></div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="bg-stone-100 p-5 rounded-2xl border border-rose-700 shadow-xs space-y-4">
-                <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-2">
-                  <Award className="w-4 h-4 text-amber-600" /> Strategic Manufacturing Guidance
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 font-mono">
+                  <Award className="w-4 h-4 text-amber-500" /> Strategic Manufacturing Guidance
                 </h4>
-                <div className="space-y-2.5 text-xs text-stone-800">
-                  <div className="p-3 bg-amber-200/50 rounded-xl border border-amber-300">
-                    <p className="font-bold text-amber-950 mb-0.5">1. Machine Washable Lightweight Rugs</p>
-                    <p className="text-amber-900 text-[11px]">
+                <div className="space-y-2.5 text-xs text-slate-700">
+                  <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200">
+                    <p className="font-bold text-amber-900 mb-0.5">1. Machine Washable Lightweight Rugs</p>
+                    <p className="text-amber-800 text-[11px] leading-relaxed">
                       German mothers prioritize easy maintenance. Flexible 100% cotton backing sells at 3x higher velocity.
                     </p>
                   </div>
-                  <div className="p-3 bg-emerald-200/50 rounded-xl border border-emerald-300">
-                    <p className="font-bold text-emerald-950 mb-0.5">2. Natural Earth & Pastel Tones</p>
-                    <p className="text-emerald-900 text-[11px]">
+                  <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <p className="font-bold text-emerald-900 mb-0.5">2. Natural Earth & Pastel Tones</p>
+                    <p className="text-emerald-800 text-[11px] leading-relaxed">
                       Top selling colors: Sage Green, Oatmeal Beige, Muted Clay, Terracotta arches.
                     </p>
                   </div>
-                  <div className="p-3 bg-indigo-200/50 rounded-xl border border-indigo-300">
-                    <p className="font-bold text-indigo-950 mb-0.5">3. Ergonomic Chairs & FSC Certification</p>
-                    <p className="text-indigo-900 text-[11px]">
+                  <div className="p-3.5 bg-indigo-50 rounded-xl border border-indigo-200">
+                    <p className="font-bold text-indigo-900 mb-0.5">3. Ergonomic Chairs & FSC Certification</p>
+                    <p className="text-indigo-800 text-[11px] leading-relaxed">
                       Non-toxic water-based finishes and FSC/PEFC wood certifications are mandatory.
                     </p>
                   </div>
@@ -643,15 +643,15 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3.5 bg-stone-100 border-t border-rose-700 flex justify-between items-center text-stone-600">
-        <p className="text-xs italic">
+      <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-slate-500">
+        <p className="text-xs italic font-mono">
           Data synchronized for DE and EU Markets ({currentDateFormatted}).
         </p>
         <button
           onClick={onClose}
-          className="px-4 py-2 text-xs font-semibold bg-stone-200 text-stone-900 hover:bg-stone-300 rounded-xl transition cursor-pointer border border-rose-700"
+          className="px-4 py-2 text-xs font-semibold bg-white text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer border border-slate-200 shadow-xs font-mono"
         >
-          Close
+          Close Menu
         </button>
       </div>
     </PageFlipModal>

@@ -120,8 +120,8 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
   return (
     <PageFlipModal isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-3xl" id="orderFormModal">
       {/* Header */}
-      <div className="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-        <h2 id="formModalTitle" className="text-base font-bold text-slate-100 font-mono">
+      <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h2 id="formModalTitle" className="text-base font-bold text-slate-800 font-mono">
           {orderToEdit ? 'Edit Purchase Order' : 'Create Purchase Order'}
         </h2>
         <button
@@ -134,10 +134,10 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
       </div>
 
       {/* Form Body */}
-      <form onSubmit={handleSubmit} className="p-6 bg-slate-900 overflow-y-auto space-y-5 custom-scrollbar flex-1 text-slate-200">
+      <form onSubmit={handleSubmit} className="p-6 bg-white overflow-y-auto space-y-5 custom-scrollbar flex-1 text-slate-700">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 font-mono">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 font-mono">
               PO Number *
             </label>
             <input
@@ -147,11 +147,11 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
               value={po}
               onChange={(e) => setPo(e.target.value)}
               placeholder="Enter PO Number"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500 font-mono"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 font-mono">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 font-mono">
               App Reference *
             </label>
             <input
@@ -161,11 +161,11 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
               value={appRef}
               onChange={(e) => setAppRef(e.target.value)}
               placeholder="Enter App Reference"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500 font-mono"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 font-mono">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 font-mono">
               Est. Delivery Date *
             </label>
             <input
@@ -174,13 +174,13 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
               required
               value={estDate}
               onChange={(e) => setEstDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-mono cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500 font-mono cursor-pointer"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 font-mono">
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 font-mono">
             Production Notes
           </label>
           <textarea
@@ -189,20 +189,20 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Enter special requirements, yarn quality, or finishing instructions..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-sans"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-500 font-sans"
           ></textarea>
         </div>
 
         {/* Design Specifications Builder Section */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono">
+            <label className="text-xs font-bold text-slate-800 uppercase tracking-wider font-mono">
               Design Specifications & Batches
             </label>
             <button
               type="button"
               onClick={handleAddDesign}
-              className="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer font-mono"
+              className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-[#E4002B] border border-rose-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer font-mono"
             >
               <Plus className="w-3.5 h-3.5" /> Add Design
             </button>
@@ -212,57 +212,57 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
             {designs.map((d, index) => (
               <div
                 key={index}
-                className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-3 relative group"
+                className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3 relative group"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono">
                     Design Specification #{index + 1}
                   </span>
                   <button
                     type="button"
                     onClick={() => handleRemoveDesign(index)}
-                    className="text-rose-400 hover:text-rose-300 text-xs px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 flex items-center gap-1 cursor-pointer font-mono"
+                    className="text-rose-600 hover:text-rose-700 text-xs px-2 py-0.5 rounded bg-rose-50 border border-rose-200 flex items-center gap-1 cursor-pointer font-mono"
                   >
                     <Trash2 className="w-3 h-3" /> Remove
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 font-mono">Design Name *</label>
+                    <label className="block text-[10px] font-semibold text-slate-500 mb-1 font-mono">Design Name *</label>
                     <input
                       type="text"
                       required
                       value={d.name}
                       onChange={(e) => handleDesignChange(index, 'name', e.target.value)}
                       placeholder="Enter Design Name"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 font-mono">Batch Number *</label>
+                    <label className="block text-[10px] font-semibold text-slate-500 mb-1 font-mono">Batch Number *</label>
                     <input
                       type="text"
                       required
                       value={d.batch}
                       onChange={(e) => handleDesignChange(index, 'batch', e.target.value)}
                       placeholder="Enter Batch Number"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 font-mono">Size Spec</label>
+                    <label className="block text-[10px] font-semibold text-slate-500 mb-1 font-mono">Size Spec</label>
                     <input
                       type="text"
                       value={d.size}
                       onChange={(e) => handleDesignChange(index, 'size', e.target.value)}
                       placeholder="e.g. 10x12, Standard, Custom"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 font-mono">Quantity *</label>
+                    <label className="block text-[10px] font-semibold text-slate-500 mb-1 font-mono">Quantity *</label>
                     <input
                       type="number"
                       min={1}
@@ -270,28 +270,28 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
                       value={d.qty || ''}
                       onChange={(e) => handleDesignChange(index, 'qty', e.target.value)}
                       placeholder="Enter quantity"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 font-mono">Status</label>
+                    <label className="block text-[10px] font-semibold text-slate-500 mb-1 font-mono">Status</label>
                     <select
                       value={d.status}
                       onChange={(e) => handleDesignChange(index, 'status', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 cursor-pointer font-mono"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 cursor-pointer font-mono"
                     >
-                      <option value="Order Received" className="bg-slate-900 text-slate-100">Order Received</option>
-                      <option value="Material Prep" className="bg-slate-900 text-slate-100">Material Prep</option>
-                      <option value="In Production" className="bg-slate-900 text-slate-100">In Production</option>
-                      <option value="Packing" className="bg-slate-900 text-slate-100">Packing</option>
-                      <option value="QC Inspection" className="bg-slate-900 text-slate-100">QC Inspection</option>
-                      <option value="Ready for Shipment" className="bg-slate-900 text-slate-100">Ready for Shipment</option>
-                      <option value="Shipped" className="bg-slate-900 text-slate-100">Shipped</option>
-                      <option value="On Hold" className="bg-slate-900 text-slate-100">On Hold</option>
+                      <option value="Order Received" className="bg-white text-slate-800">Order Received</option>
+                      <option value="Material Prep" className="bg-white text-slate-800">Material Prep</option>
+                      <option value="In Production" className="bg-white text-slate-800">In Production</option>
+                      <option value="Packing" className="bg-white text-slate-800">Packing</option>
+                      <option value="QC Inspection" className="bg-white text-slate-800">QC Inspection</option>
+                      <option value="Ready for Shipment" className="bg-white text-slate-800">Ready for Shipment</option>
+                      <option value="Shipped" className="bg-white text-slate-800">Shipped</option>
+                      <option value="On Hold" className="bg-white text-slate-800">On Hold</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-400 mb-1 font-mono">Progress (%)</label>
+                    <label className="block text-[10px] font-semibold text-slate-500 mb-1 font-mono">Progress (%)</label>
                     <input
                       type="number"
                       min={0}
@@ -299,7 +299,7 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
                       required
                       value={d.progress}
                       onChange={(e) => handleDesignChange(index, 'progress', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono"
                     />
                   </div>
                 </div>
@@ -309,17 +309,17 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 rounded-xl transition cursor-pointer font-mono border border-slate-700"
+            className="px-4 py-2.5 text-xs font-semibold bg-white text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer font-mono border border-slate-200"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-5 py-2.5 text-xs font-bold bg-[#EF3340] hover:bg-rose-600 text-white rounded-xl transition shadow-lg shadow-rose-950/50 cursor-pointer font-mono border border-rose-500/30"
+            className="px-5 py-2.5 text-xs font-bold bg-[#EF3340] hover:bg-rose-600 text-white rounded-xl transition shadow-md cursor-pointer font-mono border border-rose-500/30"
           >
             Save Purchase Order
           </button>

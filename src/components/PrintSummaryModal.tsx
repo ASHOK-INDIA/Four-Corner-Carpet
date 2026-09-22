@@ -68,15 +68,15 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
       </div>
 
       {/* Printable Area */}
-      <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar flex-1 bg-slate-900">
+      <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar flex-1 bg-slate-100">
         <div
           id="printableA4Sheet"
-          className="bg-slate-950 text-slate-200 p-8 rounded-xl shadow-xl max-w-4xl mx-auto space-y-6 font-sans border border-rose-700"
+          className="bg-white text-slate-800 p-8 rounded-xl shadow-md max-w-4xl mx-auto space-y-6 font-sans border border-slate-200"
         >
           {/* Report Header */}
-          <div className="flex items-start justify-between border-b border-rose-700 pb-4">
+          <div className="flex items-start justify-between border-b border-slate-200 pb-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-[#EF3340] border border-rose-700 flex items-center justify-center p-1">
+              <div className="w-10 h-10 rounded-xl bg-[#EF3340] flex items-center justify-center p-1">
                 <svg viewBox="0 0 200 200" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="100" cy="55" r="32" stroke="#FFFFFF" strokeWidth="12" />
                   <circle cx="100" cy="145" r="32" stroke="#FFFFFF" strokeWidth="12" />
@@ -96,15 +96,15 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-extrabold text-white tracking-wider">POPTOP PRODUCTION</h2>
-                <p className="text-xs text-slate-400 font-medium">Production & Order Tracking Report</p>
+                <h2 className="text-lg font-extrabold text-slate-900 tracking-wider">POPTOP PRODUCTION</h2>
+                <p className="text-xs text-slate-500 font-medium">Production & Order Tracking Report</p>
               </div>
             </div>
             <div className="text-right">
-              <span className="inline-block px-2.5 py-1 bg-slate-900 text-[#EF3340] border border-rose-700 rounded font-mono font-bold text-xs uppercase">
+              <span className="inline-block px-2.5 py-1 bg-rose-50 text-[#EF3340] border border-rose-200 rounded font-mono font-bold text-xs uppercase">
                 Official Document
               </span>
-              <p id="printReportDate" className="text-xs text-slate-400 font-mono mt-1">
+              <p id="printReportDate" className="text-xs text-slate-500 font-mono mt-1">
                 Date: {formattedDate}
               </p>
             </div>
@@ -113,34 +113,34 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
           {/* Report KPI Bar */}
           <div
             id="printKpiContainer"
-            className="grid grid-cols-4 gap-4 bg-slate-900 border border-rose-700 p-3.5 rounded-lg text-center"
+            className="grid grid-cols-4 gap-4 bg-slate-50 border border-slate-200 p-3.5 rounded-lg text-center"
           >
             <div>
-              <span className="text-[10px] text-slate-400 uppercase block font-semibold">Total POs</span>
-              <span className="text-base font-bold text-white font-mono">{totalPOs}</span>
+              <span className="text-[10px] text-slate-500 uppercase block font-semibold">Total POs</span>
+              <span className="text-base font-bold text-slate-800 font-mono">{totalPOs}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 uppercase block font-semibold">Total Units</span>
-              <span className="text-base font-bold text-white font-mono">{totalUnits.toLocaleString()}</span>
+              <span className="text-[10px] text-slate-500 uppercase block font-semibold">Total Units</span>
+              <span className="text-base font-bold text-slate-800 font-mono">{totalUnits.toLocaleString()}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 uppercase block font-semibold">Ready/Shipped</span>
-              <span className="text-base font-bold text-emerald-400 font-mono">{shippedCount}</span>
+              <span className="text-[10px] text-slate-500 uppercase block font-semibold">Ready/Shipped</span>
+              <span className="text-base font-bold text-emerald-600 font-mono">{shippedCount}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 uppercase block font-semibold">Report Status</span>
-              <span className="text-base font-bold text-indigo-400">Verified</span>
+              <span className="text-[10px] text-slate-500 uppercase block font-semibold">Report Status</span>
+              <span className="text-base font-bold text-indigo-600">Verified</span>
             </div>
           </div>
 
           {/* Production Orders Summary Table */}
           <div>
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
               Active Purchase Orders Overview
             </h3>
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-900 text-slate-200 font-semibold border-b-2 border-rose-700">
+                <tr className="bg-slate-50 text-slate-700 font-bold border-b-2 border-slate-200">
                   <th className="py-2 px-3">PO & Ref</th>
                   <th className="py-2 px-3">Design Breakdown</th>
                   <th className="py-2 px-3 text-center">Batches</th>
@@ -150,7 +150,7 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
                   <th className="py-2 px-3">Est. Delivery</th>
                 </tr>
               </thead>
-              <tbody id="printSummaryTableBody" className="divide-y divide-slate-800">
+              <tbody id="printSummaryTableBody" className="divide-y divide-slate-200 bg-white">
                 {productionData.map((item) => {
                   const itemQty = item.designs.reduce((acc, c) => acc + c.qty, 0);
                   const avgProg =
@@ -161,19 +161,19 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
                   const designNames = item.designs.map((d) => `${d.name} (${d.batch})`).join(', ');
 
                   return (
-                    <tr key={item.po} className="border-b border-slate-800">
+                    <tr key={item.po} className="border-b border-slate-100 hover:bg-slate-50 transition">
                       <td className="py-2.5 px-3">
-                        <span className="font-bold text-white font-mono block">{item.po}</span>
-                        <span className="text-[10px] text-slate-400 font-mono">{item.appRef}</span>
+                        <span className="font-bold text-slate-800 font-mono block">{item.po}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">{item.appRef}</span>
                       </td>
-                      <td className="py-2.5 px-3 text-slate-300 max-w-xs truncate">{designNames}</td>
-                      <td className="py-2.5 px-3 text-center font-mono">{item.designs.length}</td>
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-white">
+                      <td className="py-2.5 px-3 text-slate-600 max-w-xs truncate">{designNames}</td>
+                      <td className="py-2.5 px-3 text-center font-mono text-slate-700">{item.designs.length}</td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">
                         {itemQty.toLocaleString()}
                       </td>
-                      <td className="py-2.5 px-3 font-semibold text-slate-200 text-[11px]">{primaryStatus}</td>
-                      <td className="py-2.5 px-3 font-mono font-bold text-white">{avgProg}%</td>
-                      <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px]">{item.estDate}</td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-700 text-[11px]">{primaryStatus}</td>
+                      <td className="py-2.5 px-3 font-mono font-bold text-[#E4002B]">{avgProg}%</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-500 text-[11px]">{item.estDate}</td>
                     </tr>
                   );
                 })}
@@ -182,13 +182,13 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
           </div>
 
           {/* Report Footer */}
-          <div className="border-t border-rose-700 pt-5 mt-auto">
-            <div className="flex justify-between items-end text-[10px] text-slate-400">
+          <div className="border-t border-slate-200 pt-5 mt-auto">
+            <div className="flex justify-between items-end text-[10px] text-slate-500">
               <div>
-                <p className="font-bold text-white">POPTOP PRODUCTION MANUFACTURING UNIT</p>
+                <p className="font-bold text-slate-800">POPTOP PRODUCTION MANUFACTURING UNIT</p>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-slate-300">Authorized Signatory</p>
+                <p className="font-semibold text-slate-700">Authorized Signatory</p>
                 <img src="https://i.postimg.cc/B6v0YTML/Signature-Ashok.png" alt="Signature" className="h-12 w-auto mt-1 mb-1 object-contain" />
                 <p className="text-[9px]">POPTOP PRODUCTION QC & MANAGEMENT</p>
               </div>

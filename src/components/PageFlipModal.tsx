@@ -25,7 +25,7 @@ export const PageFlipModal: React.FC<PageFlipModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-[64px] inset-x-0 bottom-0 z-40 bg-slate-950 flex flex-col w-full h-[calc(100vh-64px)] overflow-hidden p-0 border-t border-rose-700/80"
+          className="fixed top-[64px] inset-x-0 bottom-0 z-40 bg-slate-50 flex flex-col w-full h-[calc(100vh-64px)] overflow-hidden p-0 border-t border-rose-700/80"
           style={{ perspective: 1200 }}
         >
           <motion.div
@@ -33,7 +33,7 @@ export const PageFlipModal: React.FC<PageFlipModalProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="w-full h-full bg-slate-950 flex flex-col overflow-hidden text-slate-100 shadow-none border-0 rounded-none"
+            className="w-full h-full bg-white flex flex-col overflow-hidden text-slate-800 shadow-none border-0 rounded-none"
             onClick={(e) => e.stopPropagation()}
           >
             {children}

@@ -30,8 +30,8 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
   return (
     <PageFlipModal isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-md" id="passwordModal">
       {/* Header */}
-      <div className="px-6 py-4 bg-slate-950 border-b border-rose-700 flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2 font-mono">
+      <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-mono">
           <Lock className="w-4 h-4 text-[#EF3340]" /> Admin Authentication Required
         </h2>
         <button
@@ -44,9 +44,9 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="p-6 space-y-4 bg-slate-900 text-slate-200">
+      <form onSubmit={handleSubmit} className="p-6 space-y-4 bg-white text-slate-700">
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono">
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">
             Admin Passcode
           </label>
           <input
@@ -61,10 +61,10 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
               setHasError(false);
             }}
             placeholder="Enter passcode..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 font-mono"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-rose-500 font-mono"
           />
           {hasError && (
-            <p id="passwordError" className="text-xs text-rose-400 mt-1.5 flex items-center gap-1.5 font-mono">
+            <p id="passwordError" className="text-xs text-rose-600 mt-1.5 flex items-center gap-1.5 font-mono">
               <AlertCircle className="w-3.5 h-3.5" /> Incorrect passcode. Please try again.
             </p>
           )}
@@ -74,13 +74,13 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 rounded-xl transition cursor-pointer font-mono border border-slate-700"
+            className="px-4 py-2 text-xs font-semibold bg-white text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer font-mono border border-slate-200"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-5 py-2 text-xs font-bold bg-[#EF3340] hover:bg-rose-600 text-white rounded-xl transition shadow-lg shadow-rose-950/50 cursor-pointer font-mono border border-rose-500/30"
+            className="px-5 py-2 text-xs font-bold bg-[#EF3340] hover:bg-rose-600 text-white rounded-xl transition shadow-md cursor-pointer font-mono border border-rose-500/30"
           >
             Authenticate
           </button>
