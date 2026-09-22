@@ -193,7 +193,7 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
               </div>
               <div className="text-right">
                 <p className="font-semibold text-slate-300">Authorized Signatory</p>
-                <div className="h-8 border-b border-dashed border-slate-500 w-36 mt-1 mb-1"></div>
+                <img src="https://i.postimg.cc/B6v0YTML/Signature-Ashok.png" alt="Signature" className="h-12 w-auto mt-1 mb-1 object-contain" />
                 <p className="text-[9px]">POPTOP PRODUCTION QC & MANAGEMENT</p>
               </div>
             </div>
