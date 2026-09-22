@@ -283,6 +283,7 @@ export const OrderFormModal: React.FC<OrderFormModalProps> = ({
                       <option value="Order Received" className="bg-slate-900 text-slate-100">Order Received</option>
                       <option value="Material Prep" className="bg-slate-900 text-slate-100">Material Prep</option>
                       <option value="In Production" className="bg-slate-900 text-slate-100">In Production</option>
+                      <option value="Packing" className="bg-slate-900 text-slate-100">Packing</option>
                       <option value="QC Inspection" className="bg-slate-900 text-slate-100">QC Inspection</option>
                       <option value="Ready for Shipment" className="bg-slate-900 text-slate-100">Ready for Shipment</option>
                       <option value="Shipped" className="bg-slate-900 text-slate-100">Shipped</option>

@@ -21,6 +21,8 @@ export function getStatusBadgeClass(status: string): string {
       return 'bg-amber-50 text-amber-700 border-amber-200';
     case 'In Production':
       return 'bg-rose-50 text-rose-700 border-rose-200';
+    case 'Packing':
+      return 'bg-amber-100 text-amber-800 border-amber-300';
     case 'QC Inspection':
       return 'bg-purple-50 text-purple-700 border-purple-200';
     case 'Ready for Shipment':
@@ -94,8 +96,11 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
                     {totalUnits.toLocaleString()}
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold font-mono border shadow-2xs ${badgeClass}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold font-mono border shadow-2xs ${badgeClass} block w-fit mb-1`}>
                       {primaryStatus}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono font-bold">
+                      Progress: {item.designs[0]?.progress || 0}%
                     </span>
                   </td>
                   <td className="py-3.5 px-4">

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { X, Box, Plus, Trash2, RotateCw, Layers, RefreshCw, AlertTriangle, CheckCircle, Info, Printer, ShieldAlert, FolderOpen, Lock } from 'lucide-react';
+import { X, Box, Plus, Trash2, RotateCw, Layers, RefreshCw, AlertTriangle, CheckCircle, Info, Printer, ShieldAlert, FolderOpen, Lock, FileDown } from 'lucide-react';
 import { PageFlipModal } from './PageFlipModal';
 import { PurchaseOrder } from '../types';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export interface ContainerPreset {
   id: string;
@@ -41,6 +43,15 @@ export const CONTAINER_PRESETS: ContainerPreset[] = [
     heightM: 2.698,
     maxCbm: 76.2,
     maxWeightKg: 28600,
+  },
+  {
+    id: 'lcl',
+    name: 'LCL (Less than Container Load)',
+    lengthM: 6.0,
+    widthM: 2.3,
+    heightM: 2.3,
+    maxCbm: 999,
+    maxWeightKg: 999999,
   },
 ];
 
@@ -166,6 +177,43 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
       return;
     }
     setCargoItems(cargoItems.filter((i) => i.id !== id));
+  };
+
+  const exportToPDF = async () => {
+    const doc = new jsPDF();
+    doc.text('Loading Manifest', 14, 15);
+    
+    const tableData = cargoItems.map(item => [
+      item.name,
+      `${item.lengthCm}x${item.widthCm}x${item.heightCm}`,
+      item.weightKg,
+      item.qty,
+      (calculateItemCbm(item) * item.qty).toFixed(2)
+    ]);
+
+    autoTable(doc, {
+      head: [['Item Name', 'Dim (cm)', 'Wt/unit (kg)', 'Qty', 'CBM']],
+      body: tableData,
+    });
+    
+    // Add signature
+    try {
+      const signatureUrl = 'https://i.postimg.cc/B6v0YTML/Signature-Ashok.png';
+      const response = await fetch(signatureUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        doc.addImage(base64data, 'PNG', 14, (doc as any).lastAutoTable.finalY + 10, 40, 20);
+        doc.text('Authorized Signature', 14, (doc as any).lastAutoTable.finalY + 35);
+        doc.save(`Loading_Manifest_${new Date().toISOString().slice(0,10)}.pdf`);
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error('Error loading signature image:', error);
+      doc.save(`Loading_Manifest_${new Date().toISOString().slice(0,10)}.pdf`);
+    }
   };
 
   // Three.js 3D Container Scene Setup
@@ -370,21 +418,21 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
   return (
     <PageFlipModal isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-6xl" id="cbmCalculatorModal">
       {/* Modal Header */}
-      <div className="px-6 py-4 bg-slate-900 text-white border-b border-slate-800 flex items-center justify-between">
+      <div className="px-6 py-4 bg-gradient-to-r from-[#EF3340] to-[#e11d48] text-white border-b border-rose-600 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-[#EF3340] text-white flex items-center justify-center font-bold shadow-md">
+          <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm text-white flex items-center justify-center font-bold shadow-inner">
             <Box className="w-5 h-5" />
           </div>
           <div>
             <h2 className="text-base font-bold tracking-wide">3D Container Stuffing & CBM Calculator</h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-rose-100">
               Interactive 3D Container Loading Simulation & Export Volumetric Planning
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="bg-[#E4002B] hover:bg-rose-700 text-white rounded-xl p-1.5 cursor-pointer transition border border-white/20 shadow-sm"
+          className="bg-white/20 hover:bg-white/30 text-white rounded-xl p-1.5 cursor-pointer transition border border-white/30 shadow-sm backdrop-blur-sm"
           title="Close Modal"
         >
           <X className="w-5 h-5 stroke-[2.5]" />
@@ -741,8 +789,14 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={exportToPDF}
+            className="px-3.5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <FileDown className="w-3.5 h-3.5" /> Export PDF
+          </button>
+          <button
             onClick={() => window.print()}
-            className="px-3.5 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition flex items-center gap-1.5 cursor-pointer print:hidden"
           >
             <Printer className="w-3.5 h-3.5" /> Print Loading Manifest
           </button>
