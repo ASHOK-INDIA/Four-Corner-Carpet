@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "PurchaseOrder": {
+      "title": "Purchase Order",
+      "description": "Production purchase order including line items, statuses, and shipment milestones.",
+      "type": "object",
+      "properties": {
+        "po": { "type": "string", "description": "PO Number unique key e.g. PO-901" },
+        "appRef": { "type": "string", "description": "Client app reference e.g. REF-501" },
+        "estDate": { "type": "string", "description": "Estimated target delivery date" },
+        "notes": { "type": "string", "description": "Production and quality notes" },
+        "shipmentMilestone": { "type": "string", "description": "Current 9-step shipment milestone" },
+        "designs": {
+          "type": "array",
+          "description": "Design batches included in this PO",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "batch": { "type": "string" },
+              "size": { "type": "string" },
+              "qty": { "type": "number" },
+              "status": { "type": "string" },
+              "progress": { "type": "number" }
+            },
+            "required": ["name", "batch", "qty", "status", "progress"]
+          }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["po", "appRef", "estDate", "designs"]
+    },
+    "PPWRFile": {
+      "title": "PPWR Compliance Document",
+      "description": "EU Packaging and Packaging Waste Regulation documents, test reports, and technical datasheets.",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "enum": ["declaration", "testReport", "technicalDataSheet"] },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["PDF", "EXCEL"] },
+        "date": { "type": "string" },
+        "size": { "type": "string" },
+        "po": { "type": "string" },
+        "fileData": { "type": "string", "description": "Optional base64 or download reference" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["category", "name", "type", "date", "po"]
+    }
+  },
+  "firestore": {
+    "/purchase_orders/{poId}": {
+      "entity": "PurchaseOrder",
+      "description": "Active and completed manufacturing purchase orders"
+    },
+    "/ppwr_files/{fileId}": {
+      "entity": "PPWRFile",
+      "description": "PPWR compliance declarations, lab test reports, and technical data sheets"
+    }
+  }
+}
