@@ -33,20 +33,20 @@ export const EU_COMPETITORS_DATA: CompetitorBrand[] = [
     countryCode: 'DE',
     flag: '🇩🇪',
     categories: ['Kids Rugs', 'Play Mats'],
-    priceRange: '€49 - €189',
-    salesVolumeIndex: 18400,
-    growthYoY: '+34%',
+    priceRange: '€89 - €249',
+    salesVolumeIndex: 12400,
+    growthYoY: '+24%',
     topTrendingItem: {
-      title: 'Safari Animals Washable Cotton Rug (120×170cm)',
+      title: 'Safari Animals Hand-Tufted Wool Rug (120×170cm)',
       category: 'Rug',
-      priceEur: 79.95,
-      material: '100% OEKO-TEX Washable Cotton',
+      priceEur: 139.95,
+      material: '100% Hand-Tufted New Zealand Wool',
       colors: ['Sage Green', 'Oatmeal Beige', 'Soft Clay'],
       rating: 4.9,
-      unitsSoldMonthly: 3850,
+      unitsSoldMonthly: 2150,
     },
-    keyFeatures: ['Machine Washable', 'Non-Toxic Dye', 'Anti-Slip Backing'],
-    marketShareEstimate: '22% DE Kids Rug Market',
+    keyFeatures: ['Hand-Tufted Craftsmanship', 'Non-Toxic Dye', 'Heavy Cotton Backing'],
+    marketShareEstimate: '22% DE Premium Hand-Tufted Market',
   },
   {
     id: 'vertbaudet-de',
@@ -121,20 +121,20 @@ export const EU_COMPETITORS_DATA: CompetitorBrand[] = [
     countryCode: 'NL',
     flag: '🇳🇱',
     categories: ['Kids Furniture', 'Kids Chairs', 'Kids Rugs'],
-    priceRange: '€35 - €210',
-    salesVolumeIndex: 11200,
-    growthYoY: '+41%',
+    priceRange: '€79 - €260',
+    salesVolumeIndex: 8200,
+    growthYoY: '+31%',
     topTrendingItem: {
-      title: 'Minimalist Lion Face Round Washable Rug (Ø 120cm)',
+      title: 'Minimalist Lion Face Round Hand-Tufted Rug (Ø 120cm)',
       category: 'Rug',
-      priceEur: 69.90,
-      material: '100% Organic Tufted Cotton',
+      priceEur: 129.90,
+      material: '100% Organic Hand-Tufted Cotton',
       colors: ['Warm Sand', 'Caramel'],
       rating: 4.9,
-      unitsSoldMonthly: 2400,
+      unitsSoldMonthly: 1100,
     },
-    keyFeatures: ['Dutch Minimalist Design', 'Ultra Soft Plush Pile', 'Neutral Nursery Palette'],
-    marketShareEstimate: '11% Benelux / DE Online',
+    keyFeatures: ['Dutch Minimalist Design', 'Hand-Crafted Tufting', 'Neutral Nursery Palette'],
+    marketShareEstimate: '11% Benelux / DE Premium Hand-Tufted Segment',
   },
   {
     id: 'lorena-canals',
@@ -143,20 +143,20 @@ export const EU_COMPETITORS_DATA: CompetitorBrand[] = [
     countryCode: 'ES',
     flag: '🇪🇸',
     categories: ['Kids Rugs', 'Textile Seating'],
-    priceRange: '€89 - €299',
-    salesVolumeIndex: 16500,
-    growthYoY: '+29%',
+    priceRange: '€110 - €349',
+    salesVolumeIndex: 12100,
+    growthYoY: '+21%',
     topTrendingItem: {
-      title: 'Puffy Woolly Sheep Washable Wool Rug (110×160cm)',
+      title: 'Puffy Woolly Sheep Handwoven Wool Rug (110×160cm)',
       category: 'Rug',
-      priceEur: 159.00,
-      material: '100% Natural Washable Wool',
+      priceEur: 189.00,
+      material: '100% Natural Organic Hand-Woven Wool',
       colors: ['Off-White Natural', 'Warm Grey'],
       rating: 5.0,
-      unitsSoldMonthly: 3100,
+      unitsSoldMonthly: 1800,
     },
-    keyFeatures: ['First Washable Wool Rugs', 'Handcrafted in India', 'Eco-Packaging'],
-    marketShareEstimate: '18% EU Premium Washables',
+    keyFeatures: ['Artisanal Hand-Weaving', 'Handcrafted in India', 'Eco-Packaging'],
+    marketShareEstimate: '18% EU Premium Hand-Woven Segment',
   },
   {
     id: 'bloomingville-mini',
@@ -187,20 +187,20 @@ export const EU_COMPETITORS_DATA: CompetitorBrand[] = [
     countryCode: 'ES',
     flag: '🇪🇸',
     categories: ['Kids Chairs', 'Kids Rugs', 'Furniture'],
-    priceRange: '€39 - €180',
-    salesVolumeIndex: 8900,
-    growthYoY: '+31%',
+    priceRange: '€69 - €220',
+    salesVolumeIndex: 7200,
+    growthYoY: '+25%',
     topTrendingItem: {
-      title: 'Nuage Tufted Rainbow Arches Rug (120×180cm)',
+      title: 'Nuage Hand-Tufted Rainbow Arches Rug (120×180cm)',
       category: 'Rug',
-      priceEur: 79.99,
-      material: 'Recycled PET Fiber & Cotton Backing',
+      priceEur: 119.99,
+      material: 'Hand-Tufted Recycled PET Yarn',
       colors: ['Multi Pastel', 'Earthy Ochre'],
       rating: 4.7,
-      unitsSoldMonthly: 1600,
+      unitsSoldMonthly: 1100,
     },
-    keyFeatures: ['Sustainable Recycled PET', 'Mediterranean Colors', 'High Durability'],
-    marketShareEstimate: '7% Southern DE / ES',
+    keyFeatures: ['Hand-Tufted Recycled PET', 'Mediterranean Colors', 'High Durability'],
+    marketShareEstimate: '7% Southern DE / ES Hand-Tufted Segment',
   },
   {
     id: 'hm-home-kids',
@@ -209,20 +209,64 @@ export const EU_COMPETITORS_DATA: CompetitorBrand[] = [
     countryCode: 'SE',
     flag: '🇸🇪',
     categories: ['Kids Rugs', 'Kids Seating', 'Decor'],
-    priceRange: '€19 - €89',
-    salesVolumeIndex: 31000,
-    growthYoY: '+15%',
+    priceRange: '€39 - €129',
+    salesVolumeIndex: 21000,
+    growthYoY: '+12%',
     topTrendingItem: {
-      title: 'Alphabet Hopscotch Cotton Printed Play Rug (100×150cm)',
+      title: 'Alphabet Hopscotch Hand-Woven Play Rug (100×150cm)',
       category: 'Rug',
-      priceEur: 39.99,
-      material: '100% Cotton Canvas',
+      priceEur: 69.99,
+      material: '100% Hand-Woven Organic Cotton',
       colors: ['Off-White', 'Black Print'],
       rating: 4.6,
-      unitsSoldMonthly: 7200,
+      unitsSoldMonthly: 4100,
     },
-    keyFeatures: ['Fast-Fashion Pricing', 'High Turnaround', 'Global Retail Distribution'],
-    marketShareEstimate: '26% Volume Budget Segment',
+    keyFeatures: ['Hand-Woven Construction', 'Interactive Play Design', 'Artisanal Weave'],
+    marketShareEstimate: '26% Volume Hand-Woven Budget Segment',
+  },
+  {
+    id: 'team-7-kids',
+    name: 'Team 7 Kids',
+    country: 'Austria',
+    countryCode: 'AT',
+    flag: '🇦🇹',
+    categories: ['Kids Furniture', 'Kids Chairs', 'Wooden Seating'],
+    priceRange: '€120 - €450',
+    salesVolumeIndex: 4200,
+    growthYoY: '+19%',
+    topTrendingItem: {
+      title: 'Team 7 Mobile Solid Alder Wood Ergonomic Chair',
+      category: 'Chair',
+      priceEur: 289.00,
+      material: '100% Solid Certified Alder Wood & Organic Felt',
+      colors: ['Meadow Green', 'Mustard Yellow', 'Terracotta'],
+      rating: 4.9,
+      unitsSoldMonthly: 950,
+    },
+    keyFeatures: ['100% Solid Certified Alder Wood', 'Formaldehyde-free Herbal Oil Finish', 'Ergonomic Growing Mechanics'],
+    marketShareEstimate: '18% AT Premium Wooden Kids Furniture',
+  },
+  {
+    id: 'traumeland-kids',
+    name: 'Träumeland Baby & Kids',
+    country: 'Austria',
+    countryCode: 'AT',
+    flag: '🇦🇹',
+    categories: ['Kids Rugs', 'Play Mats', 'Mattresses'],
+    priceRange: '€59 - €210',
+    salesVolumeIndex: 8600,
+    growthYoY: '+24%',
+    topTrendingItem: {
+      title: 'Cloud-Soft Organic Wool Play Rug (130×130cm)',
+      category: 'Rug',
+      priceEur: 119.00,
+      material: '100% Natural Breathable Organic Wool',
+      colors: ['Sage Green', 'Clay Blue', 'Oatmeal Beige'],
+      rating: 4.9,
+      unitsSoldMonthly: 1550,
+    },
+    keyFeatures: ['Antiallergenic Breathable Core', 'Hand-Woven Natural Texture', 'Strict OEKO-TEX Standard 100'],
+    marketShareEstimate: '24% AT Premium Nursery Textiles',
   },
 ];
 
@@ -274,7 +318,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
   return (
     <PageFlipModal isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-6xl" id="competitorIntelligenceModal">
       {/* Header */}
-      <div className="px-6 py-4 bg-slate-50 text-slate-800 border-b border-slate-200 flex items-center justify-between">
+      <div className="px-6 py-4 bg-transparent text-slate-800 border-b border-slate-100/80 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md">
             <Globe className="w-5 h-5 text-white" />
@@ -298,9 +342,9 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
       </div>
 
       {/* Main Body */}
-      <div className="p-5 lg:p-6 overflow-y-auto custom-scrollbar space-y-6 flex-1 bg-slate-50">
+      <div className="p-5 lg:p-6 overflow-y-auto custom-scrollbar space-y-6 flex-1 bg-transparent">
         {/* Navigation Tabs Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/70 backdrop-blur-md p-2 rounded-xl border border-slate-100/80 shadow-sm">
           <div className="flex items-center space-x-1.5 overflow-x-auto custom-scrollbar">
             <button
               onClick={() => setActiveTab('trending_rugs')}
@@ -355,7 +399,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
         </div>
 
         {/* Filter Toolbar */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/70 backdrop-blur-md p-3.5 rounded-xl border border-slate-100/80 shadow-sm">
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Search Brand or Product</label>
             <div className="relative">
@@ -383,6 +427,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
               <option value="ES">🇪🇸 Spain</option>
               <option value="DK">🇩🇰 Denmark</option>
               <option value="SE">🇸🇪 Sweden</option>
+              <option value="AT">🇦🇹 Austria</option>
             </select>
           </div>
 
@@ -618,9 +663,9 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
                 </h4>
                 <div className="space-y-2.5 text-xs text-slate-700">
                   <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200">
-                    <p className="font-bold text-amber-900 mb-0.5">1. Machine Washable Lightweight Rugs</p>
+                    <p className="font-bold text-amber-900 mb-0.5">1. Premium Hand-Tufted & Hand-Woven Rugs</p>
                     <p className="text-amber-800 text-[11px] leading-relaxed">
-                      German mothers prioritize easy maintenance. Flexible 100% cotton backing sells at 3x higher velocity.
+                      European buyers prioritize craftsmanship. Heavy organic hand-tufted wool with natural cotton backing sells at 3x higher value.
                     </p>
                   </div>
                   <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200">

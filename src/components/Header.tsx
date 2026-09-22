@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages } from 'lucide-react';
+import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images } from 'lucide-react';
 import { WeatherData } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -14,6 +14,7 @@ interface HeaderProps {
   onOpenPrintReport: () => void;
   onOpen3DContainer: () => void;
   onOpenCompetitorIntel: () => void;
+  onOpenSamples: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenPrintReport,
   onOpen3DContainer,
   onOpenCompetitorIntel,
+  onOpenSamples,
 }) => {
   const { language, setLanguage, t } = useLanguage();
 
@@ -157,6 +159,17 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Globe className="w-3.5 h-3.5 text-white" />
           <span className="font-bold">{t.competitorIntel}</span>
+        </button>
+
+        {/* Samples Interactive Slider Gallery Button */}
+        <button
+          id="samplesNavBtn"
+          onClick={onOpenSamples}
+          className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/15 transition flex items-center gap-1.5 cursor-pointer"
+          title="Samples Gallery - Interactive 3D Flip & Slide Viewer"
+        >
+          <Images className="w-3.5 h-3.5 text-white" />
+          <span className="font-bold">Samples</span>
         </button>
 
         {/* Shipment Track Menu Button */}

@@ -12,6 +12,7 @@ import { PrintSummaryModal } from './components/PrintSummaryModal';
 import { PasswordModal } from './components/PasswordModal';
 import { ContainerStuffingModal } from './components/ContainerStuffingModal';
 import { CompetitorIntelligenceModal } from './components/CompetitorIntelligenceModal';
+import { SamplesModal } from './components/SamplesModal';
 import {
   subscribePurchaseOrders,
   subscribePPWRFiles,
@@ -68,9 +69,10 @@ export default function App() {
 
   const [printSummaryOpen, setPrintSummaryOpen] = useState<boolean>(false);
 
-  // State: New Modules (3D CBM & Competitor Intel)
+  // State: New Modules (3D CBM, Competitor Intel & Samples)
   const [is3DContainerOpen, setIs3DContainerOpen] = useState<boolean>(false);
   const [isCompetitorIntelOpen, setIsCompetitorIntelOpen] = useState<boolean>(false);
+  const [isSamplesOpen, setIsSamplesOpen] = useState<boolean>(false);
 
   // State: Buyer Forecast Comments
   const [buyerComment, setBuyerComment] = useState<string>('');
@@ -216,6 +218,7 @@ export default function App() {
     setIs3DContainerOpen(false);
     setIsCompetitorIntelOpen(false);
     setIsPasswordModalOpen(false);
+    setIsSamplesOpen(false);
   };
 
   // Admin Toggle Handler
@@ -402,6 +405,10 @@ export default function App() {
           closeAllModals();
           setIsCompetitorIntelOpen(true);
         }}
+        onOpenSamples={() => {
+          closeAllModals();
+          setIsSamplesOpen(true);
+        }}
       />
 
       {/* Main Dashboard Container */}
@@ -571,6 +578,13 @@ export default function App() {
       <CompetitorIntelligenceModal
         isOpen={isCompetitorIntelOpen}
         onClose={() => setIsCompetitorIntelOpen(false)}
+      />
+
+      {/* Samples Interactive Slider Gallery Modal */}
+      <SamplesModal
+        isOpen={isSamplesOpen}
+        onClose={() => setIsSamplesOpen(false)}
+        adminMode={adminMode}
       />
 
       {/* Delete Confirmation Modal */}

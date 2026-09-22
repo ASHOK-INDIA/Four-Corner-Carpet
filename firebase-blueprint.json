@@ -77,6 +77,19 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "lengthCm", "widthCm", "heightCm", "weightKg", "qty", "color", "isCylinder", "packageType"]
+    },
+    "SampleItem": {
+      "title": "Sample Item",
+      "description": "Premium children furniture or rug sample image uploaded with slide flip carousel view.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "imageUrl", "createdAt"]
     }
   },
   "firestore": {
@@ -95,6 +108,10 @@
     "/container_items/{itemId}": {
       "entity": "CargoItemSpecification",
       "description": "Cargo items specified inside the 3D container plan"
+    },
+    "/sample_items/{sampleId}": {
+      "entity": "SampleItem",
+      "description": "Uploaded sample images for the full image flip carousel viewer"
     }
   }
 }

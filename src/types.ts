@@ -58,4 +58,12 @@ export interface CargoItem {
   rugsPerPallet?: number;
 }
 
+export interface SampleItem {
+  id: string;
+  title: string;
+  imageUrl: string;
+  description?: string;
+  createdAt: string;
+}
+
 

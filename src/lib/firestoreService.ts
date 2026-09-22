@@ -8,12 +8,13 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem } from '../types';
+import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem, SampleItem } from '../types';
 
 const PO_COLLECTION = 'purchase_orders';
 const PPWR_COLLECTION = 'ppwr_files';
 const COMMENTS_COLLECTION = 'forecast_comments';
 const CARGO_COLLECTION = 'container_items';
+const SAMPLE_ITEMS_COLLECTION = 'sample_items';
 
 /**
  * Sanitize Firestore document IDs by replacing slashes or invalid characters
@@ -368,5 +369,62 @@ export async function saveCargoItemToFirestore(item: CargoItem): Promise<void> {
 export async function deleteCargoItemFromFirestore(id: string): Promise<void> {
   const docId = sanitizeDocId(id);
   const docRef = doc(db, CARGO_COLLECTION, docId);
+  await deleteDoc(docRef);
+}
+
+/**
+ * Subscribe to real-time changes of Sample Items in Firestore
+ */
+export function subscribeSampleItems(
+  onUpdate: (data: SampleItem[]) => void,
+  onError?: (error: Error) => void
+) {
+  const colRef = collection(db, SAMPLE_ITEMS_COLLECTION);
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const items: SampleItem[] = [];
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+        items.push({
+          id: docSnap.id,
+          title: d.title || 'Sample Item',
+          imageUrl: d.imageUrl || '',
+          description: d.description || '',
+          createdAt: d.createdAt || new Date().toISOString()
+        });
+      });
+      // Sort chronologically
+      items.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      onUpdate(items);
+    },
+    (err) => {
+      console.error('Firestore Sample Items snapshot error:', err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Save or update a Sample Item in Firestore
+ */
+export async function saveSampleItemToFirestore(item: SampleItem): Promise<void> {
+  const docId = sanitizeDocId(item.id);
+  const docRef = doc(db, SAMPLE_ITEMS_COLLECTION, docId);
+  await setDoc(docRef, {
+    id: item.id,
+    title: item.title,
+    imageUrl: item.imageUrl,
+    description: item.description || '',
+    createdAt: item.createdAt || new Date().toISOString()
+  }, { merge: true });
+}
+
+/**
+ * Delete a Sample Item from Firestore
+ */
+export async function deleteSampleItemFromFirestore(id: string): Promise<void> {
+  const docId = sanitizeDocId(id);
+  const docRef = doc(db, SAMPLE_ITEMS_COLLECTION, docId);
   await deleteDoc(docRef);
 }
