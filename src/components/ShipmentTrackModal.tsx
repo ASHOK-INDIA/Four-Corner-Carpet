@@ -114,7 +114,7 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
       </div>
 
       {/* Modal Body */}
-      <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar flex-1 bg-slate-900 text-slate-200">
+      <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar flex-1 bg-[#d7be9f] text-slate-100">
         {!currentOrder ? (
           <div className="bg-slate-950 p-12 rounded-xl border border-rose-700 text-center space-y-3">
             <div className="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center mx-auto border border-cyan-500/30">

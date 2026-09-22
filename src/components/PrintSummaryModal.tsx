@@ -186,10 +186,6 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
             <div className="flex justify-between items-end text-[10px] text-slate-400">
               <div>
                 <p className="font-bold text-white">POPTOP PRODUCTION MANUFACTURING UNIT</p>
-                <p>Automated Production Tracking System</p>
-                <p className="text-[9px] text-slate-500 mt-0.5">
-                  Confidential internal report generated for official operations use.
-                </p>
               </div>
               <div className="text-right">
                 <p className="font-semibold text-slate-300">Authorized Signatory</p>

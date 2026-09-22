@@ -281,7 +281,7 @@ export const CompetitorIntelligenceModal: React.FC<CompetitorIntelligenceModalPr
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-base font-bold tracking-wide">Competitor Intelligence</h2>
+              <h2 className="text-base font-bold tracking-wide">Competitor</h2>
               <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-[10px] font-mono font-bold uppercase">
                 DE & Surrounding EU Kids Market
               </span>

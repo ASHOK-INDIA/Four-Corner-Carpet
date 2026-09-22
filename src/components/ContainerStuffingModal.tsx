@@ -65,6 +65,8 @@ export interface CargoItem {
   qty: number;
   color: string;
   isCylinder?: boolean;
+  packageType?: 'box' | 'roll' | 'pallet';
+  rugsPerPallet?: number;
 }
 
 const COLOR_PALETTE = ['#EF3340', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
@@ -105,6 +107,7 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
             qty: design.qty,
             color: COLOR_PALETTE[colorIdx % COLOR_PALETTE.length],
             isCylinder: design.name.toLowerCase().includes('rug'),
+            packageType: design.name.toLowerCase().includes('rug') ? 'roll' : 'box',
           });
           colorIdx++;
         });
@@ -123,7 +126,8 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
   const [newItemWeight, setNewItemWeight] = useState<number>(10);
   const [newItemQty, setNewItemQty] = useState<number>(50);
   const [newItemColor, setNewItemColor] = useState<string>('#8B5CF6');
-  const [newItemIsCylinder, setNewItemIsCylinder] = useState<boolean>(false);
+  const [newItemPackageType, setNewItemPackageType] = useState<'box' | 'roll' | 'pallet'>('box');
+  const [newItemRugsPerPallet, setNewItemRugsPerPallet] = useState<number>(20);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +169,9 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
       weightKg: newItemWeight,
       qty: newItemQty,
       color: newItemColor,
-      isCylinder: newItemIsCylinder,
+      isCylinder: newItemPackageType === 'roll',
+      packageType: newItemPackageType,
+      rugsPerPallet: newItemPackageType === 'pallet' ? newItemRugsPerPallet : undefined,
     };
     setCargoItems([...cargoItems, newItem]);
     setNewItemName('');
@@ -323,9 +329,11 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
         rowMaxH = Math.max(rowMaxH, iHgtM);
         rowMaxW = Math.max(rowMaxW, iWidM);
 
-        let mesh: THREE.Mesh;
+        let mesh: THREE.Object3D;
+        const isCylinder = item.packageType ? item.packageType === 'roll' : item.isCylinder;
+        const isPallet = item.packageType === 'pallet';
 
-        if (item.isCylinder) {
+        if (isCylinder) {
           const cylGeo = new THREE.CylinderGeometry(iWidM / 2, iWidM / 2, iLenM, 16);
           const cylMat = new THREE.MeshStandardMaterial({
             color: itemColor,
@@ -333,9 +341,54 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
             metalness: 0.1,
             wireframe: viewMode === 'wireframe',
           });
-          mesh = new THREE.Mesh(cylGeo, cylMat);
-          mesh.rotation.z = Math.PI / 2; // Lie horizontal
-          mesh.position.set(curX + iLenM / 2, curY + iWidM / 2, curZ + iWidM / 2);
+          const cylMesh = new THREE.Mesh(cylGeo, cylMat);
+          cylMesh.rotation.z = Math.PI / 2; // Lie horizontal
+          cylMesh.position.set(curX + iLenM / 2, curY + iWidM / 2, curZ + iWidM / 2);
+          mesh = cylMesh;
+        } else if (isPallet) {
+          const palletGroup = new THREE.Group();
+          
+          const baseH = iHgtM * 0.15; // 15% height for wooden pallet base
+          const cargoH = iHgtM * 0.85; // 85% height for cargo stack
+          
+          // 1. Wooden Base
+          const baseGeo = new THREE.BoxGeometry(iLenM * 0.98, baseH, iWidM * 0.98);
+          const baseMat = new THREE.MeshStandardMaterial({
+            color: 0x854d0e, // Wooden amber-800
+            roughness: 0.8,
+            metalness: 0.1,
+            wireframe: viewMode === 'wireframe',
+          });
+          const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+          baseMesh.position.set(0, baseH / 2, 0);
+          palletGroup.add(baseMesh);
+
+          // Wood line edges
+          const baseEdges = new THREE.EdgesGeometry(baseGeo);
+          const baseLineMat = new THREE.LineBasicMaterial({ color: 0x451a03, transparent: true, opacity: 0.4 });
+          const baseWire = new THREE.LineSegments(baseEdges, baseLineMat);
+          baseMesh.add(baseWire);
+
+          // 2. Cargo Stack on top
+          const cargoGeo = new THREE.BoxGeometry(iLenM * 0.96, cargoH * 0.98, iWidM * 0.96);
+          const cargoMat = new THREE.MeshStandardMaterial({
+            color: itemColor,
+            roughness: 0.4,
+            metalness: 0.1,
+            wireframe: viewMode === 'wireframe',
+          });
+          const cargoMesh = new THREE.Mesh(cargoGeo, cargoMat);
+          cargoMesh.position.set(0, baseH + cargoH / 2, 0);
+          palletGroup.add(cargoMesh);
+
+          // Cargo line edges
+          const cargoEdges = new THREE.EdgesGeometry(cargoGeo);
+          const cargoLineMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3 });
+          const cargoWire = new THREE.LineSegments(cargoEdges, cargoLineMat);
+          cargoMesh.add(cargoWire);
+
+          palletGroup.position.set(curX + iLenM / 2, curY, curZ + iWidM / 2);
+          mesh = palletGroup;
         } else {
           const boxGeo = new THREE.BoxGeometry(iLenM * 0.98, iHgtM * 0.98, iWidM * 0.98);
           const boxMat = new THREE.MeshStandardMaterial({
@@ -344,14 +397,16 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
             metalness: 0.1,
             wireframe: viewMode === 'wireframe',
           });
-          mesh = new THREE.Mesh(boxGeo, boxMat);
-          mesh.position.set(curX + iLenM / 2, curY + iHgtM / 2, curZ + iWidM / 2);
+          const boxMesh = new THREE.Mesh(boxGeo, boxMat);
+          boxMesh.position.set(curX + iLenM / 2, curY + iHgtM / 2, curZ + iWidM / 2);
 
           // Dark stroke edge on box
           const boxEdges = new THREE.EdgesGeometry(boxGeo);
           const boxLineMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3 });
           const boxWire = new THREE.LineSegments(boxEdges, boxLineMat);
-          mesh.add(boxWire);
+          boxMesh.add(boxWire);
+          
+          mesh = boxMesh;
         }
 
         containerGroup.add(mesh);
@@ -424,7 +479,7 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
             <Box className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold tracking-wide">3D Container Stuffing & CBM Calculator</h2>
+            <h2 className="text-base font-bold tracking-wide">Container Plan</h2>
             <p className="text-xs text-rose-100">
               Interactive 3D Container Loading Simulation & Export Volumetric Planning
             </p>
@@ -632,7 +687,7 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
                           <div>
                             <p className="font-bold text-slate-900">{item.name}</p>
                             <p className="text-[10px] text-slate-500 font-mono">
-                              {item.lengthCm}×{item.widthCm}×{item.heightCm} cm | {item.weightKg}kg/unit | {item.isCylinder ? 'Roll' : 'Box'}
+                              {item.lengthCm}×{item.widthCm}×{item.heightCm} cm | {item.weightKg}kg/unit | {item.packageType === 'pallet' ? `Pallet (${item.rugsPerPallet || 0} rugs)` : item.isCylinder ? 'Roll' : 'Box'}
                             </p>
                           </div>
                         </div>
@@ -750,22 +805,41 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <label className="text-xs text-slate-600 flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newItemIsCylinder}
-                      onChange={(e) => setNewItemIsCylinder(e.target.checked)}
-                      className="rounded text-[#EF3340] focus:ring-0 cursor-pointer"
-                    />
-                    <span>Roled Cylinder Shape (Rug Roll)</span>
-                  </label>
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Package Type</label>
+                    <select
+                      value={newItemPackageType}
+                      onChange={(e) => setNewItemPackageType(e.target.value as any)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#EF3340] cursor-pointer"
+                    >
+                      <option value="box">Box / Carton</option>
+                      <option value="roll">Rolled Cylinder (Rug Roll)</option>
+                      <option value="pallet">Pallet</option>
+                    </select>
+                  </div>
 
+                  {newItemPackageType === 'pallet' && (
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Rugs per Pallet</label>
+                      <input
+                        type="number"
+                        min={1}
+                        required
+                        value={newItemRugsPerPallet}
+                        onChange={(e) => setNewItemRugsPerPallet(Number(e.target.value))}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-800"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-end pt-2">
                   <button
                     type="submit"
-                    className="px-4 py-1.5 bg-[#EF3340] hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                    className="px-4 py-2 bg-[#EF3340] hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1"
                   >
-                    Add to Container
+                    <Plus className="w-3.5 h-3.5" /> Add to Container
                   </button>
                 </div>
               </form>

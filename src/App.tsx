@@ -70,6 +70,16 @@ export default function App() {
   const [is3DContainerOpen, setIs3DContainerOpen] = useState<boolean>(false);
   const [isCompetitorIntelOpen, setIsCompetitorIntelOpen] = useState<boolean>(false);
 
+  // State: Buyer Forecast Comments
+  const [buyerComment, setBuyerComment] = useState<string>('');
+  const [commentsList, setCommentsList] = useState<string[]>(() => {
+    const saved = localStorage.getItem('buyer_forecast_comments');
+    return saved ? JSON.parse(saved) : [
+      "Four Corners Carpets: Plan to place order for 2000 units of custom shag rugs in November.",
+      "Aero Retail: Forecast for Q1 2027: 1500 units of standard tufted mats.",
+    ];
+  });
+
   // Real-time Firestore Subscriptions - Live admin-entered data ONLY
   useEffect(() => {
     setIsSyncing(true);
@@ -347,6 +357,16 @@ export default function App() {
     }
   };
 
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!buyerComment.trim()) return;
+    const updated = [buyerComment.trim(), ...commentsList];
+    setCommentsList(updated);
+    localStorage.setItem('buyer_forecast_comments', JSON.stringify(updated));
+    setBuyerComment('');
+    alert('Thank you! Your forecast comment has been submitted and recorded.');
+  };
+
   return (
     <div className="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-[#E4002B] selection:text-white">
       {/* Top Header Navigation */}
@@ -405,6 +425,68 @@ export default function App() {
           onDeleteOrder={handleDeleteOrder}
         />
       </main>
+
+      {/* Interactive Footer & Moving Forecast Board */}
+      <footer className="mt-12 bg-slate-900 border-t border-rose-700/50 text-slate-300">
+        {/* Moving News Ticker */}
+        <div className="bg-[#EF3340] text-white py-2 overflow-hidden relative border-b border-rose-700 select-none">
+          <div className="animate-marquee whitespace-nowrap flex gap-8 text-xs font-mono font-bold uppercase tracking-wider">
+            <span>📢 Buyer Notice: Please submit your Q4 forecasts and next order plans in the comment board below! •</span>
+            <span>🚀 Capacities for November are booking fast - secure your production batches today •</span>
+            <span>📝 Let us know your future volume requirements to optimize material prep times •</span>
+            <span>📢 Buyer Notice: Please submit your Q4 forecasts and next order plans in the comment board below! •</span>
+            <span>🚀 Capacities for November are booking fast - secure your production batches today •</span>
+            <span>📝 Let us know your future volume requirements to optimize material prep times •</span>
+          </div>
+        </div>
+
+        {/* Comment Box & Interactive Planner Board */}
+        <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          {/* Form Side */}
+          <div className="md:col-span-5 bg-slate-950 p-5 rounded-2xl border border-rose-700/30 space-y-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#EF3340] animate-ping"></span>
+              Submit Forecast & Next Order Plan
+            </h3>
+            <p className="text-xs text-slate-400">
+              Share your forecasted volumes, size demands, or upcoming production timelines to reserve priority batches.
+            </p>
+            <form onSubmit={handleAddComment} className="space-y-3">
+              <textarea
+                value={buyerComment}
+                onChange={(e) => setBuyerComment(e.target.value)}
+                placeholder="e.g. Plan to place 1,500 pcs rug order for Q1 2027 delivery. Expected size: 160x230cm."
+                rows={3}
+                required
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-[#EF3340] resize-none"
+              ></textarea>
+              <button
+                type="submit"
+                className="w-full py-2 bg-[#EF3340] hover:bg-rose-700 text-white font-bold text-xs rounded-xl transition cursor-pointer"
+              >
+                Submit Comment Plan
+              </button>
+            </form>
+          </div>
+
+          {/* List Side */}
+          <div className="md:col-span-7 bg-slate-950 p-5 rounded-2xl border border-rose-700/30 space-y-4 max-h-[280px] overflow-y-auto custom-scrollbar">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Buyer Plan & Forecast Board ({commentsList.length} Comments)
+            </h4>
+            <div className="space-y-3">
+              {commentsList.map((cmt, idx) => (
+                <div key={idx} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 text-xs flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-[#EF3340] font-bold flex items-center justify-center font-mono flex-shrink-0 mt-0.5">
+                    {idx + 1}
+                  </div>
+                  <p className="text-slate-300 font-sans leading-relaxed break-words">{cmt}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* Detail Breakdown Modal */}
       <DetailModal

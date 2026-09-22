@@ -60,8 +60,8 @@ export interface Translations {
 const enTranslations: Translations = {
   appTitle: 'POPTOP PRODUCTION',
   createPo: 'Create PO',
-  cbmCalc: '3D CBM Calc',
-  competitorIntel: 'Competitor Intel',
+  cbmCalc: 'Container Plan',
+  competitorIntel: 'Competitor',
   shipmentTrack: 'Shipment Track',
   ppwr: 'PPWR',
   print: 'Print',
@@ -110,8 +110,8 @@ const enTranslations: Translations = {
 const deAtTranslations: Translations = {
   appTitle: 'POPTOP PRODUKTION',
   createPo: 'Bestellung erstellen',
-  cbmCalc: '3D CBM-Rechner',
-  competitorIntel: 'Mitbewerber-Analyse',
+  cbmCalc: 'Container-Plan',
+  competitorIntel: 'Mitbewerber',
   shipmentTrack: 'Sendungsverfolgung',
   ppwr: 'PPWR-Konformität',
   print: 'Drucken',
