@@ -91,7 +91,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({ order, isOpen, onClose
           <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 font-mono">
             Design Batches Breakdown
           </h3>
-          <div className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+          <div className="border border-slate-200 rounded-xl overflow-x-auto custom-scrollbar bg-slate-50">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 font-mono text-[10px] uppercase">
                 <tr>

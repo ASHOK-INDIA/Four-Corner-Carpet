@@ -26,7 +26,7 @@ export const PageFlipModal: React.FC<PageFlipModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-[64px] inset-x-0 bottom-0 z-40 bg-slate-950/50 backdrop-blur-md flex items-center justify-center p-4 lg:p-8 overflow-hidden border-t border-rose-700/80"
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 md:p-6 lg:p-8 overflow-hidden"
           onClick={onClose}
         >
           <motion.div
