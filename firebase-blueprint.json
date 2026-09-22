@@ -46,6 +46,17 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["category", "name", "type", "date", "po"]
+    },
+    "ForecastComment": {
+      "title": "Forecast Comment",
+      "description": "Buyer submitted forecast and next order plan comment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "text", "createdAt"]
     }
   },
   "firestore": {
@@ -56,6 +67,10 @@
     "/ppwr_files/{fileId}": {
       "entity": "PPWRFile",
       "description": "PPWR compliance declarations, lab test reports, and technical data sheets"
+    },
+    "/forecast_comments/{commentId}": {
+      "entity": "ForecastComment",
+      "description": "Buyer forecasted plans and comment board"
     }
   }
 }

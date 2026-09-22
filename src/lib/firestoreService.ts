@@ -8,10 +8,11 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { PurchaseOrder, PPWRFile, PPWRFilesStore } from '../types';
+import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment } from '../types';
 
 const PO_COLLECTION = 'purchase_orders';
 const PPWR_COLLECTION = 'ppwr_files';
+const COMMENTS_COLLECTION = 'forecast_comments';
 
 /**
  * Sanitize Firestore document IDs by replacing slashes or invalid characters
@@ -240,4 +241,55 @@ export async function clearAllFirestoreData(): Promise<void> {
     ppwrSnap.docs.forEach((d) => batch2.delete(d.ref));
     await batch2.commit();
   }
+
+  // Clear all forecast comments
+  const commentsSnap = await getDocs(collection(db, COMMENTS_COLLECTION));
+  if (!commentsSnap.empty) {
+    const batch3 = writeBatch(db);
+    commentsSnap.docs.forEach((d) => batch3.delete(d.ref));
+    await batch3.commit();
+  }
+}
+
+/**
+ * Subscribe to real-time changes of Buyer Forecast Comments in Firestore
+ */
+export function subscribeForecastComments(
+  onUpdate: (data: ForecastComment[]) => void,
+  onError?: (error: Error) => void
+) {
+  const colRef = collection(db, COMMENTS_COLLECTION);
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const items: ForecastComment[] = [];
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+        items.push({
+          id: docSnap.id,
+          text: d.text || '',
+          createdAt: d.createdAt || ''
+        });
+      });
+      // Sort chronologically descending
+      items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      onUpdate(items);
+    },
+    (err) => {
+      console.error('Firestore Forecast Comments snapshot error:', err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Save a Buyer Forecast Comment in Firestore
+ */
+export async function saveForecastCommentToFirestore(text: string): Promise<void> {
+  const id = `COMMENT_${Date.now()}`;
+  const docRef = doc(db, COMMENTS_COLLECTION, id);
+  await setDoc(docRef, {
+    text: text,
+    createdAt: new Date().toISOString()
+  });
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { PurchaseOrder, PPWRFilesStore, WeatherData } from './types';
+import { PurchaseOrder, PPWRFilesStore, WeatherData, ForecastComment } from './types';
 import { Header } from './components/Header';
 import { KPICards } from './components/KPICards';
 import { ControlsBar } from './components/ControlsBar';
@@ -21,6 +21,8 @@ import {
   savePPWRFileToFirestore,
   deletePPWRFileFromFirestore,
   clearAllFirestoreData,
+  subscribeForecastComments,
+  saveForecastCommentToFirestore,
 } from './lib/firestoreService';
 
 export default function App() {
@@ -72,10 +74,7 @@ export default function App() {
 
   // State: Buyer Forecast Comments
   const [buyerComment, setBuyerComment] = useState<string>('');
-  const [commentsList, setCommentsList] = useState<string[]>(() => {
-    const saved = localStorage.getItem('buyer_forecast_comments');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [commentsList, setCommentsList] = useState<ForecastComment[]>([]);
 
   // Real-time Firestore Subscriptions - Live admin-entered data ONLY
   useEffect(() => {
@@ -100,9 +99,19 @@ export default function App() {
       }
     );
 
+    const unsubscribeComments = subscribeForecastComments(
+      (data) => {
+        setCommentsList(data);
+      },
+      (err) => {
+        console.warn('Firestore Comments subscription:', err);
+      }
+    );
+
     return () => {
       unsubscribePOs();
       unsubscribePPWR();
+      unsubscribeComments();
     };
   }, []);
 
@@ -354,14 +363,17 @@ export default function App() {
     }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!buyerComment.trim()) return;
-    const updated = [buyerComment.trim(), ...commentsList];
-    setCommentsList(updated);
-    localStorage.setItem('buyer_forecast_comments', JSON.stringify(updated));
-    setBuyerComment('');
-    alert('Thank you! Your forecast comment has been submitted and recorded.');
+    try {
+      await saveForecastCommentToFirestore(buyerComment.trim());
+      setBuyerComment('');
+      alert('Thank you! Your forecast comment has been submitted and saved to the database in real-time.');
+    } catch (err) {
+      console.error('Failed to save forecast comment in real-time:', err);
+      alert('Failed to save your plan to the database. Please try again.');
+    }
   };
 
   return (
@@ -482,7 +494,7 @@ export default function App() {
                     <div className="w-6 h-6 rounded-lg bg-rose-50 text-[#EF3340] font-bold flex items-center justify-center font-mono flex-shrink-0 mt-0.5">
                       {idx + 1}
                     </div>
-                    <p className="text-slate-700 font-sans leading-relaxed break-words">{cmt}</p>
+                    <p className="text-slate-700 font-sans leading-relaxed break-words">{cmt.text}</p>
                   </div>
                 ))
               )}
