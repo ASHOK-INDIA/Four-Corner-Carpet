@@ -2,9 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { X, Box, Plus, Trash2, RotateCw, Layers, RefreshCw, AlertTriangle, CheckCircle, Info, Printer, ShieldAlert, FolderOpen, Lock, FileDown } from 'lucide-react';
 import { PageFlipModal } from './PageFlipModal';
-import { PurchaseOrder } from '../types';
+import { PurchaseOrder, CargoItem } from '../types';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  subscribeContainerItems,
+  saveCargoItemToFirestore,
+  deleteCargoItemFromFirestore
+} from '../lib/firestoreService';
 
 export interface ContainerPreset {
   id: string;
@@ -55,20 +60,6 @@ export const CONTAINER_PRESETS: ContainerPreset[] = [
   },
 ];
 
-export interface CargoItem {
-  id: string;
-  name: string;
-  lengthCm: number;
-  widthCm: number;
-  heightCm: number;
-  weightKg: number;
-  qty: number;
-  color: string;
-  isCylinder?: boolean;
-  packageType?: 'box' | 'roll' | 'pallet';
-  rugsPerPallet?: number;
-}
-
 const COLOR_PALETTE = ['#EF3340', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
 
 interface ContainerStuffingModalProps {
@@ -90,32 +81,57 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
   const [selectedLayerIndex, setSelectedLayerIndex] = useState<number>(0);
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
 
-  // Sync cargo items with real Admin productionData
+  // Sync cargo items with real Admin productionData and subscribe to real-time Firestore updates
   useEffect(() => {
-    if (productionData && productionData.length > 0) {
-      const items: CargoItem[] = [];
-      let colorIdx = 0;
-      productionData.forEach((po) => {
-        po.designs.forEach((design) => {
-          items.push({
-            id: `po-${po.po}-${design.batch}`,
-            name: `${po.po} - ${design.name} (${design.size})`,
-            lengthCm: 140,
-            widthCm: 25,
-            heightCm: 25,
-            weightKg: 7.5,
-            qty: design.qty,
-            color: COLOR_PALETTE[colorIdx % COLOR_PALETTE.length],
-            isCylinder: design.name.toLowerCase().includes('rug'),
-            packageType: design.name.toLowerCase().includes('rug') ? 'roll' : 'box',
-          });
-          colorIdx++;
-        });
-      });
-      setCargoItems(items);
-    } else {
-      setCargoItems([]);
-    }
+    if (!isOpen) return;
+
+    const unsubscribe = subscribeContainerItems(
+      async (firebaseItems) => {
+        if (firebaseItems.length > 0) {
+          setCargoItems(firebaseItems);
+        } else {
+          // If Firestore container specs are completely empty, let's pre-populate it with the active productionData POs
+          if (productionData && productionData.length > 0) {
+            const items: CargoItem[] = [];
+            let colorIdx = 0;
+            for (const po of productionData) {
+              for (const design of po.designs) {
+                const item: CargoItem = {
+                  id: `po-${po.po}-${design.batch}`,
+                  name: `${po.po} - ${design.name} (${design.size})`,
+                  lengthCm: 140,
+                  widthCm: 25,
+                  heightCm: 25,
+                  weightKg: 7.5,
+                  qty: design.qty,
+                  color: COLOR_PALETTE[colorIdx % COLOR_PALETTE.length],
+                  isCylinder: design.name.toLowerCase().includes('rug'),
+                  packageType: design.name.toLowerCase().includes('rug') ? 'roll' : 'box',
+                };
+                items.push(item);
+                colorIdx++;
+
+                try {
+                  await saveCargoItemToFirestore(item);
+                } catch (e) {
+                  console.warn('Failed to seed default cargo item to Firestore:', e);
+                }
+              }
+            }
+            setCargoItems(items);
+          } else {
+            setCargoItems([]);
+          }
+        }
+      },
+      (err) => {
+        console.warn('Failed to subscribe to container cargo items:', err);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
   }, [productionData, isOpen]);
 
   // New Item State
@@ -149,8 +165,8 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
   const isOverCbm = totalCbm > currentContainer.maxCbm;
   const isOverWeight = totalWeightKg > currentContainer.maxWeightKg;
 
-  // Add Item Handler
-  const handleAddItem = (e: React.FormEvent) => {
+  // Add Item Handler (Saves directly to Firestore in real-time)
+  const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!adminMode) {
       alert('Admin mode is required to add cargo specifications.');
@@ -173,16 +189,26 @@ export const ContainerStuffingModal: React.FC<ContainerStuffingModalProps> = ({
       packageType: newItemPackageType,
       rugsPerPallet: newItemPackageType === 'pallet' ? newItemRugsPerPallet : undefined,
     };
-    setCargoItems([...cargoItems, newItem]);
-    setNewItemName('');
+    try {
+      await saveCargoItemToFirestore(newItem);
+      setNewItemName('');
+    } catch (err) {
+      console.error('Failed to save container item to Firestore:', err);
+      alert('Failed to save cargo specification to cloud. Please try again.');
+    }
   };
 
-  const handleRemoveItem = (id: string) => {
+  const handleRemoveItem = async (id: string) => {
     if (!adminMode) {
       alert('Admin mode is required to remove cargo items.');
       return;
     }
-    setCargoItems(cargoItems.filter((i) => i.id !== id));
+    try {
+      await deleteCargoItemFromFirestore(id);
+    } catch (err) {
+      console.error('Failed to delete container item from Firestore:', err);
+      alert('Failed to delete cargo specification from cloud. Please try again.');
+    }
   };
 
   const exportToPDF = async () => {

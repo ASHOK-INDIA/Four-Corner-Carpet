@@ -8,11 +8,12 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment } from '../types';
+import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem } from '../types';
 
 const PO_COLLECTION = 'purchase_orders';
 const PPWR_COLLECTION = 'ppwr_files';
 const COMMENTS_COLLECTION = 'forecast_comments';
+const CARGO_COLLECTION = 'container_items';
 
 /**
  * Sanitize Firestore document IDs by replacing slashes or invalid characters
@@ -249,6 +250,14 @@ export async function clearAllFirestoreData(): Promise<void> {
     commentsSnap.docs.forEach((d) => batch3.delete(d.ref));
     await batch3.commit();
   }
+
+  // Clear all container items
+  const cargoSnap = await getDocs(collection(db, CARGO_COLLECTION));
+  if (!cargoSnap.empty) {
+    const batch4 = writeBatch(db);
+    cargoSnap.docs.forEach((d) => batch4.delete(d.ref));
+    await batch4.commit();
+  }
 }
 
 /**
@@ -292,4 +301,72 @@ export async function saveForecastCommentToFirestore(text: string): Promise<void
     text: text,
     createdAt: new Date().toISOString()
   });
+}
+
+/**
+ * Subscribe to real-time changes of Cargo Items in Firestore
+ */
+export function subscribeContainerItems(
+  onUpdate: (data: CargoItem[]) => void,
+  onError?: (error: Error) => void
+) {
+  const colRef = collection(db, CARGO_COLLECTION);
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const items: CargoItem[] = [];
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+        items.push({
+          id: docSnap.id,
+          name: d.name || 'Cargo Item',
+          lengthCm: Number(d.lengthCm || 0),
+          widthCm: Number(d.widthCm || 0),
+          heightCm: Number(d.heightCm || 0),
+          weightKg: Number(d.weightKg || 0),
+          qty: Number(d.qty || 0),
+          color: d.color || '#3B82F6',
+          isCylinder: d.isCylinder ?? false,
+          packageType: d.packageType || 'box',
+          rugsPerPallet: d.rugsPerPallet ? Number(d.rugsPerPallet) : undefined
+        });
+      });
+      onUpdate(items);
+    },
+    (err) => {
+      console.error('Firestore Cargo Items snapshot error:', err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Save or update a Cargo Item in Firestore
+ */
+export async function saveCargoItemToFirestore(item: CargoItem): Promise<void> {
+  const docId = sanitizeDocId(item.id);
+  const docRef = doc(db, CARGO_COLLECTION, docId);
+  await setDoc(docRef, {
+    id: item.id,
+    name: item.name,
+    lengthCm: item.lengthCm,
+    widthCm: item.widthCm,
+    heightCm: item.heightCm,
+    weightKg: item.weightKg,
+    qty: item.qty,
+    color: item.color,
+    isCylinder: item.isCylinder || false,
+    packageType: item.packageType || 'box',
+    ...(item.rugsPerPallet !== undefined && { rugsPerPallet: item.rugsPerPallet }),
+    createdAt: new Date().toISOString()
+  }, { merge: true });
+}
+
+/**
+ * Delete a Cargo Item from Firestore
+ */
+export async function deleteCargoItemFromFirestore(id: string): Promise<void> {
+  const docId = sanitizeDocId(id);
+  const docRef = doc(db, CARGO_COLLECTION, docId);
+  await deleteDoc(docRef);
 }

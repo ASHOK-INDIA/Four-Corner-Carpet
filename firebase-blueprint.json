@@ -57,6 +57,26 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "text", "createdAt"]
+    },
+    "CargoItemSpecification": {
+      "title": "Cargo Item Specification",
+      "description": "Item specified in the 3D Container Stuffing planner.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "lengthCm": { "type": "number" },
+        "widthCm": { "type": "number" },
+        "heightCm": { "type": "number" },
+        "weightKg": { "type": "number" },
+        "qty": { "type": "number" },
+        "color": { "type": "string" },
+        "isCylinder": { "type": "boolean" },
+        "packageType": { "type": "string" },
+        "rugsPerPallet": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "lengthCm", "widthCm", "heightCm", "weightKg", "qty", "color", "isCylinder", "packageType"]
     }
   },
   "firestore": {
@@ -71,6 +91,10 @@
     "/forecast_comments/{commentId}": {
       "entity": "ForecastComment",
       "description": "Buyer forecasted plans and comment board"
+    },
+    "/container_items/{itemId}": {
+      "entity": "CargoItemSpecification",
+      "description": "Cargo items specified inside the 3D container plan"
     }
   }
 }

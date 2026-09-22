@@ -44,3 +44,18 @@ export interface ForecastComment {
   createdAt: string;
 }
 
+export interface CargoItem {
+  id: string;
+  name: string;
+  lengthCm: number;
+  widthCm: number;
+  heightCm: number;
+  weightKg: number;
+  qty: number;
+  color: string;
+  isCylinder?: boolean;
+  packageType?: 'box' | 'roll' | 'pallet';
+  rugsPerPallet?: number;
+}
+
+
