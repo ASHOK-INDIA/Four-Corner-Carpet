@@ -1,39 +1,52 @@
-export interface DesignBatch {
-  name: string;
-  batch: string;
-  size: string;
-  qty: number;
-  status: string;
-  progress: number;
+export type POStatus = 'ON_TRACK' | 'DELAYED' | 'CRITICAL_DELAY' | 'COMPLETED' | 'CANCELLED';
+export type PPWRStatus = 'COMPLIANT' | 'PENDING' | 'NON_COMPLIANT';
+
+export interface POMilestones {
+  fabricInHouse: boolean;
+  cuttingStarted: boolean;
+  sewingStarted: boolean;
+  qualityInspected: boolean;
+  packedAndReady: boolean;
 }
 
 export interface PurchaseOrder {
-  po: string;
-  appRef: string;
-  estDate: string;
-  notes: string;
-  shipmentMilestone: string;
-  designs: DesignBatch[];
+  id: string;
+  poNumber: string;
+  styleName: string;
+  colorway: string;
+  buyerName: string;
+  factoryName: string;
+  destinationCountry: string;
+  orderQuantity: number;
+  exFactoryDate: string;
+  status: POStatus;
+  ppwrStatus: PPWRStatus;
+  milestones: POMilestones;
+  trackingNumber?: string;
+  carrier?: string;
+  notes?: string;
 }
 
 export interface PPWRFile {
   id: string;
   name: string;
-  type: 'PDF' | 'EXCEL';
-  date: string;
+  uploadDate: string;
   size: string;
-  po: string;
+  status: 'Verified' | 'Pending Review' | 'Expired';
+  url?: string;
+  type?: string;
 }
 
 export interface PPWRFilesStore {
-  declaration: PPWRFile[];
-  testReport: PPWRFile[];
-  technicalDataSheet: PPWRFile[];
+  certifications: PPWRFile[];
+  declarations: PPWRFile[];
+  labReports: PPWRFile[];
+  recycledContent: PPWRFile[];
 }
 
 export interface WeatherData {
-  temp: number;
+  temp: string;
   condition: string;
-  weatherCode: number;
-  iconName: string;
+  humidity: string;
+  location: string;
 }

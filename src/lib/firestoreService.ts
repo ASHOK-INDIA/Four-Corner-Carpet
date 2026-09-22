@@ -21,13 +21,46 @@ function sanitizeDocId(id: string): string {
 }
 
 /**
+ * Permanently purge any dummy or test PO documents from Firestore
+ */
+export async function purgeDummyPOsFromFirestore(): Promise<void> {
+  try {
+    const poSnap = await getDocs(collection(db, PO_COLLECTION));
+    if (!poSnap.empty) {
+      for (const docSnap of poSnap.docs) {
+        const d = docSnap.data();
+        const poNum = (d.po || docSnap.id).toLowerCase();
+        const docId = docSnap.id.toLowerCase();
+        if (
+          poNum.includes('1001') ||
+          poNum.includes('dummy') ||
+          poNum.includes('sample') ||
+          poNum.includes('test') ||
+          docId.includes('1001') ||
+          docId.includes('dummy') ||
+          docId.includes('sample') ||
+          docId.includes('test')
+        ) {
+          await deleteDoc(docSnap.ref);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Purge dummy POs error:', e);
+  }
+}
+
+/**
  * Subscribe to real-time changes of Purchase Orders in Firestore.
- * Fetches and displays ONLY records entered by Admin in the database.
+ * Fetches and displays ONLY real records entered by Admin in the database.
  */
 export function subscribePurchaseOrders(
   onUpdate: (data: PurchaseOrder[]) => void,
   onError?: (error: Error) => void
 ) {
+  // Trigger async purge of legacy dummy POs
+  purgeDummyPOsFromFirestore();
+
   const colRef = collection(db, PO_COLLECTION);
   return onSnapshot(
     colRef,
@@ -39,8 +72,26 @@ export function subscribePurchaseOrders(
       const items: PurchaseOrder[] = [];
       snapshot.forEach((docSnap) => {
         const d = docSnap.data();
+        const poNum = d.po || docSnap.id;
+        
+        // Exclude dummy/test POs
+        const lowerPo = poNum.toLowerCase();
+        const lowerDocId = docSnap.id.toLowerCase();
+        if (
+          lowerPo.includes('1001') ||
+          lowerPo.includes('dummy') ||
+          lowerPo.includes('sample') ||
+          lowerPo.includes('test') ||
+          lowerDocId.includes('1001') ||
+          lowerDocId.includes('dummy') ||
+          lowerDocId.includes('sample') ||
+          lowerDocId.includes('test')
+        ) {
+          return;
+        }
+
         items.push({
-          po: d.po || docSnap.id,
+          po: poNum,
           appRef: d.appRef || '',
           estDate: d.estDate || '',
           notes: d.notes || '',

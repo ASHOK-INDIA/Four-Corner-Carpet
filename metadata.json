@@ -1,5 +1,5 @@
 {
-  "name": "POPTOP Production",
+  "name": "POPTOP Production Suite",
   "description": "Purchase order tracking, manufacturing unit operations, 9-step logistics shipment tracking, and EU PPWR packaging compliance suite.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

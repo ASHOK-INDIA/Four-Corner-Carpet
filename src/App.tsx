@@ -10,6 +10,8 @@ import { PPWRModal } from './components/PPWRModal';
 import { OrderFormModal } from './components/OrderFormModal';
 import { PrintSummaryModal } from './components/PrintSummaryModal';
 import { PasswordModal } from './components/PasswordModal';
+import { ContainerStuffingModal } from './components/ContainerStuffingModal';
+import { CompetitorIntelligenceModal } from './components/CompetitorIntelligenceModal';
 import {
   subscribePurchaseOrders,
   subscribePPWRFiles,
@@ -20,7 +22,6 @@ import {
   deletePPWRFileFromFirestore,
   clearAllFirestoreData,
 } from './lib/firestoreService';
-import { db } from './lib/firebase';
 
 export default function App() {
   // State: Data from Cloud Firestore - initialized clean with NO random or fake data
@@ -36,8 +37,7 @@ export default function App() {
   const [adminMode, setAdminMode] = useState<boolean>(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
 
-  // State: Clock & Weather
-  const [timeString, setTimeString] = useState<string>('');
+  // State: Weather
   const [weather, setWeather] = useState<WeatherData>({
     temp: 32,
     condition: 'Sunny',
@@ -62,8 +62,13 @@ export default function App() {
   const [orderFormOpen, setOrderFormOpen] = useState<boolean>(false);
   const [orderToEdit, setOrderToEdit] = useState<PurchaseOrder | null>(null);
   const [editIndex, setEditIndex] = useState<number>(-1);
+  const [deleteConfirmOrder, setDeleteConfirmOrder] = useState<PurchaseOrder | null>(null);
 
   const [printSummaryOpen, setPrintSummaryOpen] = useState<boolean>(false);
+
+  // State: New Modules (3D CBM & Competitor Intel)
+  const [is3DContainerOpen, setIs3DContainerOpen] = useState<boolean>(false);
+  const [isCompetitorIntelOpen, setIsCompetitorIntelOpen] = useState<boolean>(false);
 
   // Real-time Firestore Subscriptions - Live admin-entered data ONLY
   useEffect(() => {
@@ -92,26 +97,6 @@ export default function App() {
       unsubscribePOs();
       unsubscribePPWR();
     };
-  }, []);
-
-  // Live IST Clock
-  useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
-      const optionsTime: Intl.DateTimeFormatOptions = {
-        timeZone: 'Asia/Kolkata',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-      };
-      const formatted = new Intl.DateTimeFormat('en-US', optionsTime).format(now);
-      setTimeString(formatted);
-    };
-
-    updateClock();
-    const interval = setInterval(updateClock, 1000);
-    return () => clearInterval(interval);
   }, []);
 
   // Live Bhadohi Weather
@@ -205,11 +190,24 @@ export default function App() {
     });
   }, [productionData, searchTerm, selectedPoFilter, selectedStatusFilter]);
 
+  // Helper to auto-close any open background popups when a new popup is requested
+  const closeAllModals = () => {
+    setDetailModalOpen(false);
+    setShipmentTrackOpen(false);
+    setPpwrModalOpen(false);
+    setOrderFormOpen(false);
+    setPrintSummaryOpen(false);
+    setIs3DContainerOpen(false);
+    setIsCompetitorIntelOpen(false);
+    setIsPasswordModalOpen(false);
+  };
+
   // Admin Toggle Handler
   const handleToggleAdmin = () => {
     if (adminMode) {
       setAdminMode(false);
     } else {
+      closeAllModals();
       setIsPasswordModalOpen(true);
     }
   };
@@ -221,12 +219,14 @@ export default function App() {
 
   // PO Detail View
   const handleViewDetails = (index: number) => {
+    closeAllModals();
     setSelectedDetailOrder(filteredData[index] || productionData[index] || null);
     setDetailModalOpen(true);
   };
 
   // Shipment Track Actions
   const handleOpenShipmentTrack = () => {
+    closeAllModals();
     if (productionData.length > 0 && !trackSelectedPo) {
       setTrackSelectedPo(productionData[0].po);
     }
@@ -234,6 +234,7 @@ export default function App() {
   };
 
   const handleSelectShipmentForPo = (po: string) => {
+    closeAllModals();
     setTrackSelectedPo(po);
     setShipmentTrackOpen(true);
   };
@@ -251,6 +252,7 @@ export default function App() {
 
   // PO CRUD Actions
   const handleOpenCreatePo = () => {
+    closeAllModals();
     if (!adminMode) {
       setIsPasswordModalOpen(true);
       return;
@@ -260,27 +262,32 @@ export default function App() {
     setOrderFormOpen(true);
   };
 
-  const handleEditOrder = (index: number) => {
+  const handleEditOrder = (realIndex: number) => {
+    closeAllModals();
     if (!adminMode) return;
-    const targetOrder = filteredData[index] || productionData[index];
+    const targetOrder = productionData[realIndex];
     if (!targetOrder) return;
-    const realIndex = productionData.findIndex((p) => p.po === targetOrder.po);
     setOrderToEdit(targetOrder);
     setEditIndex(realIndex);
     setOrderFormOpen(true);
   };
 
-  const handleDeleteOrder = async (index: number) => {
+  const handleDeleteOrder = async (realIndex: number) => {
     if (!adminMode) return;
-    const itemToDelete = filteredData[index] || productionData[index];
+    const itemToDelete = productionData[realIndex];
     if (!itemToDelete) return;
-    if (window.confirm(`Are you sure you want to delete purchase order ${itemToDelete.po}?`)) {
-      try {
-        await deletePurchaseOrderFromFirestore(itemToDelete.po);
-      } catch (e) {
-        console.error('Failed to delete PO from Firestore:', e);
-        setProductionData((prev) => prev.filter((p) => p.po !== itemToDelete.po));
-      }
+    setDeleteConfirmOrder(itemToDelete);
+  };
+
+  const confirmDeleteOrder = async () => {
+    if (!deleteConfirmOrder) return;
+    try {
+      await deletePurchaseOrderFromFirestore(deleteConfirmOrder.po);
+      setProductionData((prev) => prev.filter((p) => p.po !== deleteConfirmOrder.po));
+      setDeleteConfirmOrder(null);
+    } catch (e) {
+      console.error('Failed to delete PO from Firestore:', e);
+      setDeleteConfirmOrder(null);
     }
   };
 
@@ -341,18 +348,31 @@ export default function App() {
   };
 
   return (
-    <div className="bg-[#FFFFFF] text-slate-800 min-h-screen flex flex-col antialiased">
+    <div className="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-[#E4002B] selection:text-white">
       {/* Top Header Navigation */}
       <Header
-        timeString={timeString}
         weather={weather}
         adminMode={adminMode}
         isSyncing={isSyncing}
         onToggleAdmin={handleToggleAdmin}
         onOpenCreatePo={handleOpenCreatePo}
         onOpenShipmentTrack={handleOpenShipmentTrack}
-        onOpenPPWR={() => setPpwrModalOpen(true)}
-        onOpenPrintReport={() => setPrintSummaryOpen(true)}
+        onOpenPPWR={() => {
+          closeAllModals();
+          setPpwrModalOpen(true);
+        }}
+        onOpenPrintReport={() => {
+          closeAllModals();
+          setPrintSummaryOpen(true);
+        }}
+        onOpen3DContainer={() => {
+          closeAllModals();
+          setIs3DContainerOpen(true);
+        }}
+        onOpenCompetitorIntel={() => {
+          closeAllModals();
+          setIsCompetitorIntelOpen(true);
+        }}
       />
 
       {/* Main Dashboard Container */}
@@ -441,6 +461,46 @@ export default function App() {
         onClose={() => setIsPasswordModalOpen(false)}
         onSuccess={handlePasswordSuccess}
       />
+
+      {/* 3D Container Stuffing & CBM Calculator Modal */}
+      <ContainerStuffingModal
+        isOpen={is3DContainerOpen}
+        onClose={() => setIs3DContainerOpen(false)}
+        productionData={productionData}
+        adminMode={adminMode}
+      />
+
+      {/* Competitor Intelligence Modal (German & EU Kids Brands, Chairs, Rugs) */}
+      <CompetitorIntelligenceModal
+        isOpen={isCompetitorIntelOpen}
+        onClose={() => setIsCompetitorIntelOpen(false)}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl p-6 shadow-xl border border-rose-700 w-full max-w-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900">Confirm Deletion</h3>
+            <p className="text-sm text-slate-600">
+              Are you sure you want to delete purchase order <span className="font-bold text-rose-700">{deleteConfirmOrder.po}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setDeleteConfirmOrder(null)}
+                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteOrder}
+                className="px-4 py-2 text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 rounded-lg transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
