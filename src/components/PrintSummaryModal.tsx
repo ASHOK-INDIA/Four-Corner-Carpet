@@ -11,7 +11,7 @@ interface PrintSummaryModalProps {
 export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
   isOpen,
   onClose,
-  productionData = [],
+  productionData,
 }) => {
   if (!isOpen) return null;
 
@@ -20,16 +20,10 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
   let shippedCount = 0;
 
   productionData.forEach((item) => {
-    const rawDesigns = (item as any).designs;
-    if (Array.isArray(rawDesigns) && rawDesigns.length > 0) {
-      rawDesigns.forEach((d: any) => {
-        totalUnits += d?.qty || 0;
-        if (d?.status === 'Shipped' || d?.status === 'Ready for Shipment') shippedCount++;
-      });
-    } else {
-      totalUnits += item.orderQuantity || 0;
-      if (item.status === 'COMPLETED' || item.milestones?.packedAndReady) shippedCount++;
-    }
+    item.designs.forEach((d) => {
+      totalUnits += d.qty;
+      if (d.status === 'Shipped' || d.status === 'Ready for Shipment') shippedCount++;
+    });
   });
 
   const formattedDate = new Date().toLocaleDateString('en-GB', {
@@ -45,7 +39,7 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
   return (
     <div
       id="printSummaryModal"
-      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white border border-slate-200 w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         {/* Header (hidden in print) */}
@@ -64,13 +58,13 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" /> Print Now
             </button>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-700 text-xl p-1 cursor-pointer rounded-lg hover:bg-slate-200"
+              className="text-slate-400 hover:text-slate-700 text-xl p-1 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -152,37 +146,38 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
                 <thead>
                   <tr className="bg-slate-100 text-slate-700 font-semibold border-b-2 border-slate-300">
                     <th className="py-2 px-3">PO & Ref</th>
-                    <th className="py-2 px-3">Style / Buyer</th>
-                    <th className="py-2 px-3 text-center">Factory</th>
+                    <th className="py-2 px-3">Design Breakdown</th>
+                    <th className="py-2 px-3 text-center">Batches</th>
                     <th className="py-2 px-3 text-right">Total Qty</th>
                     <th className="py-2 px-3">Status</th>
-                    <th className="py-2 px-3">EU PPWR</th>
-                    <th className="py-2 px-3">Ex-Factory</th>
+                    <th className="py-2 px-3">Progress</th>
+                    <th className="py-2 px-3">Est. Delivery</th>
                   </tr>
                 </thead>
                 <tbody id="printSummaryTableBody" className="divide-y divide-slate-200">
                   {productionData.map((item) => {
-                    const poNum = item.poNumber || (item as any).po || item.id;
-                    const styleStr = `${item.styleName || 'Apparel'} (${item.colorway || 'Std'})`;
-                    const buyerStr = item.buyerName || 'Client';
-                    const factoryStr = item.factoryName || 'Hub Unit 1';
-                    const itemQty = item.orderQuantity || 0;
-                    const estDelivery = item.exFactoryDate || (item as any).estDate || '-';
+                    const itemQty = item.designs.reduce((acc, c) => acc + c.qty, 0);
+                    const avgProg =
+                      item.designs.length > 0
+                        ? Math.round(item.designs.reduce((a, c) => a + c.progress, 0) / item.designs.length)
+                        : 0;
+                    const primaryStatus = item.designs[0]?.status || 'Order Received';
+                    const designNames = item.designs.map((d) => `${d.name} (${d.batch})`).join(', ');
 
                     return (
-                      <tr key={item.id || poNum} className="border-b border-slate-100">
+                      <tr key={item.po} className="border-b border-slate-100">
                         <td className="py-2.5 px-3">
-                          <span className="font-bold text-slate-900 font-mono block">{poNum}</span>
-                          <span className="text-[10px] text-slate-500 font-mono">{buyerStr}</span>
+                          <span className="font-bold text-slate-900 font-mono block">{item.po}</span>
+                          <span className="text-[10px] text-slate-500 font-mono">{item.appRef}</span>
                         </td>
-                        <td className="py-2.5 px-3 text-slate-700 max-w-xs truncate">{styleStr}</td>
-                        <td className="py-2.5 px-3 text-center font-semibold text-slate-800">{factoryStr}</td>
+                        <td className="py-2.5 px-3 text-slate-700 max-w-xs truncate">{designNames}</td>
+                        <td className="py-2.5 px-3 text-center font-mono">{item.designs.length}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
-                          {itemQty.toLocaleString()} Pcs
+                          {itemQty.toLocaleString()}
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-800 text-[11px]">{item.status || 'ON_TRACK'}</td>
-                        <td className="py-2.5 px-3 font-mono font-bold text-slate-900">{item.ppwrStatus || 'PENDING'}</td>
-                        <td className="py-2.5 px-3 font-mono text-slate-600 text-[11px]">{estDelivery}</td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-800 text-[11px]">{primaryStatus}</td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-slate-900">{avgProg}%</td>
+                        <td className="py-2.5 px-3 font-mono text-slate-600 text-[11px]">{item.estDate}</td>
                       </tr>
                     );
                   })}
@@ -203,11 +198,24 @@ export const PrintSummaryModal: React.FC<PrintSummaryModalProps> = ({
                 <div className="text-right">
                   <p className="font-semibold text-slate-800">Authorized Signatory</p>
                   <div className="h-8 border-b border-dashed border-slate-400 w-36 mt-1 mb-1"></div>
-                  <p className="text-[9px] text-slate-400">Operations & Quality Lead</p>
+                  <p className="text-[9px]">POPTOP PRODUCTION QC & MANAGEMENT</p>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Footer (hidden in print) */}
+        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center no-print">
+          <p className="text-xs text-slate-500 italic">
+            Table columns perfectly aligned with dashboard data for A4 printing.
+          </p>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-xl transition cursor-pointer"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>

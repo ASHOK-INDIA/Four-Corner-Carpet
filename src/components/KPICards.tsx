@@ -6,31 +6,24 @@ interface KPICardsProps {
   productionData: PurchaseOrder[];
 }
 
-export const KPICards: React.FC<KPICardsProps> = ({ productionData = [] }) => {
+export const KPICards: React.FC<KPICardsProps> = ({ productionData }) => {
   const total = productionData.length;
   let inProd = 0;
   let qcCount = 0;
   let shippedCount = 0;
 
   productionData.forEach((item) => {
-    const designs = (item as any).designs;
-    if (Array.isArray(designs) && designs.length > 0) {
-      designs.forEach((d: any) => {
-        if (d?.status === 'In Production' || d?.status === 'Material Prep') inProd++;
-        if (d?.status === 'QC Inspection') qcCount++;
-        if (d?.status === 'Shipped' || d?.status === 'Ready for Shipment') shippedCount++;
-      });
-    } else {
-      if (item.status === 'ON_TRACK' || item.status === 'DELAYED') inProd++;
-      if (item.milestones?.qualityInspected || item.ppwrStatus === 'PENDING') qcCount++;
-      if (item.status === 'COMPLETED' || item.milestones?.packedAndReady) shippedCount++;
-    }
+    item.designs.forEach((d) => {
+      if (d.status === 'In Production' || d.status === 'Material Prep') inProd++;
+      if (d.status === 'QC Inspection') qcCount++;
+      if (d.status === 'Shipped' || d.status === 'Ready for Shipment') shippedCount++;
+    });
   });
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Active POs */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between">
         <div>
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Active POs</p>
           <h3 id="statTotal" className="text-2xl font-bold text-slate-900 mt-1 font-mono">
@@ -43,7 +36,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ productionData = [] }) => {
       </div>
 
       {/* In Production */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between">
         <div>
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">In Production</p>
           <h3 id="statInProd" className="text-2xl font-bold text-[#EF3340] mt-1 font-mono">
@@ -56,9 +49,9 @@ export const KPICards: React.FC<KPICardsProps> = ({ productionData = [] }) => {
       </div>
 
       {/* QC Inspection */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">QC / Pending</p>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">QC Inspection</p>
           <h3 id="statQC" className="text-2xl font-bold text-purple-600 mt-1 font-mono">
             {qcCount}
           </h3>
@@ -69,7 +62,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ productionData = [] }) => {
       </div>
 
       {/* Ready / Shipped */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between">
         <div>
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Ready / Shipped</p>
           <h3 id="statShipped" className="text-2xl font-bold text-emerald-600 mt-1 font-mono">

@@ -16,7 +16,7 @@ interface ControlsBarProps {
 }
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({
-  productionData = [],
+  productionData,
   searchTerm,
   onSearchChange,
   selectedPoFilter,
@@ -28,7 +28,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   onClearData,
 }) => {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xs">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[240px]">
@@ -40,8 +40,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             id="searchInput"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search PO#, Style, Buyer, Factory..."
-            className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-xl pl-9 pr-4 py-2.5 focus:outline-hidden focus:border-[#EF3340] transition font-mono"
+            placeholder="Search PO, App Ref, Design, Batch..."
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-[#EF3340] transition font-mono"
           />
         </div>
 
@@ -50,18 +50,14 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           id="poFilter"
           value={selectedPoFilter}
           onChange={(e) => onPoFilterChange(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2.5 focus:outline-hidden focus:border-[#EF3340] transition cursor-pointer"
+          className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#EF3340] transition cursor-pointer"
         >
           <option value="ALL">All Purchase Orders ({productionData.length})</option>
-          {productionData.map((item) => {
-            const poNum = item.poNumber || (item as any).po || item.id;
-            const styleLabel = item.styleName || (item as any).appRef || 'Order';
-            return (
-              <option key={item.id || poNum} value={poNum}>
-                {poNum} ({styleLabel})
-              </option>
-            );
-          })}
+          {productionData.map((item) => (
+            <option key={item.po} value={item.po}>
+              {item.po} ({item.appRef})
+            </option>
+          ))}
         </select>
 
         {/* Status Filter Dropdown */}
@@ -69,14 +65,16 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           id="statusFilter"
           value={selectedStatusFilter}
           onChange={(e) => onStatusFilterChange(e.target.value)}
-          className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2.5 focus:outline-hidden focus:border-[#EF3340] transition cursor-pointer"
+          className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#EF3340] transition cursor-pointer"
         >
           <option value="ALL">All Statuses</option>
-          <option value="ON_TRACK">On Track</option>
-          <option value="DELAYED">Delayed</option>
-          <option value="CRITICAL_DELAY">Critical Delay</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="CANCELLED">Cancelled</option>
+          <option value="Order Received">Order Received</option>
+          <option value="Material Prep">Material Prep</option>
+          <option value="In Production">In Production</option>
+          <option value="QC Inspection">QC Inspection</option>
+          <option value="Ready for Shipment">Ready for Shipment</option>
+          <option value="Shipped">Shipped</option>
+          <option value="On Hold">On Hold</option>
         </select>
       </div>
 
@@ -86,7 +84,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           <button
             id="addOrderBtn"
             onClick={onOpenCreatePo}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#EF3340] hover:bg-rose-700 text-white transition shadow-xs flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#EF3340] hover:bg-rose-700 text-white transition shadow-sm flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 text-white" /> Create PO
           </button>

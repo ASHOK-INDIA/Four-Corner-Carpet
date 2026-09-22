@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Route, X, MapPin, Edit3, Unlock, Check, FolderOpen } from 'lucide-react';
+import { Route, X, MapPin, Edit3, Unlock, Lock, Check, FolderOpen } from 'lucide-react';
 import { PurchaseOrder } from '../types';
-import { SHIPMENT_STEPS } from '../data/defaultData';
+import { SHIPMENT_STEPS, getMilestoneDescription } from '../data/defaultData';
 
 interface ShipmentTrackModalProps {
   isOpen: boolean;
@@ -17,35 +17,30 @@ interface ShipmentTrackModalProps {
 export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
   isOpen,
   onClose,
-  productionData = [],
+  productionData,
   selectedPoNumber,
   onSelectPo,
   adminMode,
+  onUnlockAdmin,
   onUpdateMilestone,
 }) => {
-  const currentOrder =
-    productionData.find(
-      (i) =>
-        (i.poNumber || (i as any).po || i.id) === selectedPoNumber
-    ) || productionData[0] || null;
-
+  const currentOrder = productionData.find((i) => i.po === selectedPoNumber) || productionData[0];
   const [adminMilestone, setAdminMilestone] = useState<string>('1. Packing');
 
   useEffect(() => {
     if (currentOrder) {
-      setAdminMilestone((currentOrder as any).shipmentMilestone || '1. Packing');
+      setAdminMilestone(currentOrder.shipmentMilestone || '1. Packing');
     }
   }, [currentOrder, selectedPoNumber]);
 
   if (!isOpen) return null;
 
-  const currentMilestone = (currentOrder as any)?.shipmentMilestone || '1. Packing';
+  const currentMilestone = currentOrder?.shipmentMilestone || '1. Packing';
   const currentMilestoneIndex = SHIPMENT_STEPS.indexOf(currentMilestone as any);
 
   const handleSaveMilestone = () => {
     if (!adminMode || !currentOrder) return;
-    const poNum = currentOrder.poNumber || (currentOrder as any).po || currentOrder.id;
-    onUpdateMilestone(poNum, adminMilestone);
+    onUpdateMilestone(currentOrder.po, adminMilestone);
   };
 
   const getStepStyles = (idx: number) => {
@@ -61,7 +56,7 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
       textColorClass = 'text-blue-900';
       badgeBgClass = 'bg-blue-600 text-white';
     } else if (idx === 1) {
-      customBgClass = 'bg-white border-slate-200 shadow-xs';
+      customBgClass = 'bg-white border-slate-200 shadow-sm';
       textColorClass = 'text-slate-900';
       badgeBgClass = 'bg-slate-700 text-white';
     } else if (idx === 2) {
@@ -100,7 +95,7 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
   return (
     <div
       id="shipmentTrackModal"
-      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div className="bg-white border border-slate-200 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
@@ -116,7 +111,7 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 text-xl cursor-pointer p-1 rounded-lg hover:bg-slate-200 transition"
+            className="text-slate-400 hover:text-slate-700 text-xl cursor-pointer p-1"
           >
             <X className="w-5 h-5" />
           </button>
@@ -131,13 +126,13 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
               </div>
               <h3 className="text-sm font-bold text-slate-900">No Purchase Orders Available</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                There are no purchase orders in the database yet. Create a purchase order or load sample data to track 9-step shipment milestones.
+                There are no purchase orders in the database yet. Create a purchase order in Admin Mode to track its 9-step shipment milestones.
               </p>
             </div>
           ) : (
             <>
               {/* PO Selector & Milestone Control Bar */}
-              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-4">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex-1 w-full">
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -145,30 +140,26 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
                     </label>
                     <select
                       id="trackPoSelect"
-                      value={currentOrder.poNumber || (currentOrder as any).po || currentOrder.id}
+                      value={currentOrder.po}
                       onChange={(e) => onSelectPo(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 focus:outline-hidden focus:border-indigo-600 cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-indigo-600 cursor-pointer"
                     >
-                      {productionData.map((item) => {
-                        const poNum = item.poNumber || (item as any).po || item.id;
-                        const label = item.styleName || (item as any).appRef || 'Order';
-                        return (
-                          <option key={item.id || poNum} value={poNum}>
-                            {poNum} - {label} [Current: {(item as any).shipmentMilestone || '1. Packing'}]
-                          </option>
-                        );
-                      })}
+                      {productionData.map((item) => (
+                        <option key={item.po} value={item.po}>
+                          {item.po} - Ref: {item.appRef} [Current: {item.shipmentMilestone || '1. Packing'}]
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div id="trackAdminBadgeContainer" className="pt-0 sm:pt-5">
-                    <span className="px-3 py-2 bg-indigo-50 text-indigo-800 border border-indigo-200 rounded-xl text-xs font-mono font-bold inline-flex items-center gap-1.5 shadow-2xs">
+                    <span className="px-3 py-2 bg-indigo-50 text-indigo-800 border border-indigo-200 rounded-xl text-xs font-mono font-bold inline-flex items-center gap-1.5 shadow-xs">
                       <MapPin className="w-3.5 h-3.5 text-indigo-600" /> Active Milestone: {currentMilestone}
                     </span>
                   </div>
                 </div>
 
                 {/* Admin Edit Milestone Form */}
-                {adminMode && (
+                {adminMode ? (
                   <div id="trackAdminEditSection" className="border-t border-slate-200 pt-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
@@ -187,7 +178,7 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
                           id="adminMilestoneSelect"
                           value={adminMilestone}
                           onChange={(e) => setAdminMilestone(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600 cursor-pointer"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-600 cursor-pointer"
                         >
                           {SHIPMENT_STEPS.map((step) => (
                             <option key={step} value={step}>
@@ -200,52 +191,72 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
                         <button
                           id="saveMilestoneBtn"
                           onClick={handleSaveMilestone}
-                          className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Check className="w-3.5 h-3.5" /> Update Milestone
                         </button>
                       </div>
                     </div>
                   </div>
+                ) : (
+                  <div
+                    id="trackUserNotice"
+                    className="border-t border-slate-200 pt-3 flex items-center justify-between text-xs text-slate-500"
+                  >
+                    <span>
+                      <Lock className="w-3.5 h-3.5 inline text-[#EF3340] mr-1" /> Admin mode is currently OFF. Milestone
+                      updates are restricted.
+                    </span>
+                    <button
+                      onClick={onUnlockAdmin}
+                      className="text-indigo-600 font-bold hover:underline cursor-pointer"
+                    >
+                      Unlock Admin
+                    </button>
+                  </div>
                 )}
               </div>
 
-              {/* Steps Progress Timeline */}
-              <div className="space-y-3">
+              {/* Visual 9-Step Progress Timeline */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                 <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  9-Step Export Process Checklist
+                  Logistics Journey Timeline
                 </h3>
-                <div className="grid grid-cols-1 gap-2.5">
+                <div id="timelineStepsContainer" className="space-y-3">
                   {SHIPMENT_STEPS.map((step, idx) => {
                     const { customBgClass, textColorClass, badgeBgClass, isCompleted, isCurrent } = getStepStyles(idx);
+
                     return (
                       <div
                         key={step}
-                        className={`p-3.5 rounded-xl border flex items-center justify-between transition-all ${customBgClass} ${
-                          isCurrent ? 'ring-2 ring-indigo-500/50 shadow-sm' : ''
+                        className={`p-3.5 rounded-xl border flex items-center justify-between transition ${customBgClass} ${
+                          isCurrent ? 'ring-2 ring-indigo-600 shadow-md' : ''
                         }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono ${badgeBgClass}`}>
-                            Step {idx + 1}
-                          </span>
+                          <div
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono font-bold text-xs ${badgeBgClass}`}
+                          >
+                            {isCompleted ? <Check className="w-3.5 h-3.5" /> : idx + 1}
+                          </div>
                           <div>
-                            <h4 className={`text-xs ${textColorClass}`}>{step}</h4>
+                            <h4 className={`text-xs font-bold ${textColorClass}`}>{step}</h4>
+                            <p className={`text-[10px] opacity-80 ${textColorClass}`}>
+                              {getMilestoneDescription(idx + 1)}
+                            </p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div>
                           {isCurrent ? (
-                            <span className="px-2.5 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full animate-pulse">
-                              In Progress
+                            <span className="px-2.5 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded font-mono uppercase shadow-sm">
+                              Current Stage
                             </span>
                           ) : isCompleted ? (
-                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
+                            <span className="px-2 py-0.5 bg-black/10 text-slate-800 text-[10px] font-semibold rounded font-mono">
                               Completed
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-medium rounded">
-                              Pending
-                            </span>
+                            <span className="text-[10px] opacity-60 font-mono">Pending</span>
                           )}
                         </div>
                       </div>
@@ -257,8 +268,11 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end">
+        {/* Modal Footer */}
+        <div className="px-6 py-3.5 bg-white border-t border-slate-200 flex justify-between items-center">
+          <p className="text-xs text-slate-500 italic">
+            Shipment status updates are synchronized with Cloud Firestore.
+          </p>
           <button
             onClick={onClose}
             className="px-4 py-2 text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-xl transition cursor-pointer"
