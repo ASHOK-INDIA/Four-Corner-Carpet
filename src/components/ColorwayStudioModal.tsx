@@ -5,6 +5,7 @@ import { Palette, Layers, RefreshCw, Send, Sparkles, Check, Download, Info, Slid
 interface ColorwayStudioModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenWeaverGraph?: (pattern: string, colorMap: Record<string, YarnPom>) => void;
 }
 
 interface YarnPom {
@@ -132,7 +133,12 @@ function findClosestYarnPom(targetHex: string, poms: YarnPom[]): { pom: YarnPom;
   return { pom: bestPom, similarity };
 }
 
-export const ColorwayStudioModal: React.FC<ColorwayStudioModalProps> = ({ isOpen, onClose }) => {
+export const ColorwayStudioModal: React.FC<ColorwayStudioModalProps> = ({
+  isOpen,
+  onClose,
+  onOpenARView,
+  onOpenWeaverGraph,
+}) => {
   const [selectedTemplate, setSelectedTemplate] = useState<PatternTemplate>(TEMPLATES[0]);
   const [activeZone, setActiveZone] = useState<'field' | 'pattern' | 'border' | 'accent'>('field');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -362,13 +368,26 @@ export const ColorwayStudioModal: React.FC<ColorwayStudioModalProps> = ({ isOpen
               </p>
             </div>
 
-            <button
-              onClick={handleRequestStrikeOff}
-              className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer shrink-0"
-            >
-              <Send className="w-4 h-4 text-slate-950" />
-              <span>Request Physical Strike-Off (30x30 cm)</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {onOpenWeaverGraph && (
+                <button
+                  onClick={() => onOpenWeaverGraph(selectedTemplate.id, colorMap)}
+                  className="px-3.5 py-2.5 bg-white/15 hover:bg-white/25 text-white border border-white/20 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer backdrop-blur-xs"
+                  title="Open Master Weaver Naksha"
+                >
+                  <Zap className="w-4 h-4 text-amber-300" />
+                  <span>Weaver Naksha</span>
+                </button>
+              )}
+
+              <button
+                onClick={handleRequestStrikeOff}
+                className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
+              >
+                <Send className="w-4 h-4 text-slate-950" />
+                <span>Request Strike-Off</span>
+              </button>
+            </div>
           </div>
 
         {requestedSuccess && (

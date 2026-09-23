@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { PurchaseOrder, PPWRFilesStore, WeatherData, ForecastComment } from './types';
+import { PurchaseOrder, PPWRFilesStore, WeatherData, ForecastComment, SampleItem } from './types';
 import { Header } from './components/Header';
 import { KPICards } from './components/KPICards';
 import { ControlsBar } from './components/ControlsBar';
@@ -14,6 +14,8 @@ import { ContainerStuffingModal } from './components/ContainerStuffingModal';
 import { CompetitorIntelligenceModal } from './components/CompetitorIntelligenceModal';
 import { SamplesModal } from './components/SamplesModal';
 import { ColorwayStudioModal } from './components/ColorwayStudioModal';
+import { ARRoomVisualizerModal } from './components/ARRoomVisualizerModal';
+import { WeaverGraphModal } from './components/WeaverGraphModal';
 import {
   subscribePurchaseOrders,
   subscribePPWRFiles,
@@ -75,6 +77,15 @@ export default function App() {
   const [isCompetitorIntelOpen, setIsCompetitorIntelOpen] = useState<boolean>(false);
   const [isSamplesOpen, setIsSamplesOpen] = useState<boolean>(false);
   const [isColorwayStudioOpen, setIsColorwayStudioOpen] = useState<boolean>(false);
+
+  // State: Advanced Rug Studio & Logistics Enhancements
+  const [isARVisualizerOpen, setIsARVisualizerOpen] = useState<boolean>(false);
+  const [selectedARSample, setSelectedARSample] = useState<SampleItem | null>(null);
+  const [isWeaverGraphOpen, setIsWeaverGraphOpen] = useState<boolean>(false);
+  const [activeRugDesign, setActiveRugDesign] = useState<{
+    pattern: string;
+    colorMap?: Record<string, any>;
+  }>({ pattern: 'alpine-grid' });
 
   // State: Buyer Forecast Comments
   const [buyerComment, setBuyerComment] = useState<string>('');
@@ -222,6 +233,8 @@ export default function App() {
     setIsPasswordModalOpen(false);
     setIsSamplesOpen(false);
     setIsColorwayStudioOpen(false);
+    setIsARVisualizerOpen(false);
+    setIsWeaverGraphOpen(false);
   };
 
   // Admin Toggle Handler
@@ -416,6 +429,15 @@ export default function App() {
           closeAllModals();
           setIsColorwayStudioOpen(true);
         }}
+        onOpenARVisualizer={() => {
+          closeAllModals();
+          setSelectedARSample(null);
+          setIsARVisualizerOpen(true);
+        }}
+        onOpenWeaverGraph={() => {
+          closeAllModals();
+          setIsWeaverGraphOpen(true);
+        }}
       />
 
       {/* Main Dashboard Container */}
@@ -518,11 +540,13 @@ export default function App() {
       </footer>
 
       {/* Detail Breakdown Modal */}
-      <DetailModal
-        order={selectedDetailOrder}
-        isOpen={detailModalOpen}
-        onClose={() => setDetailModalOpen(false)}
-      />
+      {selectedDetailOrder && (
+        <DetailModal
+          order={selectedDetailOrder}
+          isOpen={detailModalOpen}
+          onClose={() => setDetailModalOpen(false)}
+        />
+      )}
 
       {/* Shipment Track 9-Step Milestone Modal */}
       <ShipmentTrackModal
@@ -588,17 +612,50 @@ export default function App() {
       />
 
       {/* Samples Interactive Slider Gallery Modal */}
-      <SamplesModal
-        isOpen={isSamplesOpen}
-        onClose={() => setIsSamplesOpen(false)}
-        adminMode={adminMode}
-      />
+      {isSamplesOpen && (
+        <SamplesModal
+          isOpen={isSamplesOpen}
+          onClose={() => setIsSamplesOpen(false)}
+          adminMode={adminMode}
+          onOpenARView={(sample) => {
+            setSelectedARSample(sample);
+            closeAllModals();
+            setIsARVisualizerOpen(true);
+          }}
+        />
+      )}
 
       {/* Virtual Yarn Pom Box & B2B Colorway Studio Modal */}
-      <ColorwayStudioModal
-        isOpen={isColorwayStudioOpen}
-        onClose={() => setIsColorwayStudioOpen(false)}
-      />
+      {isColorwayStudioOpen && (
+        <ColorwayStudioModal
+          isOpen={isColorwayStudioOpen}
+          onClose={() => setIsColorwayStudioOpen(false)}
+          onOpenWeaverGraph={(pattern, colorMap) => {
+            setActiveRugDesign({ pattern, colorMap });
+            closeAllModals();
+            setIsWeaverGraphOpen(true);
+          }}
+        />
+      )}
+
+      {/* AR 'View Rug in Your Room' Modal (Fetched from Samples Module) */}
+      {isARVisualizerOpen && (
+        <ARRoomVisualizerModal
+          isOpen={isARVisualizerOpen}
+          onClose={() => setIsARVisualizerOpen(false)}
+          initialSample={selectedARSample}
+        />
+      )}
+
+      {/* Master Weaver Graph (Naksha) Modal */}
+      {isWeaverGraphOpen && (
+        <WeaverGraphModal
+          isOpen={isWeaverGraphOpen}
+          onClose={() => setIsWeaverGraphOpen(false)}
+          initialPattern={activeRugDesign.pattern}
+          initialColorMap={activeRugDesign.colorMap}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmOrder && (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X, Palette } from 'lucide-react';
+import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X, Palette, Camera, Grid } from 'lucide-react';
 import { WeatherData } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -16,6 +16,8 @@ interface HeaderProps {
   onOpenCompetitorIntel: () => void;
   onOpenSamples: () => void;
   onOpenColorwayStudio: () => void;
+  onOpenARVisualizer?: () => void;
+  onOpenWeaverGraph?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,6 +33,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCompetitorIntel,
   onOpenSamples,
   onOpenColorwayStudio,
+  onOpenARVisualizer,
+  onOpenWeaverGraph,
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -191,6 +195,32 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="font-bold">Colorway Studio</span>
             </button>
 
+            {/* AR View Rug in Room Button */}
+            {onOpenARVisualizer && (
+              <button
+                id="arVisualizerNavBtn"
+                onClick={onOpenARVisualizer}
+                className="px-2 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-white/15 transition flex items-center gap-1 cursor-pointer bg-white/10"
+                title="AR 'View Rug in Your Room' - Live Camera & Floor Placement"
+              >
+                <Camera className="w-3.5 h-3.5 text-amber-300" />
+                <span className="font-bold">AR Room View</span>
+              </button>
+            )}
+
+            {/* Master Weaver Naksha */}
+            {onOpenWeaverGraph && (
+              <button
+                id="weaverGraphNavBtn"
+                onClick={onOpenWeaverGraph}
+                className="px-2 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/15 transition flex items-center gap-1 cursor-pointer"
+                title="Master Weaver Graph (Naksha)"
+              >
+                <Grid className="w-3.5 h-3.5 text-amber-300" />
+                <span className="font-bold hidden 2xl:inline">Weaver Naksha</span>
+              </button>
+            )}
+
             {/* Shipment Track Menu Button */}
             <button
               id="shipmentTrackNavBtn"
@@ -310,6 +340,26 @@ export const Header: React.FC<HeaderProps> = ({
               <Palette className="w-4 h-4 shrink-0 text-amber-300" />
               <span>Colorway Studio</span>
             </button>
+
+            {onOpenARVisualizer && (
+              <button
+                onClick={() => handleMobileNavClick(onOpenARVisualizer)}
+                className="p-2.5 bg-amber-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-2"
+              >
+                <Camera className="w-4 h-4 shrink-0 text-slate-950" />
+                <span>AR Room View</span>
+              </button>
+            )}
+
+            {onOpenWeaverGraph && (
+              <button
+                onClick={() => handleMobileNavClick(onOpenWeaverGraph)}
+                className="p-2.5 bg-white/10 hover:bg-white/15 rounded-xl text-xs font-bold flex items-center gap-2 text-white"
+              >
+                <Grid className="w-4 h-4 shrink-0 text-amber-300" />
+                <span>Weaver Naksha</span>
+              </button>
+            )}
 
             <button
               onClick={() => handleMobileNavClick(onOpenShipmentTrack)}
