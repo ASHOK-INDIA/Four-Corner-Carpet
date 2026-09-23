@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X } from 'lucide-react';
+import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X, Palette } from 'lucide-react';
 import { WeatherData } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -15,6 +15,7 @@ interface HeaderProps {
   onOpen3DContainer: () => void;
   onOpenCompetitorIntel: () => void;
   onOpenSamples: () => void;
+  onOpenColorwayStudio: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -29,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpen3DContainer,
   onOpenCompetitorIntel,
   onOpenSamples,
+  onOpenColorwayStudio,
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -178,6 +180,17 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="font-bold">Samples</span>
             </button>
 
+            {/* Virtual Yarn Pom & Colorway Studio Button */}
+            <button
+              id="colorwayStudioNavBtn"
+              onClick={onOpenColorwayStudio}
+              className="px-2 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/15 transition flex items-center gap-1 cursor-pointer"
+              title="Virtual Yarn Pom Box & B2B Colorway Studio"
+            >
+              <Palette className="w-3.5 h-3.5 text-amber-300" />
+              <span className="font-bold">Colorway Studio</span>
+            </button>
+
             {/* Shipment Track Menu Button */}
             <button
               id="shipmentTrackNavBtn"
@@ -284,10 +297,18 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => handleMobileNavClick(onOpenSamples)}
-              className="p-2.5 bg-white/10 hover:bg-white/15 rounded-xl text-xs font-bold flex items-center gap-2 text-white col-span-2"
+              className="p-2.5 bg-white/10 hover:bg-white/15 rounded-xl text-xs font-bold flex items-center gap-2 text-white"
             >
               <Images className="w-4 h-4 shrink-0 text-rose-200" />
               <span>Samples Gallery</span>
+            </button>
+
+            <button
+              onClick={() => handleMobileNavClick(onOpenColorwayStudio)}
+              className="p-2.5 bg-white/10 hover:bg-white/15 rounded-xl text-xs font-bold flex items-center gap-2 text-white"
+            >
+              <Palette className="w-4 h-4 shrink-0 text-amber-300" />
+              <span>Colorway Studio</span>
             </button>
 
             <button

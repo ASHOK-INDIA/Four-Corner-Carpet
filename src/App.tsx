@@ -13,6 +13,7 @@ import { PasswordModal } from './components/PasswordModal';
 import { ContainerStuffingModal } from './components/ContainerStuffingModal';
 import { CompetitorIntelligenceModal } from './components/CompetitorIntelligenceModal';
 import { SamplesModal } from './components/SamplesModal';
+import { ColorwayStudioModal } from './components/ColorwayStudioModal';
 import {
   subscribePurchaseOrders,
   subscribePPWRFiles,
@@ -69,10 +70,11 @@ export default function App() {
 
   const [printSummaryOpen, setPrintSummaryOpen] = useState<boolean>(false);
 
-  // State: New Modules (3D CBM, Competitor Intel & Samples)
+  // State: New Modules (3D CBM, Competitor Intel, Samples & Colorway Studio)
   const [is3DContainerOpen, setIs3DContainerOpen] = useState<boolean>(false);
   const [isCompetitorIntelOpen, setIsCompetitorIntelOpen] = useState<boolean>(false);
   const [isSamplesOpen, setIsSamplesOpen] = useState<boolean>(false);
+  const [isColorwayStudioOpen, setIsColorwayStudioOpen] = useState<boolean>(false);
 
   // State: Buyer Forecast Comments
   const [buyerComment, setBuyerComment] = useState<string>('');
@@ -219,6 +221,7 @@ export default function App() {
     setIsCompetitorIntelOpen(false);
     setIsPasswordModalOpen(false);
     setIsSamplesOpen(false);
+    setIsColorwayStudioOpen(false);
   };
 
   // Admin Toggle Handler
@@ -409,6 +412,10 @@ export default function App() {
           closeAllModals();
           setIsSamplesOpen(true);
         }}
+        onOpenColorwayStudio={() => {
+          closeAllModals();
+          setIsColorwayStudioOpen(true);
+        }}
       />
 
       {/* Main Dashboard Container */}
@@ -585,6 +592,12 @@ export default function App() {
         isOpen={isSamplesOpen}
         onClose={() => setIsSamplesOpen(false)}
         adminMode={adminMode}
+      />
+
+      {/* Virtual Yarn Pom Box & B2B Colorway Studio Modal */}
+      <ColorwayStudioModal
+        isOpen={isColorwayStudioOpen}
+        onClose={() => setIsColorwayStudioOpen(false)}
       />
 
       {/* Delete Confirmation Modal */}
