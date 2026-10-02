@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X, Palette, Camera, Grid } from 'lucide-react';
+import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X, Palette, Camera, Grid, FileText, MessageSquare } from 'lucide-react';
 import { WeatherData } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -9,11 +9,12 @@ interface HeaderProps {
   isSyncing?: boolean;
   onToggleAdmin: () => void;
   onOpenCreatePo: () => void;
+  onOpenAiyaraInvoice?: () => void;
+  onOpenWorkerSms?: () => void;
   onOpenShipmentTrack: () => void;
   onOpenPPWR: () => void;
   onOpenPrintReport: () => void;
   onOpen3DContainer: () => void;
-  onOpenCompetitorIntel: () => void;
   onOpenSamples: () => void;
   onOpenColorwayStudio: () => void;
   onOpenARVisualizer?: () => void;
@@ -26,11 +27,12 @@ export const Header: React.FC<HeaderProps> = ({
   isSyncing,
   onToggleAdmin,
   onOpenCreatePo,
+  onOpenAiyaraInvoice,
+  onOpenWorkerSms,
   onOpenShipmentTrack,
   onOpenPPWR,
   onOpenPrintReport,
   onOpen3DContainer,
-  onOpenCompetitorIntel,
   onOpenSamples,
   onOpenColorwayStudio,
   onOpenARVisualizer,
@@ -140,14 +142,41 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="hidden lg:flex items-center space-x-1">
             {/* Create PO Top Button (Visible ONLY in Admin Mode) */}
             {adminMode && (
+              <>
+                <button
+                  id="createPoTopBtn"
+                  onClick={onOpenCreatePo}
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-white text-[#E4002B] hover:bg-slate-100 transition flex items-center gap-1 cursor-pointer shadow-sm"
+                  title="Create New Purchase Order"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#E4002B]" />
+                  <span>{t.createPo}</span>
+                </button>
+
+                {onOpenAiyaraInvoice && (
+                  <button
+                    id="aiyaraInvoiceNavBtn"
+                    onClick={onOpenAiyaraInvoice}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-amber-400 text-slate-950 hover:bg-amber-300 transition flex items-center gap-1 cursor-pointer shadow-sm border border-amber-300"
+                    title="Aiyara INVOICE Generator & Archive (Admin Only)"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-slate-950" />
+                    <span>Aiyara INVOICE</span>
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Worker SMS Dispatch Gateway Button */}
+            {onOpenWorkerSms && (
               <button
-                id="createPoTopBtn"
-                onClick={onOpenCreatePo}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-white text-[#E4002B] hover:bg-slate-100 transition flex items-center gap-1 cursor-pointer shadow-sm"
-                title="Create New Purchase Order"
+                id="workerSmsNavBtn"
+                onClick={onOpenWorkerSms}
+                className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1 cursor-pointer shadow-sm border border-indigo-400/40"
+                title="Send Real-Time SMS Alert to Manufacturer Workers & Artisans"
               >
-                <Plus className="w-3.5 h-3.5 text-[#E4002B]" />
-                <span>{t.createPo}</span>
+                <MessageSquare className="w-3.5 h-3.5 text-indigo-200" />
+                <span>Worker SMS</span>
               </button>
             )}
 
@@ -162,16 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="font-bold">{t.cbmCalc}</span>
             </button>
 
-            {/* Competitor Intelligence Button */}
-            <button
-              id="competitorIntelNavBtn"
-              onClick={onOpenCompetitorIntel}
-              className="px-2 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/15 transition flex items-center gap-1 cursor-pointer"
-              title="Competitor Intelligence - German & EU Kids Brands, Chairs & Rugs"
-            >
-              <Globe className="w-3.5 h-3.5 text-white" />
-              <span className="font-bold">{t.competitorIntel}</span>
-            </button>
+
 
             {/* Samples Interactive Slider Gallery Button */}
             <button
@@ -298,16 +318,36 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action List items styled beautifully as tappable cards */}
           <div className="grid grid-cols-2 gap-2">
-            {/* Create PO Form (Admin Mode Only) */}
+            {/* Create PO Form & Aiyara Invoice (Admin Mode Only) */}
             {adminMode && (
-              <button
-                onClick={() => handleMobileNavClick(onOpenCreatePo)}
-                className="col-span-2 p-2.5 bg-white text-[#E4002B] rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{t.createPo}</span>
-              </button>
+              <>
+                <button
+                  onClick={() => handleMobileNavClick(onOpenCreatePo)}
+                  className="p-2.5 bg-white text-[#E4002B] rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{t.createPo}</span>
+                </button>
+
+                {onOpenAiyaraInvoice && (
+                  <button
+                    onClick={() => handleMobileNavClick(onOpenAiyaraInvoice)}
+                    className="p-2.5 bg-amber-400 text-slate-950 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Aiyara INVOICE</span>
+                  </button>
+                )}
+              </>
             )}
+
+            <button
+              onClick={() => handleMobileNavClick(onOpenWorkerSms!)}
+              className="p-2.5 bg-indigo-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Worker SMS Alert</span>
+            </button>
 
             <button
               onClick={() => handleMobileNavClick(onOpen3DContainer)}
@@ -317,13 +357,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="truncate">{t.cbmCalc}</span>
             </button>
 
-            <button
-              onClick={() => handleMobileNavClick(onOpenCompetitorIntel)}
-              className="p-2.5 bg-white/10 hover:bg-white/15 rounded-xl text-xs font-bold flex items-center gap-2 text-white"
-            >
-              <Globe className="w-4 h-4 shrink-0 text-rose-200" />
-              <span className="truncate">{t.competitorIntel}</span>
-            </button>
+
 
             <button
               onClick={() => handleMobileNavClick(onOpenSamples)}

@@ -11,11 +11,13 @@ import { OrderFormModal } from './components/OrderFormModal';
 import { PrintSummaryModal } from './components/PrintSummaryModal';
 import { PasswordModal } from './components/PasswordModal';
 import { ContainerStuffingModal } from './components/ContainerStuffingModal';
-import { CompetitorIntelligenceModal } from './components/CompetitorIntelligenceModal';
+
 import { SamplesModal } from './components/SamplesModal';
 import { ColorwayStudioModal } from './components/ColorwayStudioModal';
 import { ARRoomVisualizerModal } from './components/ARRoomVisualizerModal';
 import { WeaverGraphModal } from './components/WeaverGraphModal';
+import { AiyaraInvoiceModal } from './components/AiyaraInvoiceModal';
+import { WorkerSmsModal } from './components/WorkerSmsModal';
 import {
   subscribePurchaseOrders,
   subscribePPWRFiles,
@@ -30,7 +32,7 @@ import {
 } from './lib/firestoreService';
 
 export default function App() {
-  // State: Data from Cloud Firestore - initialized clean with NO random or fake data
+  // State: Data - initialized clean with NO random or fake data
   const [productionData, setProductionData] = useState<PurchaseOrder[]>([]);
   const [ppwrFilesStore, setPpwrFilesStore] = useState<PPWRFilesStore>({
     declaration: [],
@@ -74,9 +76,11 @@ export default function App() {
 
   // State: New Modules (3D CBM, Competitor Intel, Samples & Colorway Studio)
   const [is3DContainerOpen, setIs3DContainerOpen] = useState<boolean>(false);
-  const [isCompetitorIntelOpen, setIsCompetitorIntelOpen] = useState<boolean>(false);
   const [isSamplesOpen, setIsSamplesOpen] = useState<boolean>(false);
   const [isColorwayStudioOpen, setIsColorwayStudioOpen] = useState<boolean>(false);
+  const [isAiyaraInvoiceOpen, setIsAiyaraInvoiceOpen] = useState<boolean>(false);
+  const [isWorkerSmsOpen, setIsWorkerSmsOpen] = useState<boolean>(false);
+  const [smsPoNumber, setSmsPoNumber] = useState<string>('');
 
   // State: Advanced Rug Studio & Logistics Enhancements
   const [isARVisualizerOpen, setIsARVisualizerOpen] = useState<boolean>(false);
@@ -100,7 +104,7 @@ export default function App() {
         setIsSyncing(false);
       },
       (err) => {
-        console.warn('Firestore PO subscription:', err);
+        console.warn('PO subscription:', err);
         setIsSyncing(false);
       }
     );
@@ -110,7 +114,7 @@ export default function App() {
         setPpwrFilesStore(data);
       },
       (err) => {
-        console.warn('Firestore PPWR subscription:', err);
+        console.warn('PPWR subscription:', err);
       }
     );
 
@@ -119,7 +123,7 @@ export default function App() {
         setCommentsList(data);
       },
       (err) => {
-        console.warn('Firestore Comments subscription:', err);
+        console.warn('Comments subscription:', err);
       }
     );
 
@@ -229,12 +233,13 @@ export default function App() {
     setOrderFormOpen(false);
     setPrintSummaryOpen(false);
     setIs3DContainerOpen(false);
-    setIsCompetitorIntelOpen(false);
     setIsPasswordModalOpen(false);
     setIsSamplesOpen(false);
     setIsColorwayStudioOpen(false);
     setIsARVisualizerOpen(false);
     setIsWeaverGraphOpen(false);
+    setIsAiyaraInvoiceOpen(false);
+    setIsWorkerSmsOpen(false);
   };
 
   // Admin Toggle Handler
@@ -278,7 +283,7 @@ export default function App() {
     try {
       await updateMilestoneInFirestore(po, milestone);
     } catch (e) {
-      console.error('Failed to update milestone in Firestore:', e);
+      console.error('Failed to update milestone:', e);
       setProductionData((prev) =>
         prev.map((item) => (item.po === po ? { ...item, shipmentMilestone: milestone } : item))
       );
@@ -321,7 +326,7 @@ export default function App() {
       setProductionData((prev) => prev.filter((p) => p.po !== deleteConfirmOrder.po));
       setDeleteConfirmOrder(null);
     } catch (e) {
-      console.error('Failed to delete PO from Firestore:', e);
+      console.error('Failed to delete PO:', e);
       setDeleteConfirmOrder(null);
     }
   };
@@ -330,7 +335,7 @@ export default function App() {
     try {
       await savePurchaseOrderToFirestore(newOrder);
     } catch (e) {
-      console.error('Failed to save PO to Firestore:', e);
+      console.error('Failed to save PO:', e);
       setProductionData((prev) => {
         const exists = prev.some((p) => p.po === newOrder.po);
         if (exists) {
@@ -343,13 +348,13 @@ export default function App() {
 
   const handleClearData = async () => {
     if (!adminMode) return;
-    if (window.confirm('Are you sure you want to delete all records from Firestore? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete all records? This action cannot be undone.')) {
       try {
         await clearAllFirestoreData();
         setProductionData([]);
         setPpwrFilesStore({ declaration: [], testReport: [], technicalDataSheet: [] });
       } catch (e) {
-        console.error('Failed to clear Firestore data:', e);
+        console.error('Failed to clear data:', e);
       }
     }
   };
@@ -359,7 +364,7 @@ export default function App() {
     try {
       await savePPWRFileToFirestore(category, file);
     } catch (e) {
-      console.error('Failed to save PPWR file to Firestore:', e);
+      console.error('Failed to save PPWR file:', e);
       setPpwrFilesStore((prev) => ({
         ...prev,
         [category]: [file, ...(prev[category] || [])],
@@ -369,11 +374,11 @@ export default function App() {
 
   const handleDeletePpwrFile = async (category: keyof PPWRFilesStore, fileId: string) => {
     if (!adminMode) return;
-    if (window.confirm('Are you sure you want to delete this document from Firestore?')) {
+    if (window.confirm('Are you sure you want to delete this document?')) {
       try {
         await deletePPWRFileFromFirestore(fileId);
       } catch (e) {
-        console.error('Failed to delete PPWR file from Firestore:', e);
+        console.error('Failed to delete PPWR file:', e);
         setPpwrFilesStore((prev) => ({
           ...prev,
           [category]: prev[category].filter((f) => f.id !== fileId),
@@ -404,6 +409,10 @@ export default function App() {
         isSyncing={isSyncing}
         onToggleAdmin={handleToggleAdmin}
         onOpenCreatePo={handleOpenCreatePo}
+        onOpenAiyaraInvoice={() => {
+          closeAllModals();
+          setIsAiyaraInvoiceOpen(true);
+        }}
         onOpenShipmentTrack={handleOpenShipmentTrack}
         onOpenPPWR={() => {
           closeAllModals();
@@ -416,10 +425,6 @@ export default function App() {
         onOpen3DContainer={() => {
           closeAllModals();
           setIs3DContainerOpen(true);
-        }}
-        onOpenCompetitorIntel={() => {
-          closeAllModals();
-          setIsCompetitorIntelOpen(true);
         }}
         onOpenSamples={() => {
           closeAllModals();
@@ -437,6 +442,11 @@ export default function App() {
         onOpenWeaverGraph={() => {
           closeAllModals();
           setIsWeaverGraphOpen(true);
+        }}
+        onOpenWorkerSms={() => {
+          closeAllModals();
+          setSmsPoNumber('');
+          setIsWorkerSmsOpen(true);
         }}
       />
 
@@ -605,11 +615,7 @@ export default function App() {
         adminMode={adminMode}
       />
 
-      {/* Competitor Intelligence Modal (German & EU Kids Brands, Chairs, Rugs) */}
-      <CompetitorIntelligenceModal
-        isOpen={isCompetitorIntelOpen}
-        onClose={() => setIsCompetitorIntelOpen(false)}
-      />
+
 
       {/* Samples Interactive Slider Gallery Modal */}
       {isSamplesOpen && (
@@ -656,6 +662,21 @@ export default function App() {
           initialColorMap={activeRugDesign.colorMap}
         />
       )}
+
+      {/* Aiyara INVOICE Module (Visible ONLY to ADMIN) */}
+      <AiyaraInvoiceModal
+        isOpen={isAiyaraInvoiceOpen}
+        onClose={() => setIsAiyaraInvoiceOpen(false)}
+        adminMode={adminMode}
+      />
+
+      {/* Worker SMS Alert Gateway Modal */}
+      <WorkerSmsModal
+        isOpen={isWorkerSmsOpen}
+        onClose={() => setIsWorkerSmsOpen(false)}
+        productionData={productionData}
+        preselectedPoNumber={smsPoNumber}
+      />
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmOrder && (

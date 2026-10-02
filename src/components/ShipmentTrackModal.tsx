@@ -270,7 +270,7 @@ export const ShipmentTrackModal: React.FC<ShipmentTrackModalProps> = ({
       {/* Modal Footer */}
       <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
         <p className="text-xs text-slate-500 italic font-mono">
-          Shipment status updates are synchronized with Cloud Firestore.
+          Shipment status updates are synchronized.
         </p>
         <button
           onClick={onClose}

@@ -59,3 +59,13 @@
   display: inline-block;
   animation: marquee 30s linear infinite;
 }
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+.animate-blink {
+  animation: blink 1s linear infinite;
+}

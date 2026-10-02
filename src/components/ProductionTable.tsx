@@ -205,7 +205,7 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
                   <span className="text-[9px] text-slate-500 uppercase font-bold font-mono">Milestone:</span>
                   <button
                     onClick={() => onSelectShipmentPo(item.po)}
-                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-indigo-600 text-white hover:bg-indigo-700 transition inline-flex items-center gap-1 cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono bg-indigo-600 text-white hover:bg-indigo-700 transition inline-flex items-center gap-1 cursor-pointer animate-blink"
                   >
                     <Route className="w-3 h-3 text-indigo-200" /> {currentMilestone}
                   </button>

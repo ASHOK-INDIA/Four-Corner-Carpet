@@ -63,8 +63,8 @@ export async function makeRugBackgroundTransparent(
         const width = img.naturalWidth || img.width;
         const height = img.naturalHeight || img.height;
 
-        // Downscale slightly for processing speed if image is huge
-        const maxDim = 1400;
+        // Downscale to 500px max dimension for fast processing and compact size (fits well within Firestore 1MB limit)
+        const maxDim = 500;
         let targetW = width;
         let targetH = height;
         if (width > maxDim || height > maxDim) {
@@ -185,6 +185,68 @@ export async function makeRugBackgroundTransparent(
       resolve(srcUrl);
     };
 
+    img.src = srcUrl;
+  });
+}
+
+/**
+ * Resizes and compresses any image to fit comfortably under Firestore's 1MB limit.
+ */
+export async function compressAndResizeImage(
+  imageSource: string | File,
+  maxDim: number = 500
+): Promise<string> {
+  let srcUrl: string;
+  if (imageSource instanceof File) {
+    srcUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(imageSource);
+    });
+  } else {
+    srcUrl = imageSource;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+
+        let targetW = width;
+        let targetH = height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            targetW = maxDim;
+            targetH = Math.round((height * maxDim) / width);
+          } else {
+            targetH = maxDim;
+            targetW = Math.round((width * maxDim) / height);
+          }
+        }
+
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(srcUrl);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+        // Use JPEG format for non-transparent high compression, or PNG if it has transparent indicators.
+        // For general safety and to preserve file type, a downscaled PNG at maxDim = 700 is typically 100-200kb.
+        const compressedUrl = canvas.toDataURL('image/png');
+        resolve(compressedUrl);
+      } catch (err) {
+        resolve(srcUrl);
+      }
+    };
+    img.onerror = () => resolve(srcUrl);
     img.src = srcUrl;
   });
 }

@@ -90,6 +90,43 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "title", "imageUrl", "createdAt"]
+    },
+    "AiyaraInvoice": {
+      "title": "Aiyara Invoice",
+      "description": "Official Performa Invoice generated from uploaded files, POs, or custom editor.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNo": { "type": "string" },
+        "date": { "type": "string" },
+        "poNumber": { "type": "string" },
+        "poTitle": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "supplierAddress": { "type": "string" },
+        "supplierGstin": { "type": "string" },
+        "supplierContact": { "type": "string" },
+        "supplierAttention": { "type": "string" },
+        "supplierBankDetails": { "type": "string" },
+        "supplierIfsc": { "type": "string" },
+        "buyerName": { "type": "string" },
+        "buyerAddress": { "type": "string" },
+        "buyerGstin": { "type": "string" },
+        "buyerPhone": { "type": "string" },
+        "buyerEmail": { "type": "string" },
+        "buyerAttention": { "type": "string" },
+        "items": { "type": "array" },
+        "totalPcs": { "type": "number" },
+        "totalSqMeter": { "type": "number" },
+        "subTotal": { "type": "number" },
+        "igstPercent": { "type": "number" },
+        "igstAmount": { "type": "number" },
+        "advancePercent": { "type": "number" },
+        "advanceAmount": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "invoiceNo", "date", "poNumber", "buyerName", "items", "totalAmount"]
     }
   },
   "firestore": {
@@ -112,6 +149,10 @@
     "/sample_items/{sampleId}": {
       "entity": "SampleItem",
       "description": "Uploaded sample images for the full image flip carousel viewer"
+    },
+    "/aiyara_invoices/{invoiceId}": {
+      "entity": "AiyaraInvoice",
+      "description": "Uploaded and user-created Aiyara performa invoices"
     }
   }
 }

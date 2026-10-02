@@ -24,7 +24,7 @@ import {
   saveSampleItemToFirestore, 
   deleteSampleItemFromFirestore 
 } from '../lib/firestoreService';
-import { makeRugBackgroundTransparent } from '../lib/transparentRug';
+import { makeRugBackgroundTransparent, compressAndResizeImage } from '../lib/transparentRug';
 
 interface SamplesModalProps {
   isOpen: boolean;
@@ -159,7 +159,7 @@ export const SamplesModal: React.FC<SamplesModalProps> = ({ isOpen, onClose, adm
     setCurrentIndex((prev) => (prev - 1 + samples.length) % samples.length);
   };
 
-  // Direct file upload with auto-transparency
+  // Direct file upload with auto-transparency & compression
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -172,19 +172,17 @@ export const SamplesModal: React.FC<SamplesModalProps> = ({ isOpen, onClose, adm
       }
 
       if (autoRemoveUploadBg) {
-        // Automatically make uploaded rug background transparent
+        // Automatically make uploaded rug background transparent and downscaled
         const transparentDataUrl = await makeRugBackgroundTransparent(file);
         setNewUrl(transparentDataUrl);
       } else {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          setNewUrl(ev.target?.result as string);
-        };
-        reader.readAsDataURL(file);
+        // Automatically compress and downscale uploaded image to fit Firestore <1MB limit
+        const compressedDataUrl = await compressAndResizeImage(file);
+        setNewUrl(compressedDataUrl);
       }
     } catch (err) {
-      console.error('File background removal error:', err);
-      setFormError('Failed to process image transparency.');
+      console.error('File upload or processing error:', err);
+      setFormError('Failed to process image file.');
     } finally {
       setIsUploading(false);
     }
@@ -207,8 +205,14 @@ export const SamplesModal: React.FC<SamplesModalProps> = ({ isOpen, onClose, adm
       
       let finalImageUrl = newUrl.trim();
 
-      // If user enabled auto-remove background and it's a URL (not already processed data URL)
-      if (autoRemoveUploadBg && !finalImageUrl.startsWith('data:image/png;base64')) {
+      // Compress and downscale any raw base64 data URLs to prevent Firestore document size limit errors (1MB)
+      if (finalImageUrl.startsWith('data:image/')) {
+        try {
+          finalImageUrl = await compressAndResizeImage(finalImageUrl);
+        } catch (compressErr) {
+          console.warn('Compression failed, saving original:', compressErr);
+        }
+      } else if (autoRemoveUploadBg) {
         try {
           const autoTransparentUrl = await makeRugBackgroundTransparent(finalImageUrl);
           if (autoTransparentUrl && autoTransparentUrl !== finalImageUrl) {
