@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X, Palette, Camera, Grid, FileText, MessageSquare } from 'lucide-react';
+import { Sun, CloudSun, CloudRain, CloudFog, CloudSnow, CloudLightning, Plus, Route, Leaf, Printer, Lock, Unlock, Database, Box, Globe, Languages, Images, Menu, X, Palette, Camera, Grid, FileText, MessageSquare, BookOpen, Upload } from 'lucide-react';
 import { WeatherData } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -10,6 +10,8 @@ interface HeaderProps {
   onToggleAdmin: () => void;
   onOpenCreatePo: () => void;
   onOpenAiyaraInvoice?: () => void;
+  onOpenUploadInvoiceExcel?: () => void;
+  onOpenLedger?: () => void;
   onOpenWorkerSms?: () => void;
   onOpenShipmentTrack: () => void;
   onOpenPPWR: () => void;
@@ -28,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleAdmin,
   onOpenCreatePo,
   onOpenAiyaraInvoice,
+  onOpenUploadInvoiceExcel,
+  onOpenLedger,
   onOpenWorkerSms,
   onOpenShipmentTrack,
   onOpenPPWR,
@@ -158,10 +162,34 @@ export const Header: React.FC<HeaderProps> = ({
                     id="aiyaraInvoiceNavBtn"
                     onClick={onOpenAiyaraInvoice}
                     className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-amber-400 text-slate-950 hover:bg-amber-300 transition flex items-center gap-1 cursor-pointer shadow-sm border border-amber-300"
-                    title="Aiyara INVOICE Generator & Archive (Admin Only)"
+                    title="Aiyara INVOICE & Dispatch Module (Admin Only)"
                   >
                     <FileText className="w-3.5 h-3.5 text-slate-950" />
-                    <span>Aiyara INVOICE</span>
+                    <span>Aiyara INVOICE & DISPATCH</span>
+                  </button>
+                )}
+
+                {onOpenUploadInvoiceExcel && (
+                  <button
+                    id="uploadInvoiceHeaderBtn"
+                    onClick={onOpenUploadInvoiceExcel}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-blue-600 text-white hover:bg-blue-500 transition flex items-center gap-1 cursor-pointer shadow-sm border border-blue-400"
+                    title="Directly upload Excel or Invoice file to auto-generate export docs"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-white" />
+                    <span>Upload Invoice / Excel</span>
+                  </button>
+                )}
+
+                {onOpenLedger && (
+                  <button
+                    id="ledgerNavBtn"
+                    onClick={onOpenLedger}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-500 text-white hover:bg-emerald-400 transition flex items-center gap-1 cursor-pointer shadow-sm border border-emerald-400"
+                    title="Maintain Account Ledger & Party Statements"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-white" />
+                    <span>Ledger Book</span>
                   </button>
                 )}
               </>
@@ -336,6 +364,16 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <FileText className="w-4 h-4" />
                     <span>Aiyara INVOICE</span>
+                  </button>
+                )}
+
+                {onOpenLedger && (
+                  <button
+                    onClick={() => handleMobileNavClick(onOpenLedger)}
+                    className="p-2.5 bg-emerald-500 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm col-span-2"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Ledger Book & Statements</span>
                   </button>
                 )}
               </>

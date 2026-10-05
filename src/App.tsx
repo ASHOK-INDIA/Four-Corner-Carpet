@@ -17,6 +17,7 @@ import { ColorwayStudioModal } from './components/ColorwayStudioModal';
 import { ARRoomVisualizerModal } from './components/ARRoomVisualizerModal';
 import { WeaverGraphModal } from './components/WeaverGraphModal';
 import { AiyaraInvoiceModal } from './components/AiyaraInvoiceModal';
+import { AiyaraLedgerModal } from './components/AiyaraLedgerModal';
 import { WorkerSmsModal } from './components/WorkerSmsModal';
 import {
   subscribePurchaseOrders,
@@ -79,6 +80,7 @@ export default function App() {
   const [isSamplesOpen, setIsSamplesOpen] = useState<boolean>(false);
   const [isColorwayStudioOpen, setIsColorwayStudioOpen] = useState<boolean>(false);
   const [isAiyaraInvoiceOpen, setIsAiyaraInvoiceOpen] = useState<boolean>(false);
+  const [isAiyaraLedgerOpen, setIsAiyaraLedgerOpen] = useState<boolean>(false);
   const [isWorkerSmsOpen, setIsWorkerSmsOpen] = useState<boolean>(false);
   const [smsPoNumber, setSmsPoNumber] = useState<string>('');
 
@@ -239,6 +241,7 @@ export default function App() {
     setIsARVisualizerOpen(false);
     setIsWeaverGraphOpen(false);
     setIsAiyaraInvoiceOpen(false);
+    setIsAiyaraLedgerOpen(false);
     setIsWorkerSmsOpen(false);
   };
 
@@ -412,6 +415,14 @@ export default function App() {
         onOpenAiyaraInvoice={() => {
           closeAllModals();
           setIsAiyaraInvoiceOpen(true);
+        }}
+        onOpenUploadInvoiceExcel={() => {
+          closeAllModals();
+          setIsAiyaraInvoiceOpen(true);
+        }}
+        onOpenLedger={() => {
+          closeAllModals();
+          setIsAiyaraLedgerOpen(true);
         }}
         onOpenShipmentTrack={handleOpenShipmentTrack}
         onOpenPPWR={() => {
@@ -667,6 +678,15 @@ export default function App() {
       <AiyaraInvoiceModal
         isOpen={isAiyaraInvoiceOpen}
         onClose={() => setIsAiyaraInvoiceOpen(false)}
+        adminMode={adminMode}
+        productionData={productionData}
+      />
+
+      {/* Aiyara Ledger & Account Book Module */}
+      <AiyaraLedgerModal
+        isOpen={isAiyaraLedgerOpen}
+        onClose={() => setIsAiyaraLedgerOpen(false)}
+        productionData={productionData}
         adminMode={adminMode}
       />
 

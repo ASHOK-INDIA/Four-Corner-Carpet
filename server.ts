@@ -117,7 +117,7 @@ Instructions for parsing table items:
     parts.push({ text: prompt });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         {
           role: 'user',
@@ -339,7 +339,7 @@ Return a JSON array of objects with the exact schema:
 Provide only the raw JSON array. No conversational text, no markdown block wrappers.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           config: {
             responseMimeType: 'application/json',

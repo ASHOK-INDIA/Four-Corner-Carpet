@@ -73,10 +73,47 @@ export interface AiyaraLineItem {
   specification: string;
   productCode: string;
   sizesCm: string;
+  qtyPallet?: number;
   qtyPcs: number;
   totalSqMeter: number;
   sqMtrPrice: number;
+  pcsPrice?: number;
   totalAmount: number;
+  // Packing List & Export specific fields
+  palletDimension?: string;
+  cartonBaleNo?: string;
+  rollNo?: string;
+  netWeightKg?: number;
+  grossWeightKg?: number;
+  cbmVolume?: number;
+  hsnCode?: string;
+  weightKg?: number;
+}
+
+export interface ConsigneeMaster {
+  id?: string;
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  eoriVat: string;
+  attention: string;
+}
+
+export interface ExporterMaster {
+  id?: string;
+  name: string;
+  address: string;
+  gstin: string;
+  iecNo: string;
+  rexNo: string;
+  contact: string;
+  bankName: string;
+  accountNo: string;
+  ifsc: string;
+  swiftCode: string;
+  adCode: string;
+  branch: string;
 }
 
 export interface AiyaraInvoice {
@@ -85,7 +122,9 @@ export interface AiyaraInvoice {
   date: string;
   poNumber: string;
   poTitle?: string;
+  documentTitle?: string; // Header title: e.g. 'Performa Invoice', 'Tax Invoice', 'Commercial Invoice'
   
+  // Exporter / Supplier Master details
   supplierName: string;
   supplierAddress: string;
   supplierGstin: string;
@@ -93,18 +132,51 @@ export interface AiyaraInvoice {
   supplierAttention: string;
   supplierBankDetails: string;
   supplierIfsc: string;
+  supplierSwiftCode?: string;
+  supplierAdCode?: string;
+  supplierIecNo?: string;
+  supplierRexNo?: string;
   
+  // Consignee / Buyer Master details
   buyerName: string;
   buyerAddress: string;
   buyerGstin: string;
+  buyerEoriVat?: string;
   buyerPhone: string;
   buyerEmail: string;
   buyerAttention: string;
+
+  // Export Shipping & Terms details
+  invoiceType?: 'STANDARD' | 'POPTOP'; // Dedicated Poptop invoice format vs Standard export
+  priceMode?: 'PER_SQM' | 'PER_PCS'; // Price per Sq.M vs Price per Piece
+  perPalletCharge?: number; // Per Pallet Charge amount
+  totalPallets?: number; // Total number of pallets
+  pcsPerPallet?: number; // Number of rug pieces per pallet (e.g. 10 pcs/pallet)
+
+  currency?: string; // e.g. 'EUR (€)', 'USD ($)', 'INR (₹)'
+  portOfLoading?: string; // e.g. Nhava Sheva / ICD Bhadohi / Delhi
+  portOfDischarge?: string; // e.g. Gothenburg / Hamburg / Vienna
+  countryOfOrigin?: string; // e.g. INDIA
+  countryOfDestination?: string; // e.g. SWEDEN / AUSTRIA / GERMANY
+  termsOfPayment?: string; // e.g. 30 Days Net / Letter of Credit / Advance
+  termsOfDelivery?: string; // e.g. FOB / CIF / DDP
+
+  // Shipping & Logistics Grid details (as per export invoice standard)
+  preCarriedBy?: string; // e.g. "BY TRUCK"
+  placeOfReceiptByPreCarrier?: string; // e.g. "BHADOHI"
+  vesselFlightNo?: string; // e.g. "BY SEA"
+  shipmentFrom?: string; // e.g. "MUMBAI"
+  finalDestination?: string; // e.g. "Austria"
+  marksAndNos?: string; // e.g. "Marks : F4C\nAustria"
+  noAndKindOfPackages?: string; // e.g. "10 Pallet"
 
   items: AiyaraLineItem[];
 
   totalPcs: number;
   totalSqMeter: number;
+  totalNetWeightKg?: number;
+  totalGrossWeightKg?: number;
+  totalCbm?: number;
   subTotal: number;
   igstPercent: number;
   igstAmount: number;
@@ -113,6 +185,8 @@ export interface AiyaraInvoice {
   totalAmount: number;
   
   notes?: string;
+  isUserUploaded?: boolean;
+  updatedByUser?: boolean;
   createdAt: string;
   updatedAt?: string;
 }
@@ -137,6 +211,22 @@ export interface ManufacturerWorker {
   role: string;
   unit: string;
   activeOrdersCount?: number;
+}
+
+export interface LedgerEntry {
+  id: string;
+  date: string;
+  voucherNo: string;
+  partyName: string;
+  partyType: 'BUYER' | 'SUPPLIER' | 'ARTISAN' | 'TRANSPORTER' | 'BANK' | 'OTHER';
+  transactionType: 'DEBIT' | 'CREDIT'; // Debit (Dr - Amount given/invoice raised) / Credit (Cr - Payment received/advance)
+  particulars: string;
+  poReference?: string;
+  invoiceNo?: string;
+  amount: number;
+  paymentMode?: 'BANK_TRANSFER' | 'CASH' | 'CHEQUE' | 'UPI' | 'CREDIT';
+  notes?: string;
+  createdAt: string;
 }
 
 

@@ -8,7 +8,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem, SampleItem, AiyaraInvoice, WorkerSmsAlert, ManufacturerWorker } from '../types';
+import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem, SampleItem, AiyaraInvoice, WorkerSmsAlert, ManufacturerWorker, LedgerEntry } from '../types';
 
 const PO_COLLECTION = 'purchase_orders';
 const PPWR_COLLECTION = 'ppwr_files';
@@ -18,6 +18,7 @@ const SAMPLE_ITEMS_COLLECTION = 'sample_items';
 const AIYARA_INVOICES_COLLECTION = 'aiyara_invoices';
 const WORKER_SMS_COLLECTION = 'worker_sms_alerts';
 const WORKERS_COLLECTION = 'manufacturer_workers';
+const LEDGER_COLLECTION = 'ledger_entries';
 
 /**
  * Sanitize Firestore document IDs by replacing slashes or invalid characters
@@ -624,10 +625,20 @@ export async function saveAiyaraInvoiceToFirestore(invoice: AiyaraInvoice): Prom
     specification: item.specification ?? '',
     productCode: item.productCode ?? '',
     sizesCm: item.sizesCm ?? '',
+    qtyPallet: Number(item.qtyPallet ?? 1),
     qtyPcs: Number(item.qtyPcs) || 1,
     totalSqMeter: Number(item.totalSqMeter) || 0,
     sqMtrPrice: Number(item.sqMtrPrice) || 0,
+    pcsPrice: Number(item.pcsPrice ?? 0),
     totalAmount: Number(item.totalAmount) || 0,
+    palletDimension: item.palletDimension ?? '',
+    cartonBaleNo: item.cartonBaleNo ?? `Bale ${idx + 1}`,
+    rollNo: item.rollNo ?? `R-${idx + 1}`,
+    netWeightKg: Number(item.netWeightKg ?? 0),
+    grossWeightKg: Number(item.grossWeightKg ?? 0),
+    cbmVolume: Number(item.cbmVolume ?? 0),
+    hsnCode: item.hsnCode ?? '57050039',
+    weightKg: Number(item.weightKg ?? 0),
   }));
 
   const cleanedInvoice = {
@@ -635,20 +646,51 @@ export async function saveAiyaraInvoiceToFirestore(invoice: AiyaraInvoice): Prom
     invoiceNo: invoice.invoiceNo ?? `PO # ${docId}`,
     poNumber: invoice.poNumber ?? '',
     poTitle: invoice.poTitle ?? '',
+    documentTitle: invoice.documentTitle ?? 'Performa Invoice',
     date: invoice.date ?? new Date().toISOString().split('T')[0],
     supplierName: invoice.supplierName ?? 'FOUR CORNERS CARPETS',
-    supplierAddress: invoice.supplierAddress ?? '',
-    supplierGstin: invoice.supplierGstin ?? '',
-    supplierContact: invoice.supplierContact ?? '',
-    supplierAttention: invoice.supplierAttention ?? '',
-    supplierBankDetails: invoice.supplierBankDetails ?? '',
-    supplierIfsc: invoice.supplierIfsc ?? '',
-    buyerName: invoice.buyerName ?? '',
-    buyerAddress: invoice.buyerAddress ?? '',
-    buyerGstin: invoice.buyerGstin ?? '',
-    buyerPhone: invoice.buyerPhone ?? '',
-    buyerEmail: invoice.buyerEmail ?? '',
-    buyerAttention: invoice.buyerAttention ?? '',
+    supplierAddress: invoice.supplierAddress ?? 'Main Road, Maryadpatti, Bhadohi - 221401, UP, INDIA',
+    supplierGstin: invoice.supplierGstin ?? '09AABFF1234A1ZB',
+    supplierContact: invoice.supplierContact ?? '+91 94152 25800',
+    supplierAttention: invoice.supplierAttention ?? 'Exports Department',
+    supplierBankDetails: invoice.supplierBankDetails ?? 'ICICI BANK LTD, A/C: 039005001234',
+    supplierIfsc: invoice.supplierIfsc ?? 'ICIC0000390',
+    supplierSwiftCode: invoice.supplierSwiftCode ?? 'ICICINBBCTS',
+    supplierAdCode: invoice.supplierAdCode ?? '6390001234567',
+    supplierIecNo: invoice.supplierIecNo ?? 'AJTPD8099G',
+    supplierRexNo: invoice.supplierRexNo ?? 'INREX123456789',
+    
+    buyerName: invoice.buyerName ?? 'Poptop GmbH',
+    buyerAddress: invoice.buyerAddress ?? 'Mühlbachgasse 18 B/4, 2514 Traiskirchen, Austria',
+    buyerGstin: invoice.buyerGstin ?? 'ATU78280315',
+    buyerEoriVat: invoice.buyerEoriVat ?? 'ATU78280315 / EORI: ATEORI100012345',
+    buyerPhone: invoice.buyerPhone ?? '+4367763155993',
+    buyerEmail: invoice.buyerEmail ?? 'office@poptop.at',
+    buyerAttention: invoice.buyerAttention ?? 'Ashok / Import Desk',
+
+    invoiceType: invoice.invoiceType ?? 'STANDARD',
+    priceMode: invoice.priceMode ?? (invoice.invoiceType === 'POPTOP' ? 'PER_PCS' : 'PER_SQM'),
+    perPalletCharge: Number(invoice.perPalletCharge ?? 0),
+    totalPallets: Number(invoice.totalPallets ?? 0),
+    pcsPerPallet: Number(invoice.pcsPerPallet ?? 10),
+
+    currency: invoice.currency ?? (invoice.invoiceType === 'POPTOP' ? 'USD ($)' : 'USD ($)'),
+    portOfLoading: invoice.portOfLoading ?? (invoice.invoiceType === 'POPTOP' ? 'MUMBAI' : 'Nhava Sheva / ICD Bhadohi'),
+    portOfDischarge: invoice.portOfDischarge ?? (invoice.invoiceType === 'POPTOP' ? 'Austria' : 'Gothenburg / Hamburg / Vienna'),
+    countryOfOrigin: invoice.countryOfOrigin ?? 'INDIA',
+    countryOfDestination: invoice.countryOfDestination ?? (invoice.invoiceType === 'POPTOP' ? 'Austria' : 'SWEDEN / AUSTRIA / GERMANY'),
+    termsOfPayment: invoice.termsOfPayment ?? '30 Days Net / L/C',
+    termsOfDelivery: invoice.termsOfDelivery ?? 'FOB Nhava Sheva',
+
+    // Shipping & Logistics Grid details
+    preCarriedBy: invoice.preCarriedBy ?? 'BY TRUCK',
+    placeOfReceiptByPreCarrier: invoice.placeOfReceiptByPreCarrier ?? 'BHADOHI',
+    vesselFlightNo: invoice.vesselFlightNo ?? 'BY SEA',
+    shipmentFrom: invoice.shipmentFrom ?? (invoice.invoiceType === 'POPTOP' ? 'MUMBAI' : (invoice.portOfLoading || 'MUMBAI')),
+    finalDestination: invoice.finalDestination ?? (invoice.invoiceType === 'POPTOP' ? 'Austria' : (invoice.countryOfDestination || 'Austria')),
+    marksAndNos: invoice.marksAndNos ?? 'Marks : F4C\nAustria',
+    noAndKindOfPackages: invoice.noAndKindOfPackages ?? `${invoice.totalPallets || 10} Pallet`,
+
     igstPercent: Number(invoice.igstPercent ?? 5),
     igstAmount: Number(invoice.igstAmount ?? 0),
     advancePercent: Number(invoice.advancePercent ?? 25),
@@ -656,9 +698,14 @@ export async function saveAiyaraInvoiceToFirestore(invoice: AiyaraInvoice): Prom
     subTotal: Number(invoice.subTotal ?? 0),
     totalPcs: Number(invoice.totalPcs ?? 0),
     totalSqMeter: Number(invoice.totalSqMeter ?? 0),
+    totalNetWeightKg: Number(invoice.totalNetWeightKg ?? 0),
+    totalGrossWeightKg: Number(invoice.totalGrossWeightKg ?? 0),
+    totalCbm: Number(invoice.totalCbm ?? 0),
     totalAmount: Number(invoice.totalAmount ?? 0),
     notes: invoice.notes ?? '25 % Advance & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.',
     items: cleanedItems,
+    isUserUploaded: invoice.isUserUploaded ?? false,
+    updatedByUser: true,
     createdAt: invoice.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -866,3 +913,142 @@ export async function saveManufacturerWorkerToFirestore(worker: ManufacturerWork
     id: docId
   }, { merge: true });
 }
+
+const DEFAULT_LEDGER_ENTRIES: LedgerEntry[] = [
+  {
+    id: 'led-1',
+    date: '21-01-2026',
+    voucherNo: 'VCH-001',
+    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyType: 'SUPPLIER',
+    transactionType: 'CREDIT',
+    particulars: 'Advance by RTGS',
+    poReference: 'PO# 1123966',
+    amount: 205045.59,
+    paymentMode: 'BANK_TRANSFER',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'led-2',
+    date: '06-03-2026',
+    voucherNo: 'VCH-002',
+    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyType: 'SUPPLIER',
+    transactionType: 'CREDIT',
+    particulars: 'Advance by RTGS',
+    poReference: 'PO# 1124286',
+    amount: 195489.98,
+    paymentMode: 'BANK_TRANSFER',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'led-3',
+    date: '18-04-2026',
+    voucherNo: 'VCH-003',
+    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyType: 'SUPPLIER',
+    transactionType: 'CREDIT',
+    particulars: 'Advance by RTGS',
+    poReference: 'PO# 1125567',
+    amount: 110107.74,
+    paymentMode: 'BANK_TRANSFER',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'led-4',
+    date: '26-03-2026',
+    voucherNo: 'VCH-004',
+    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyType: 'SUPPLIER',
+    transactionType: 'DEBIT',
+    particulars: 'Invoice against Purchase Orders',
+    poReference: 'PO # 1123966, PO# 1124286, PO # 1125567',
+    amount: 2064184.16,
+    paymentMode: 'CREDIT',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'led-5',
+    date: '02-03-2026',
+    voucherNo: 'VCH-005',
+    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyType: 'SUPPLIER',
+    transactionType: 'DEBIT',
+    particulars: 'Photosample development',
+    poReference: 'Photosample',
+    amount: 50175.00,
+    paymentMode: 'BANK_TRANSFER',
+    createdAt: new Date().toISOString()
+  }
+];
+
+
+/**
+ * Subscribe to Ledger Entries from Firestore
+ */
+export function subscribeLedgerEntries(
+  onUpdate: (entries: LedgerEntry[]) => void,
+  onError?: (err: any) => void
+) {
+  const colRef = collection(db, LEDGER_COLLECTION);
+  return onSnapshot(
+    colRef,
+    async (snapshot) => {
+      if (snapshot.empty) {
+        try {
+          const batch = writeBatch(db);
+          DEFAULT_LEDGER_ENTRIES.forEach((entry) => {
+            const docRef = doc(db, LEDGER_COLLECTION, entry.id);
+            batch.set(docRef, entry);
+          });
+          await batch.commit();
+        } catch (e) {
+          console.warn('Could not seed default ledger entries:', e);
+        }
+        onUpdate(DEFAULT_LEDGER_ENTRIES);
+        return;
+      }
+
+      const items: LedgerEntry[] = [];
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data() as LedgerEntry;
+        items.push({
+          ...d,
+          id: docSnap.id
+        });
+      });
+      items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      onUpdate(items);
+    },
+    (err) => {
+      console.error('Firestore Ledger Entries snapshot error:', err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Save Ledger Entry to Firestore
+ */
+export async function saveLedgerEntryToFirestore(entry: LedgerEntry): Promise<void> {
+  const docId = sanitizeDocId(entry.id || `led_${Date.now()}`);
+  const docRef = doc(db, LEDGER_COLLECTION, docId);
+  const cleanData: Record<string, any> = {};
+  for (const [key, val] of Object.entries(entry)) {
+    if (val !== undefined) {
+      cleanData[key] = val;
+    }
+  }
+  cleanData.id = docId;
+  await setDoc(docRef, cleanData, { merge: true });
+}
+
+/**
+ * Delete Ledger Entry from Firestore
+ */
+export async function deleteLedgerEntryFromFirestore(id: string): Promise<void> {
+  const docId = sanitizeDocId(id);
+  const docRef = doc(db, LEDGER_COLLECTION, docId);
+  await deleteDoc(docRef);
+}
+
