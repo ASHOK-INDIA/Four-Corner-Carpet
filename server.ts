@@ -116,21 +116,53 @@ Instructions for parsing table items:
     }
     parts.push({ text: prompt });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        {
-          role: 'user',
-          parts
-        }
-      ],
-      config: {
-        responseMimeType: 'application/json',
-        temperature: 0.05
-      }
-    });
+    // Call Gemini 3.8 Flash with retry on rate limit (429)
+    let responseText = '';
+    let lastError: any = null;
 
-    const responseText = response.text || '';
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: [
+            {
+              role: 'user',
+              parts
+            }
+          ],
+          config: {
+            responseMimeType: 'application/json',
+            temperature: 0.05
+          }
+        });
+        responseText = response.text || '';
+        if (responseText) break;
+      } catch (genErr: any) {
+        lastError = genErr;
+        const errMsg = genErr?.message || '';
+        const isRateLimit = errMsg.includes('429') || errMsg.includes('RESOURCE_EXHAUSTED') || errMsg.toLowerCase().includes('rate');
+        if (isRateLimit && attempt < 2) {
+          console.warn(`[AI] Rate limit on attempt ${attempt}, waiting 2s before retry...`);
+          await new Promise(r => setTimeout(r, 2000));
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (!responseText && lastError) {
+      const errMsg = lastError?.message || '';
+      const isRateLimit = errMsg.includes('429') || errMsg.includes('RESOURCE_EXHAUSTED') || errMsg.toLowerCase().includes('rate');
+      if (isRateLimit) {
+        return res.json({
+          success: false,
+          error: 'RATE_LIMIT_EXCEEDED',
+          message: 'Gemini API Rate Limit Exceeded. कृपया 10-15 सेकंड बाद पुनः प्रयास करें या सीधे Excel (.xlsx / .csv) फ़ाइल अपलोड करें।'
+        });
+      }
+      throw lastError;
+    }
+
     if (!responseText) {
       return res.json({ success: false, error: 'EMPTY_AI_RESPONSE', message: 'AI model returned empty response for this document.' });
     }
@@ -142,7 +174,7 @@ Instructions for parsing table items:
     return res.json({ 
       success: false, 
       error: 'AI_EXTRACTION_ERROR',
-      message: 'AI scanning is not available without Gemini API credentials. Please upload your Purchase Order as an Excel spreadsheet (.xlsx / .xls / .csv) for direct instant import.' 
+      message: 'AI Document scanning temporarily unavailable. Please upload your Purchase Order as an Excel spreadsheet (.xlsx / .xls / .csv) for direct instant import.' 
     });
   }
 });
@@ -269,7 +301,7 @@ app.post('/api/analyze-trade', async (req, res) => {
     Format the response in rich, elegant Markdown with clean bullet points and bold headers.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.8-flash',
       contents: [
         {
           role: 'user',
@@ -339,7 +371,7 @@ Return a JSON array of objects with the exact schema:
 Provide only the raw JSON array. No conversational text, no markdown block wrappers.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.8-flash',
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           config: {
             responseMimeType: 'application/json',

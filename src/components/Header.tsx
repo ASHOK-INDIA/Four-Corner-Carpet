@@ -13,6 +13,7 @@ interface HeaderProps {
   onOpenUploadInvoiceExcel?: () => void;
   onOpenLedger?: () => void;
   onOpenWorkerSms?: () => void;
+  onOpenPdfStudio?: () => void;
   onOpenShipmentTrack: () => void;
   onOpenPPWR: () => void;
   onOpenPrintReport: () => void;
@@ -33,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenUploadInvoiceExcel,
   onOpenLedger,
   onOpenWorkerSms,
+  onOpenPdfStudio,
   onOpenShipmentTrack,
   onOpenPPWR,
   onOpenPrintReport,
@@ -85,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
               </text>
             </svg>
           </div>
-          <div className="hidden sm:block">
+          <div className="hidden sm:flex flex-col justify-center">
             <div className="flex items-center space-x-2">
               <h1 className="font-extrabold text-sm lg:text-base text-white tracking-wide font-sans">{t.appTitle}</h1>
             </div>
@@ -191,6 +193,29 @@ export const Header: React.FC<HeaderProps> = ({
                     <BookOpen className="w-3.5 h-3.5 text-white" />
                     <span>Ledger Book</span>
                   </button>
+                )}
+
+                {onOpenPdfStudio && (
+                  <>
+                    <button
+                      id="upscQuizNavBtn"
+                      onClick={onOpenPdfStudio}
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 hover:from-amber-400 hover:to-amber-500 transition flex items-center gap-1.5 cursor-pointer shadow-sm border border-amber-400"
+                      title="UPSC 100 Random Questions & Interactive Green Answer Key"
+                    >
+                      <span className="text-sm">🎯</span>
+                      <span>UPSC 100 Q&A</span>
+                    </button>
+                    <button
+                      id="pdfStudioNavBtn"
+                      onClick={onOpenPdfStudio}
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-indigo-600 text-white hover:bg-indigo-500 transition flex items-center gap-1 cursor-pointer shadow-sm border border-indigo-400"
+                      title="Universal PDF Studio & Auto-Converter (Admin Only)"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-white" />
+                      <span>PDF Studio</span>
+                    </button>
+                  </>
                 )}
               </>
             )}
@@ -456,6 +481,25 @@ export const Header: React.FC<HeaderProps> = ({
               <Printer className="w-4 h-4 shrink-0 text-rose-200" />
               <span>{t.print} (A4 Official PDF)</span>
             </button>
+
+            {adminMode && onOpenPdfStudio && (
+              <>
+                <button
+                  onClick={() => handleMobileNavClick(onOpenPdfStudio)}
+                  className="p-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 rounded-xl text-xs font-black flex items-center gap-2 col-span-2 shadow-sm"
+                >
+                  <span className="text-sm">🎯</span>
+                  <span>UPSC 100 Q&A (Random Qs & Green Answer Key)</span>
+                </button>
+                <button
+                  onClick={() => handleMobileNavClick(onOpenPdfStudio)}
+                  className="p-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black flex items-center gap-2 col-span-2"
+                >
+                  <FileText className="w-4 h-4 shrink-0 text-white" />
+                  <span>PDF Studio & Auto-Converter (Admin)</span>
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Admin toggle button */}

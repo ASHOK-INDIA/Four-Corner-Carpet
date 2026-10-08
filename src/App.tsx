@@ -19,6 +19,7 @@ import { WeaverGraphModal } from './components/WeaverGraphModal';
 import { AiyaraInvoiceModal } from './components/AiyaraInvoiceModal';
 import { AiyaraLedgerModal } from './components/AiyaraLedgerModal';
 import { WorkerSmsModal } from './components/WorkerSmsModal';
+import { PdfStudioModal } from './components/PdfStudioModal';
 import {
   subscribePurchaseOrders,
   subscribePPWRFiles,
@@ -82,6 +83,7 @@ export default function App() {
   const [isAiyaraInvoiceOpen, setIsAiyaraInvoiceOpen] = useState<boolean>(false);
   const [isAiyaraLedgerOpen, setIsAiyaraLedgerOpen] = useState<boolean>(false);
   const [isWorkerSmsOpen, setIsWorkerSmsOpen] = useState<boolean>(false);
+  const [isPdfStudioOpen, setIsPdfStudioOpen] = useState<boolean>(false);
   const [smsPoNumber, setSmsPoNumber] = useState<string>('');
 
   // State: Advanced Rug Studio & Logistics Enhancements
@@ -243,6 +245,7 @@ export default function App() {
     setIsAiyaraInvoiceOpen(false);
     setIsAiyaraLedgerOpen(false);
     setIsWorkerSmsOpen(false);
+    setIsPdfStudioOpen(false);
   };
 
   // Admin Toggle Handler
@@ -458,6 +461,14 @@ export default function App() {
           closeAllModals();
           setSmsPoNumber('');
           setIsWorkerSmsOpen(true);
+        }}
+        onOpenPdfStudio={() => {
+          if (!adminMode) {
+            alert('Admin access required.');
+            return;
+          }
+          closeAllModals();
+          setIsPdfStudioOpen(true);
         }}
       />
 
@@ -696,6 +707,13 @@ export default function App() {
         onClose={() => setIsWorkerSmsOpen(false)}
         productionData={productionData}
         preselectedPoNumber={smsPoNumber}
+      />
+
+      {/* Admin PDF Studio & Auto-Converter Module */}
+      <PdfStudioModal
+        isOpen={isPdfStudioOpen}
+        onClose={() => setIsPdfStudioOpen(false)}
+        adminMode={adminMode}
       />
 
       {/* Delete Confirmation Modal */}
