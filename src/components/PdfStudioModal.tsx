@@ -277,15 +277,15 @@ Ans: a [${base} 2026]`);
         useCORS: true, 
         logging: true,
         onclone: (doc) => {
-            // Inject style to override oklch
-            const style = doc.createElement('style');
-            style.textContent = `
-                * {
-                    color: black !important;
-                    background-color: white !important;
+            const elements = doc.querySelectorAll('*');
+            elements.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                const style = getComputedStyle(htmlEl);
+                if (style.color.includes('oklch') || style.backgroundColor.includes('oklch')) {
+                    htmlEl.style.color = 'black';
+                    htmlEl.style.backgroundColor = 'white';
                 }
-            `;
-            doc.head.appendChild(style);
+            });
         }
       },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
