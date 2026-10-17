@@ -624,7 +624,7 @@ export const AiyaraLedgerModal: React.FC<AiyaraLedgerModalProps> = ({
         }
       `}</style>
 
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-fadeIn border border-slate-200 printable-ledger-card print:border-none print:shadow-none print:max-h-none print:overflow-visible print:w-full print:max-w-none">
+      <div className="bg-transparent rounded-2xl shadow-2xl w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-fadeIn border border-slate-200 printable-ledger-card print:border-none print:shadow-none print:max-h-none print:overflow-visible print:w-full print:max-w-none">
         
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-[#E4002B] to-rose-700 text-white px-6 py-4 flex items-center justify-between shrink-0 shadow-md print:hidden">

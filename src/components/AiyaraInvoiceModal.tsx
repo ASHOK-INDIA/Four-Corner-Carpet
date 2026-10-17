@@ -28,7 +28,8 @@ import {
   Layers,
   RefreshCw,
   Box,
-  Calculator
+  Calculator,
+  Package
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -47,8 +48,10 @@ import {
   saveAiyaraInvoiceToFirestore, 
   deleteAiyaraInvoiceFromFirestore,
   DEFAULT_AIYARA_INVOICES,
+  UPDATED_PO_17_ITEMS_INVOICE,
   subscribeContainerItems
 } from '../lib/firestoreService';
+import { downloadPoptopInvoiceExcelFile } from '../utils/poptopExcelExporter';
 
 // Helper to convert currency amount to words (International export & standard invoice format)
 export function convertAmountToWords(num: number, currencyStr?: string): string {
@@ -543,14 +546,20 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   // Access check: Only Admin can view Aiyara Invoice Module
   if (!adminMode) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center space-y-4 border border-rose-200">
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+        onClick={onClose}
+      >
+        <div 
+          className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center space-y-4 border border-rose-200"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="w-16 h-16 bg-rose-100 text-[#E4002B] rounded-2xl flex items-center justify-center mx-auto">
             <ShieldCheck className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-black text-slate-900 tracking-tight">Admin Access Required</h2>
           <p className="text-xs text-slate-600">
-            Aiyara INVOICE module is exclusively visible to Administrators. Please unlock Admin mode in the top navigation bar to access this module.
+            POPTOP INVOICE module is exclusively visible to Administrators. Please unlock Admin mode in the top navigation bar to access this module.
           </p>
           <button
             onClick={onClose}
@@ -563,19 +572,21 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     );
   }
 
-  // Format Currency (USD $, EUR €, INR ₹)
+  // Format Currency (USD $, EUR €, INR ₹, GBP £)
   const formatCurrency = (val: number, customCurrency?: string) => {
-    const isPoptop = (isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) === 'POPTOP' || (activeDoc?.buyerName || '').toLowerCase().includes('poptop');
-    const curr = customCurrency || (isEditing ? editForm?.currency : activeDoc?.currency) || (isPoptop ? 'USD ($)' : 'USD ($)');
+    const curr = customCurrency || (isEditing ? editForm?.currency : activeDoc?.currency) || 'USD ($)';
     const num = val || 0;
 
-    if (isPoptop || curr.includes('USD') || curr.includes('$')) {
-      return `$ ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
     if (curr.includes('EUR') || curr.includes('€')) {
       return `€ ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-    return `₹ ${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (curr.includes('INR') || curr.includes('₹')) {
+      return `₹ ${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    if (curr.includes('GBP') || curr.includes('£')) {
+      return `£ ${num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `$ ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
   const formatINR = (val: number) => formatCurrency(val);
 
@@ -606,12 +617,12 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     updatedItems: AiyaraLineItem[], 
     customIgst?: number, 
     customAdvance?: number,
-    overrideType?: 'STANDARD' | 'POPTOP',
+    overrideType?: 'STANDARD' | 'POPTOP' | 'AIYARA',
     customPalletCharge?: number,
     customTotalPallets?: number,
     customPcsPerPallet?: number
   ) => {
-    const invType = overrideType ?? editForm?.invoiceType ?? (editForm?.buyerName?.toLowerCase().includes('poptop') ? 'POPTOP' : 'STANDARD');
+    const invType = overrideType ?? editForm?.invoiceType ?? (editForm?.buyerName?.toLowerCase().includes('poptop') ? 'POPTOP' : 'AIYARA');
     const isPoptop = invType === 'POPTOP';
 
     // Calculate line item amounts based on Poptop vs Standard mode and ensure accurate Sq.Meter
@@ -623,17 +634,33 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
         ? Number(item.totalSqMeter)
         : (calculatedSqM > 0 ? calculatedSqM : 0);
 
-      let tot = 0;
+      let tot = item.totalAmount !== undefined && Number(item.totalAmount) > 0 ? Number(item.totalAmount) : 0;
       if (isPoptop) {
-        // Price per PCS
-        const pcPrice = item.pcsPrice !== undefined && item.pcsPrice > 0 ? Number(item.pcsPrice) : Number(item.sqMtrPrice) || 0;
-        tot = parseFloat((pcs * pcPrice).toFixed(2));
-        return { ...item, totalSqMeter: sqM, pcsPrice: pcPrice, totalAmount: tot };
+        const hasPcsPrice = item.pcsPrice !== undefined && Number(item.pcsPrice) > 0;
+        const pcPrice = hasPcsPrice ? Number(item.pcsPrice) : 0;
+        const mPrice = Number(item.sqMtrPrice) || 0;
+
+        if (tot === 0) {
+          if (hasPcsPrice) {
+            tot = parseFloat((pcs * pcPrice).toFixed(2));
+          } else if (mPrice > 0) {
+            tot = parseFloat((sqM * mPrice).toFixed(2));
+          }
+        }
+        return {
+          ...item,
+          totalSqMeter: sqM,
+          pcsPrice: hasPcsPrice ? pcPrice : (item.pcsPrice || (tot > 0 && pcs > 0 ? parseFloat((tot / pcs).toFixed(2)) : 0)),
+          sqMtrPrice: mPrice > 0 ? mPrice : (tot > 0 && sqM > 0 ? parseFloat((tot / sqM).toFixed(2)) : 0),
+          totalAmount: tot
+        };
       } else {
         // Price per Sq.Meter
         const mPrice = Number(item.sqMtrPrice) || 0;
-        tot = parseFloat((sqM * mPrice).toFixed(2));
-        return { ...item, totalSqMeter: sqM, totalAmount: tot };
+        if (tot === 0 && mPrice > 0) {
+          tot = parseFloat((sqM * mPrice).toFixed(2));
+        }
+        return { ...item, totalSqMeter: sqM, sqMtrPrice: mPrice, totalAmount: tot };
       }
     });
 
@@ -713,15 +740,26 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       }
     }
 
-    if (isPoptop) {
+    if (field === 'pcsPrice') {
       const pcs = Number(currentItem.qtyPcs) || 1;
-      const pcPrice = currentItem.pcsPrice !== undefined && Number(currentItem.pcsPrice) > 0 ? Number(currentItem.pcsPrice) : Number(currentItem.sqMtrPrice) || 0;
+      const pcPrice = Number(value) || 0;
       currentItem.pcsPrice = pcPrice;
       currentItem.totalAmount = parseFloat((pcs * pcPrice).toFixed(2));
-    } else {
+    } else if (field === 'sqMtrPrice') {
       const sqM = Number(currentItem.totalSqMeter) || 0;
-      const price = Number(currentItem.sqMtrPrice) || 0;
-      currentItem.totalAmount = parseFloat((sqM * price).toFixed(2));
+      const mPrice = Number(value) || 0;
+      currentItem.sqMtrPrice = mPrice;
+      currentItem.totalAmount = parseFloat((sqM * mPrice).toFixed(2));
+    } else if (field === 'totalAmount') {
+      currentItem.totalAmount = Number(value) || 0;
+    } else if (field === 'qtyPcs') {
+      const pcs = Number(value) || 1;
+      if (isPoptop && currentItem.pcsPrice && Number(currentItem.pcsPrice) > 0) {
+        currentItem.totalAmount = parseFloat((pcs * Number(currentItem.pcsPrice)).toFixed(2));
+      } else if (currentItem.sqMtrPrice && Number(currentItem.sqMtrPrice) > 0) {
+        const sqM = Number(currentItem.totalSqMeter) || 0;
+        currentItem.totalAmount = parseFloat((sqM * Number(currentItem.sqMtrPrice)).toFixed(2));
+      }
     }
 
     newItems[index] = currentItem;
@@ -747,6 +785,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   // Add new row
   const handleAddLineItem = () => {
     if (!editForm) return;
+    const isPoptop = editForm.invoiceType === 'POPTOP' || editForm.buyerName?.toLowerCase().includes('poptop');
     const newItem: AiyaraLineItem = {
       id: `item-${Date.now()}-${editForm.items.length + 1}`,
       itemNo: `3919${20 + editForm.items.length}`,
@@ -758,8 +797,9 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       qtyPallet: 1,
       qtyPcs: 1,
       totalSqMeter: 8.75,
-      sqMtrPrice: 1050,
-      totalAmount: 9187.50,
+      sqMtrPrice: isPoptop ? 120 : 1050,
+      pcsPrice: isPoptop ? 1050 : 0,
+      totalAmount: isPoptop ? 1050 : 9187.50,
       cbmVolume: 0.863
     };
     const updated = [...editForm.items, newItem];
@@ -1542,108 +1582,155 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     setToastMessage({ type: 'success', text: 'Created dedicated Poptop Invoice template!' });
   };
 
-  // Export Active Invoice to Excel File (.xlsx)
-  const handleExportExcel = () => {
-    const active = isEditing ? editForm : selectedInvoice;
+  // Load User's exact 17-item Updated PO data (317 Pcs, ₹ 10,74,223.80 Subtotal, ₹ 11,27,934.99 Total)
+  const handleLoadUpdated17ItemPo = async () => {
+    try {
+      setIsSaving(true);
+      const invoiceToSave: AiyaraInvoice = {
+        ...JSON.parse(JSON.stringify(UPDATED_PO_17_ITEMS_INVOICE)),
+        id: `po_1128405_17items_${Date.now()}`,
+        createdAt: new Date().toISOString()
+      };
+      await saveAiyaraInvoiceToFirestore(invoiceToSave);
+      setSelectedInvoice(invoiceToSave);
+      setEditForm(JSON.parse(JSON.stringify(invoiceToSave)));
+      setIsEditing(false);
+      setToastMessage({ 
+        type: 'success', 
+        text: 'Updated PO (17 Items, 317 Pcs, ₹11,27,934.99) loaded & saved to database!' 
+      });
+    } catch (err) {
+      console.error('Error loading updated PO:', err);
+      const fallback: AiyaraInvoice = {
+        ...JSON.parse(JSON.stringify(UPDATED_PO_17_ITEMS_INVOICE)),
+        id: `po_1128405_17items_${Date.now()}`
+      };
+      setSelectedInvoice(fallback);
+      setEditForm(JSON.parse(JSON.stringify(fallback)));
+      setIsEditing(false);
+      setToastMessage({ type: 'success', text: 'Updated PO (17 Items, 317 Pcs) loaded into view!' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Export Active Invoice to Excel File (.xlsx) with exact PDF formatting
+  const handleExportExcel = async (customPrefix?: string) => {
+    const active = (isEditing && editForm) ? editForm : (selectedInvoice || editForm);
     if (!active) return;
 
-    const isExcelPoptop = active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop');
+    try {
+      setToastMessage({ type: 'success', text: 'Generating Excel with exact invoice data...' });
+      const isExcelPoptop = active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop');
+      const prefix = customPrefix || (isExcelPoptop ? 'POPTOP_Commercial_Invoice' : 'F4C_Commercial_Invoice');
+      await downloadPoptopInvoiceExcelFile(active, prefix);
+      setToastMessage({ 
+        type: 'success', 
+        text: `Excel downloaded successfully! Data matches invoice exactly.` 
+      });
+    } catch (err) {
+      console.error('Error generating PDF-matched Excel, falling back:', err);
+      // Fallback export with basic sheet
+      const isExcelPoptop = active.invoiceType !== 'AIYARA' && !(active.buyerName || '').toLowerCase().includes('aiyara') && (active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop'));
+      const sheetData: any[][] = [
+        isExcelPoptop ? [(active.documentTitle || "PERFORMA / COMMERCIAL INVOICE").toUpperCase()] : ["FOUR CORNERS CARPETS — INVOICE"],
+        ["FOUR CORNERS CARPETS — EXPORT DEPT."],
+        [],
+        ["SUPPLIER DETAILS", "", "", "", "BUYER DETAILS"],
+        ["Date:", active.date, "", "", "Company Name:", active.buyerName],
+        ["Company Name:", active.supplierName, "", "", "Address:", active.buyerAddress],
+        ["Address:", active.supplierAddress, "", "", isExcelPoptop ? "" : "EORI / VAT:", isExcelPoptop ? "" : (active.buyerEoriVat || active.buyerGstin)],
+        ["GSTIN:", active.supplierGstin, "", "", isExcelPoptop ? "" : "Phone:", isExcelPoptop ? "" : active.buyerPhone],
+        ...(isExcelPoptop ? [
+          ["SWIFT:", active.supplierSwiftCode || exporterMaster.swiftCode, "", "", "", ""],
+          ["AD Code:", active.supplierAdCode || exporterMaster.adCode, "", "", "", ""]
+        ] : [
+          ["", "", "", "", "Email:", active.buyerEmail],
+          ["", "", "", "", "Attention:", active.buyerAttention]
+        ]),
+        ["Bank Details:", active.supplierBankDetails],
+        ["IFSC Code:", active.supplierIfsc],
+        [],
+        ...(isExcelPoptop ? [
+          ["SHIPPING & TRANSPORT DETAILS"],
+          ["Pre-Carried by:", active.preCarriedBy || "BY TRUCK", "", "", "Place of Receipt Pre-Carrier:", active.placeOfReceiptByPreCarrier || "BHADOHI"],
+          ["Vessel/Flight No.:", active.vesselFlightNo || "BY SEA", "", "", "Shipment From:", active.shipmentFrom || active.portOfLoading || "MUMBAI"],
+          ["Port of Discharge:", active.portOfDischarge || "Austria", "", "", "Final Destination:", active.finalDestination || active.countryOfDestination || "Austria"],
+          ["Country of Goods:", active.countryOfOrigin || "INDIA", "", "", "Country of Final Destination:", active.countryOfDestination || "Austria"],
+          ["Marks & Nos:", (active.marksAndNos || "Marks : F4C\nAustria").replace(/\n/g, ' / '), "", "", "No. and Kind of Packing:", active.noAndKindOfPackages || `${active.totalPallets || 10} Pallet`],
+          []
+        ] : []),
+        [active.poTitle || 'PO DETAILS', active.invoiceNo],
+        [],
+        isExcelPoptop
+          ? ["ITEM #", "HSN CODE", "DESCRIPTION OF ITEM", "SPECIFICATION", "PRODUCT CODE", "SIZES In cm", "PALLET DIMENSION", "WEIGHT (KG)", "CBM (m³)", "QTY OF PALLET", "RUG PCS", "TOTAL IN METER", "PRICE / PCS", "TOTAL AMOUNT"]
+          : ["ITEM #", "HSN CODE", "DESCRIPTION OF ITEM", "SPECIFICATION", "PRODUCT CODE", "SIZES In cm", "PALLET DIMENSION", "WEIGHT (KG)", "CBM (m³)", "QTY IN pcs", "TOTAL IN METER", "SQ MTR PRICE", "TOTAL AMOUNT"]
+      ];
 
-    const sheetData: any[][] = [
-      [(active.documentTitle || "PERFORMA / COMMERCIAL INVOICE").toUpperCase()],
-      ["FOUR CORNERS CARPETS — EXPORT DEPT."],
-      [],
-      ["SUPPLIER DETAILS", "", "", "", "BUYER DETAILS"],
-      ["Date:", active.date, "", "", "Company Name:", active.buyerName],
-      ["Company Name:", active.supplierName, "", "", "Address:", active.buyerAddress],
-      ["Address:", active.supplierAddress, "", "", isExcelPoptop ? "" : "EORI / VAT:", isExcelPoptop ? "" : (active.buyerEoriVat || active.buyerGstin)],
-      ["GSTIN:", active.supplierGstin, "", "", isExcelPoptop ? "" : "Phone:", isExcelPoptop ? "" : active.buyerPhone],
-      ["SWIFT:", active.supplierSwiftCode || exporterMaster.swiftCode, "", "", isExcelPoptop ? "" : "Email:", isExcelPoptop ? "" : active.buyerEmail],
-      ["AD Code:", active.supplierAdCode || exporterMaster.adCode, "", "", isExcelPoptop ? "" : "Attention:", isExcelPoptop ? "" : active.buyerAttention],
-      ["Bank Details:", active.supplierBankDetails],
-      ["IFSC Code:", active.supplierIfsc],
-      [],
-      ["SHIPPING & TRANSPORT DETAILS"],
-      ["Pre-Carried by:", active.preCarriedBy || "BY TRUCK", "", "", "Place of Receipt Pre-Carrier:", active.placeOfReceiptByPreCarrier || "BHADOHI"],
-      ["Vessel/Flight No.:", active.vesselFlightNo || "BY SEA", "", "", "Shipment From:", active.shipmentFrom || active.portOfLoading || "MUMBAI"],
-      ["Port of Discharge:", active.portOfDischarge || "Austria", "", "", "Final Destination:", active.finalDestination || active.countryOfDestination || "Austria"],
-      ["Country of Goods:", active.countryOfOrigin || "INDIA", "", "", "Country of Final Destination:", active.countryOfDestination || "Austria"],
-      ["Marks & Nos:", (active.marksAndNos || "Marks : F4C\nAustria").replace(/\n/g, ' / '), "", "", "No. and Kind of Packing:", active.noAndKindOfPackages || `${active.totalPallets || 10} Pallet`],
-      [],
-      [active.poTitle || 'PO DETAILS', active.invoiceNo],
-      [],
-      isExcelPoptop
-        ? ["ITEM #", "HSN CODE", "DESCRIPTION OF ITEM", "SPECIFICATION", "PRODUCT CODE", "SIZES In cm", "PALLET DIMENSION", "WEIGHT (KG)", "CBM (m³)", "QTY OF PALLET", "RUG PCS", "TOTAL IN METER", "PRICE / PCS", "TOTAL AMOUNT"]
-        : ["ITEM #", "HSN CODE", "DESCRIPTION OF ITEM", "SPECIFICATION", "PRODUCT CODE", "SIZES In cm", "PALLET DIMENSION", "WEIGHT (KG)", "CBM (m³)", "QTY IN pcs", "TOTAL IN METER", "SQ MTR PRICE", "TOTAL AMOUNT"]
-    ];
+      active.items.forEach((item) => {
+        const cbmVal = calculateLineItemCbm(item);
+        if (isExcelPoptop) {
+          sheetData.push([
+            item.itemNo,
+            item.hsnCode || '57050039',
+            item.description,
+            item.specification,
+            item.productCode,
+            item.sizesCm,
+            item.palletDimension || '-',
+            item.weightKg || 0,
+            cbmVal.toFixed(3),
+            item.qtyPallet || 1,
+            item.qtyPcs,
+            item.totalSqMeter,
+            item.pcsPrice || item.sqMtrPrice,
+            item.totalAmount
+          ]);
+        } else {
+          sheetData.push([
+            item.itemNo,
+            item.hsnCode || '57050039',
+            item.description,
+            item.specification,
+            item.productCode,
+            item.sizesCm,
+            item.palletDimension || '-',
+            item.weightKg || 0,
+            cbmVal.toFixed(3),
+            item.qtyPcs,
+            item.totalSqMeter,
+            item.sqMtrPrice,
+            item.totalAmount
+          ]);
+        }
+      });
 
-    // Add line items
-    active.items.forEach((item) => {
-      const cbmVal = calculateLineItemCbm(item);
+      const totalCbmExcel = (active.totalCbm || active.items.reduce((s, it) => s + calculateLineItemCbm(it), 0)).toFixed(3);
+      sheetData.push([]);
       if (isExcelPoptop) {
-        sheetData.push([
-          item.itemNo,
-          item.hsnCode || '57050039',
-          item.description,
-          item.specification,
-          item.productCode,
-          item.sizesCm,
-          item.palletDimension || '-',
-          item.weightKg || 0,
-          cbmVal.toFixed(3),
-          item.qtyPallet || 1,
-          item.qtyPcs,
-          item.totalSqMeter,
-          item.pcsPrice || item.sqMtrPrice,
-          item.totalAmount
-        ]);
+        sheetData.push(["", "", "", "", "", "TOTAL PALLETS:", active.totalPallets || 1, "TOTAL RUG PCS:", active.totalPcs, "TOTAL SQ MTR:", active.totalSqMeter, "TOTAL CBM:", `${totalCbmExcel} m³`]);
+        sheetData.push(["", "", "", "", "", "", "", "", "", "Sub Total:", active.subTotal]);
+        sheetData.push(["", "", "", "", "", "", "", "", "", "Sub Total in Words:", convertAmountToWords(active.subTotal, active.currency)]);
+        sheetData.push(["", "", "", "", "", "", "", "", "", `Per Pallet Charge (${active.totalPallets || 1} Pallets @ $${active.perPalletCharge || 50}):`, (active.totalPallets || 1) * (active.perPalletCharge || 50)]);
+        sheetData.push(["", "", "", "", "", "", "", "", "", `${active.advancePercent}% Advance:`, active.advanceAmount]);
+        sheetData.push(["", "", "", "", "", "", "", "", "", "Total Amount:", active.totalAmount]);
+        sheetData.push(["", "", "", "", "", "", "", "", "", "Total in Words:", convertAmountToWords(active.totalAmount, active.currency)]);
       } else {
-        sheetData.push([
-          item.itemNo,
-          item.hsnCode || '57050039',
-          item.description,
-          item.specification,
-          item.productCode,
-          item.sizesCm,
-          item.palletDimension || '-',
-          item.weightKg || 0,
-          cbmVal.toFixed(3),
-          item.qtyPcs,
-          item.totalSqMeter,
-          item.sqMtrPrice,
-          item.totalAmount
-        ]);
+        sheetData.push(["", "", "", "", "", "TOTAL PCS:", active.totalPcs, "TOTAL SQ MTR:", active.totalSqMeter, "TOTAL CBM:", `${totalCbmExcel} m³`]);
+        sheetData.push(["", "", "", "", "", "", "", "", "Sub Total:", active.subTotal]);
+        sheetData.push(["", "", "", "", "", "", "", "", "Sub Total in Words:", convertAmountToWords(active.subTotal, active.currency)]);
+        sheetData.push(["", "", "", "", "", "", "", "", `IGST ${active.igstPercent}%:`, active.igstAmount]);
+        sheetData.push(["", "", "", "", "", "", "", "", `${active.advancePercent}% Advance:`, active.advanceAmount]);
+        sheetData.push(["", "", "", "", "", "", "", "", "Total Amount:", active.totalAmount]);
+        sheetData.push(["", "", "", "", "", "", "", "", "Total in Words:", convertAmountToWords(active.totalAmount, active.currency)]);
       }
-    });
 
-    const totalCbmExcel = (active.totalCbm || active.items.reduce((s, it) => s + calculateLineItemCbm(it), 0)).toFixed(3);
-
-    // Add summary rows
-    sheetData.push([]);
-    if (isExcelPoptop) {
-      sheetData.push(["", "", "", "", "", "TOTAL PALLETS:", active.totalPallets || 1, "TOTAL RUG PCS:", active.totalPcs, "TOTAL SQ MTR:", active.totalSqMeter, "TOTAL CBM:", `${totalCbmExcel} m³`]);
-      sheetData.push(["", "", "", "", "", "", "", "", "", "Sub Total:", active.subTotal]);
-      sheetData.push(["", "", "", "", "", "", "", "", "", "Sub Total in Words:", convertAmountToWords(active.subTotal, active.currency)]);
-      sheetData.push(["", "", "", "", "", "", "", "", "", `Per Pallet Charge (${active.totalPallets || 1} Pallets @ $${active.perPalletCharge || 50}):`, (active.totalPallets || 1) * (active.perPalletCharge || 50)]);
-      sheetData.push(["", "", "", "", "", "", "", "", "", `${active.advancePercent}% Advance:`, active.advanceAmount]);
-      sheetData.push(["", "", "", "", "", "", "", "", "", "Total Amount:", active.totalAmount]);
-      sheetData.push(["", "", "", "", "", "", "", "", "", "Total in Words:", convertAmountToWords(active.totalAmount, active.currency)]);
-    } else {
-      sheetData.push(["", "", "", "", "", "TOTAL PCS:", active.totalPcs, "TOTAL SQ MTR:", active.totalSqMeter, "TOTAL CBM:", `${totalCbmExcel} m³`]);
-      sheetData.push(["", "", "", "", "", "", "", "", "Sub Total:", active.subTotal]);
-      sheetData.push(["", "", "", "", "", "", "", "", "Sub Total in Words:", convertAmountToWords(active.subTotal, active.currency)]);
-      sheetData.push(["", "", "", "", "", "", "", "", `IGST ${active.igstPercent}%:`, active.igstAmount]);
-      sheetData.push(["", "", "", "", "", "", "", "", `${active.advancePercent}% Advance:`, active.advanceAmount]);
-      sheetData.push(["", "", "", "", "", "", "", "", "Total Amount:", active.totalAmount]);
-      sheetData.push(["", "", "", "", "", "", "", "", "Total in Words:", convertAmountToWords(active.totalAmount, active.currency)]);
+      const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Commercial Invoice");
+      const safeName = (active.invoiceNo || 'Invoice').replace(/[^a-zA-Z0-9]/g, '_');
+      XLSX.writeFile(workbook, `F4C_Export_Invoice_${safeName}.xlsx`);
     }
-
-    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Commercial Invoice");
-
-    const safeName = (active.invoiceNo || 'Invoice').replace(/[^a-zA-Z0-9]/g, '_');
-    XLSX.writeFile(workbook, `F4C_Export_Invoice_${safeName}.xlsx`);
   };
 
   // Trigger Print / PDF Generation for 3 Main Export Documents (Commercial Invoice, Packing List, REX Certificate)
@@ -1665,13 +1752,13 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     let contentHtml = '';
 
     if (docType === 'COMMERCIAL') {
-      const isPrintPoptop = active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop');
+      const isPrintPoptop = active.invoiceType !== 'AIYARA' && !(active.buyerName || '').toLowerCase().includes('aiyara') && (active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop'));
 
       contentHtml = `
         <div style="padding:15px; font-family: system-ui, sans-serif; color:#0f172a;">
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:8px; margin-bottom:12px;">
             <div>
-              <h1 style="margin:0; font-size:20px; font-weight:900; text-transform:uppercase;">${(active.documentTitle || 'Commercial Invoice').toUpperCase()}</h1>
+              ${isPrintPoptop ? `<h1 style="margin:0; font-size:20px; font-weight:900; text-transform:uppercase;">${(active.documentTitle || 'Commercial Invoice').toUpperCase()}</h1>` : ''}
               <p style="margin:2px 0 0 0; font-size:11px; font-weight:bold; color:#E4002B;">FOUR CORNERS CARPETS — INTERNATIONAL EXPORT INVOICE</p>
             </div>
             <div style="text-align:right; font-size:11px; font-family:monospace;">
@@ -1685,10 +1772,9 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
             <div>
               <h3 style="margin:0 0 4px 0; text-transform:uppercase; font-size:11px; border-bottom:1px solid #ccc; font-weight:bold;">EXPORTER / SUPPLIER</h3>
               <p style="margin:2px 0;"><strong>${active.supplierName}</strong></p>
-              <p style="margin:2px 0;">${active.supplierAddress}</p>
-              <p style="margin:2px 0;"><strong>GSTIN:</strong> ${active.supplierGstin} | <strong>IEC:</strong> ${active.supplierIecNo || exporterMaster.iecNo}</p>
-              ${!isPrintPoptop ? `<p style="margin:2px 0;"><strong>REX NO:</strong> ${active.supplierRexNo || exporterMaster.rexNo}</p>` : ''}
-              <p style="margin:2px 0;"><strong>SWIFT CODE:</strong> ${active.supplierSwiftCode || exporterMaster.swiftCode} ${!isPrintPoptop ? `| <strong>AD CODE:</strong> ${active.supplierAdCode || exporterMaster.adCode}` : ''}</p>
+              <p style="margin:2px 0;"><strong>GSTIN:</strong> ${active.supplierGstin} ${isPrintPoptop ? `| <strong>IEC:</strong> ${active.supplierIecNo || exporterMaster.iecNo}` : ''}</p>
+              ${isPrintPoptop ? `<p style="margin:2px 0;"><strong>REX NO:</strong> ${active.supplierRexNo || exporterMaster.rexNo}</p>` : ''}
+              ${isPrintPoptop ? `<p style="margin:2px 0;"><strong>SWIFT CODE:</strong> ${active.supplierSwiftCode || exporterMaster.swiftCode} | <strong>AD CODE:</strong> ${active.supplierAdCode || exporterMaster.adCode}</p>` : ''}
             </div>
             <div>
               <h3 style="margin:0 0 4px 0; text-transform:uppercase; font-size:11px; border-bottom:1px solid #ccc; font-weight:bold;">CONSIGNEE / BUYER</h3>
@@ -1703,6 +1789,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
             </div>
           </div>
 
+          ${isPrintPoptop ? `
           <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:10px; font-family:Arial, Helvetica, sans-serif; border:1.5px solid #000;" border="1" cellpadding="5">
             <tbody>
               <tr>
@@ -1756,6 +1843,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
               </tr>
             </tbody>
           </table>
+          ` : ''}
 
           <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:10.5px; text-align:left;" border="1" cellpadding="4">
             <thead style="background:#0f172a; color:#fff; font-family:monospace; text-align:center;">
@@ -1804,7 +1892,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
               <p style="margin:0 0 3px 0;"><strong>BANK PAYMENT DETAILS:</strong></p>
               <p style="margin:2px 0;">BANK: ICICI BANK LTD | BRANCH: BHADOHI</p>
               <p style="margin:2px 0;">A/C NO: 039005001234 | IFSC: ICIC0000390</p>
-              <p style="margin:2px 0;">SWIFT: ICICINBBCTS ${!isPrintPoptop ? '| AD CODE: 6390001234567' : ''}</p>
+              ${isPrintPoptop ? '<p style="margin:2px 0;">SWIFT: ICICINBBCTS | AD CODE: 6390001234567</p>' : ''}
               <p style="margin:4px 0 0 0;"><strong>DELIVERY & PAYMENT TERMS:</strong> ${active.notes || 'Palletized delivery. Payment against shipping documents.'}</p>
             </div>
             <div style="width:40%; font-size:10.5px; font-family:monospace;">
@@ -2202,10 +2290,27 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     (inv.poTitle || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const currentInvoiceType = isEditing ? editForm?.invoiceType : activeDoc?.invoiceType;
+  const currentBuyerName = ((isEditing ? editForm?.buyerName : activeDoc?.buyerName) || '').toLowerCase();
+  
+  // Explicitly AIYARA if typed as AIYARA or buyer contains aiyara
+  const isAiyara = currentInvoiceType === 'AIYARA' || (!currentInvoiceType && currentBuyerName.includes('aiyara')) || (currentInvoiceType !== 'POPTOP' && currentBuyerName.includes('aiyara'));
+  
+  // isPoptop is true ONLY if POPTOP format (never true for AIYARA)
+  const isPoptop = !isAiyara && Boolean(
+    currentInvoiceType === 'POPTOP' || currentBuyerName.includes('poptop')
+  );
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-slate-950/70 backdrop-blur-md">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-slate-950/70 backdrop-blur-md"
+      onClick={onClose}
+    >
       {/* Container */}
-      <div className="relative w-full h-full md:max-w-7xl md:h-[92vh] bg-white md:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-300">
+      <div 
+        className="relative w-full h-full md:max-w-7xl md:h-[92vh] bg-white md:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-300"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Top Crimson Admin Header */}
         <div className="bg-gradient-to-r from-[#B91C1C] via-[#E4002B] to-[#B91C1C] px-4 md:px-6 py-3 text-white flex flex-wrap items-center justify-between shrink-0 shadow-md print:hidden gap-3">
@@ -2216,7 +2321,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="font-black text-sm md:text-base tracking-wide uppercase">
-                  Aiyara INVOICE &amp; DISPATCH Module
+                  POPTOP INVOICE Module
                 </h2>
                 <span className="px-2 py-0.5 bg-amber-400 text-slate-950 text-[10px] font-black rounded-md uppercase tracking-wider">
                   ADMIN
@@ -2291,7 +2396,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
             <button
               onClick={() => setIsMasterRecordsModalOpen(true)}
               className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer border border-indigo-400"
-              title="View/Edit Master Records for Consignee (Poptop GmbH) & Exporter (Four Corners Carpets)"
+              title="View/Edit Master Records for Consignee (Poptop GmbH) & Exporter (AIYARA TEXTILE)"
             >
               <Building2 className="w-3.5 h-3.5 text-white" />
               <span>Master Records</span>
@@ -2307,6 +2412,16 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
               <span>Poptop Invoice</span>
             </button>
 
+            {/* Load Updated 17-Item PO Button */}
+            <button
+              onClick={handleLoadUpdated17ItemPo}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer border border-emerald-400"
+              title="Load Updated PO Data (17 Items, 317 Pcs, ₹11,27,934.99)"
+            >
+              <Package className="w-3.5 h-3.5 text-white" />
+              <span>Load 17-Item PO</span>
+            </button>
+
             {/* Create New Invoice Button */}
             <button
               onClick={handleCreateNewInvoice}
@@ -2316,15 +2431,18 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
               <span>Create Invoice</span>
             </button>
 
-            {/* Download Excel Button */}
+            {/* Download Excel Button (Matches PDF Format Exactly) */}
             {activeDoc && (
               <button
-                onClick={handleExportExcel}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer border border-emerald-500"
-                title="Export Active Invoice to Microsoft Excel File (.xlsx)"
+                onClick={() => handleExportExcel()}
+                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer border border-emerald-400 hover:shadow-md"
+                title="Download Poptop Invoice in Microsoft Excel (.xlsx) formatted identically to the PDF"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
-                <span className="hidden sm:inline">Excel</span>
+                <span>{((isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) === 'POPTOP' || (activeDoc?.buyerName || '').toLowerCase().includes('poptop')) ? 'POPTOP Excel' : 'Excel'}</span>
+                <span className="hidden md:inline text-[9px] bg-emerald-900/70 text-emerald-100 px-1.5 py-0.5 rounded font-mono font-bold">
+                  PDF Layout
+                </span>
               </button>
             )}
 
@@ -2543,6 +2661,16 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleExportExcel()}
+                      className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold rounded-xl transition flex items-center gap-1 cursor-pointer shadow-sm border border-emerald-500"
+                      title="Download Poptop Invoice as Excel (.xlsx) - Exactly same format as PDF"
+                    >
+                      <FileSpreadsheet className="w-3 h-3 text-white" />
+                      <span>Download Excel</span>
+                    </button>
+
                     {isEditing && matchingPo && (
                       <button
                         onClick={handleResetToPoDefaults}
@@ -2583,55 +2711,91 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                       </span>
                     )}
 
-                    {/* Invoice Format Selector (Standard vs Poptop) */}
+                    {/* Invoice Format Combo Selector (AIYARA vs POPTOP) */}
                     <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-300">
                       <button
                         type="button"
                         onClick={() => {
                           if (isEditing && editForm) {
-                            updateFormTotals(editForm.items, 5, editForm.advancePercent, 'STANDARD');
+                            const updatedEdit = {
+                              ...editForm,
+                              invoiceType: 'AIYARA' as const,
+                              priceMode: 'PER_SQM' as const,
+                              currency: 'INR (₹)',
+                              buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+                              buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
+                              buyerGstin: '26AAVCA3353L1Z6',
+                              igstPercent: 5
+                            };
+                            setEditForm(updatedEdit);
+                            updateFormTotals(updatedEdit.items, 5, updatedEdit.advancePercent, 'AIYARA');
                           } else if (activeDoc) {
-                            const updated: AiyaraInvoice = { ...activeDoc, invoiceType: 'STANDARD', priceMode: 'PER_SQM' };
+                            const updated: AiyaraInvoice = { 
+                              ...activeDoc, 
+                              invoiceType: 'AIYARA', 
+                              priceMode: 'PER_SQM', 
+                              currency: 'INR (₹)',
+                              buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+                              buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
+                              buyerGstin: '26AAVCA3353L1Z6',
+                              igstPercent: 5
+                            };
                             setSelectedInvoice(updated);
                             saveAiyaraInvoiceToFirestore(updated);
                           }
-                          setToastMessage({ type: 'success', text: 'Switched to Standard Export Invoice Format.' });
+                          setToastMessage({ type: 'success', text: 'Switched to AIYARA Format (INR ₹, Rate / M², IGST 5%).' });
                         }}
-                        className={`px-2 py-0.5 text-[10px] font-extrabold rounded-lg transition cursor-pointer ${
+                        className={`px-3 py-1 text-xs font-black rounded-lg transition cursor-pointer flex items-center gap-1 ${
                           (isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) !== 'POPTOP'
-                            ? 'bg-slate-900 text-white shadow-2xs'
+                            ? 'bg-blue-600 text-white shadow-2xs'
                             : 'text-slate-600 hover:text-slate-900'
                         }`}
                       >
-                        Standard
+                        <Building2 className="w-3 h-3" />
+                        <span>AIYARA</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => {
                           if (isEditing && editForm) {
-                            updateFormTotals(editForm.items, 0, editForm.advancePercent, 'POPTOP');
+                            const updatedEdit = {
+                              ...editForm,
+                              invoiceType: 'POPTOP' as const,
+                              priceMode: 'PER_PCS' as const,
+                              currency: 'USD ($)',
+                              buyerName: 'Poptop GmbH',
+                              buyerAddress: 'Vienna, Austria',
+                              buyerGstin: '',
+                              igstPercent: 0,
+                              igstAmount: 0
+                            };
+                            setEditForm(updatedEdit);
+                            updateFormTotals(updatedEdit.items, 0, updatedEdit.advancePercent, 'POPTOP');
                           } else if (activeDoc) {
                             const updated: AiyaraInvoice = { 
                               ...activeDoc, 
                               invoiceType: 'POPTOP', 
                               priceMode: 'PER_PCS', 
                               currency: 'USD ($)',
+                              buyerName: 'Poptop GmbH',
+                              buyerAddress: 'Vienna, Austria',
+                              buyerGstin: '',
                               igstPercent: 0,
                               igstAmount: 0
                             };
                             setSelectedInvoice(updated);
                             saveAiyaraInvoiceToFirestore(updated);
                           }
-                          setToastMessage({ type: 'success', text: 'Switched to Poptop Invoice Format (USD $, Price Per Pcs, Pallet Charges).' });
+                          setToastMessage({ type: 'success', text: 'Switched to POPTOP Format (USD $, Price Per Pcs, Pallet Charges).' });
                         }}
-                        className={`px-2 py-0.5 text-[10px] font-black rounded-lg transition cursor-pointer flex items-center gap-1 ${
+                        className={`px-3 py-1 text-xs font-black rounded-lg transition cursor-pointer flex items-center gap-1 ${
                           (isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) === 'POPTOP'
                             ? 'bg-amber-400 text-slate-950 shadow-2xs'
                             : 'text-slate-600 hover:text-amber-700'
                         }`}
                       >
-                        <Sparkles className="w-2.5 h-2.5" />
-                        <span>Poptop Format</span>
+                        <Sparkles className="w-3 h-3" />
+                        <span>POPTOP</span>
                       </button>
                     </div>
 
@@ -2658,6 +2822,18 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                         <option value="INR (₹)">INR (₹)</option>
                       </select>
                     </div>
+
+                    {/* Dedicated Poptop Excel Export Button (PDF Matched) */}
+                    <button
+                      type="button"
+                      onClick={() => handleExportExcel()}
+                      className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs border border-emerald-500 hover:shadow-sm"
+                      title="Download Poptop Invoice in Microsoft Excel format (Matches PDF layout exactly)"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
+                      <span>Download Excel (PDF Format)</span>
+                      <Download className="w-3 h-3 text-emerald-100" />
+                    </button>
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -2761,44 +2937,60 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                     <div className="text-center sm:text-right space-y-1">
                       <div className="flex flex-col items-center sm:items-end gap-1">
                         <div className="flex items-center gap-1.5 print:hidden">
-                          <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Document Title:</span>
-                          <select
-                            value={['Performa Invoice', 'Tax Invoice', 'Commercial Invoice', 'Proforma Invoice'].includes((isEditing ? editForm?.documentTitle : activeDoc?.documentTitle) || 'Performa Invoice') ? ((isEditing ? editForm?.documentTitle : activeDoc?.documentTitle) || 'Performa Invoice') : 'Custom'}
-                            onChange={async (e) => {
-                              const val = e.target.value;
-                              if (val !== 'Custom') {
-                                if (isEditing && editForm) {
-                                  setEditForm({ ...editForm, documentTitle: val });
-                                } else if (activeDoc) {
-                                  const updated = { ...activeDoc, documentTitle: val };
-                                  setSelectedInvoice(updated);
-                                  await saveAiyaraInvoiceToFirestore(updated);
-                                }
-                                setToastMessage({ type: 'success', text: `Header Title set to ${val}` });
-                              }
-                            }}
-                            className="px-2 py-0.5 border border-slate-300 rounded font-serif font-black text-xs bg-white text-slate-900 cursor-pointer shadow-2xs focus:ring-1 focus:ring-slate-900"
+                          {isPoptop && (
+                            <>
+                              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Document Title:</span>
+                              <select
+                                value={['Performa Invoice', 'Tax Invoice', 'Commercial Invoice', 'Proforma Invoice'].includes((isEditing ? editForm?.documentTitle : activeDoc?.documentTitle) || 'Performa Invoice') ? ((isEditing ? editForm?.documentTitle : activeDoc?.documentTitle) || 'Performa Invoice') : 'Custom'}
+                                onChange={async (e) => {
+                                  const val = e.target.value;
+                                  if (val !== 'Custom') {
+                                    if (isEditing && editForm) {
+                                      setEditForm({ ...editForm, documentTitle: val });
+                                    } else if (activeDoc) {
+                                      const updated = { ...activeDoc, documentTitle: val };
+                                      setSelectedInvoice(updated);
+                                      await saveAiyaraInvoiceToFirestore(updated);
+                                    }
+                                    setToastMessage({ type: 'success', text: `Header Title set to ${val}` });
+                                  }
+                                }}
+                                className="px-2 py-0.5 border border-slate-300 rounded font-serif font-black text-xs bg-white text-slate-900 cursor-pointer shadow-2xs focus:ring-1 focus:ring-slate-900"
+                              >
+                                <option value="Performa Invoice">Performa Invoice</option>
+                                <option value="Proforma Invoice">Proforma Invoice</option>
+                                <option value="Tax Invoice">Tax Invoice</option>
+                                <option value="Commercial Invoice">Commercial Invoice</option>
+                                <option value="Custom">Custom Text...</option>
+                              </select>
+                            </>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleExportExcel()}
+                            className="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-extrabold text-[10px] flex items-center gap-1 cursor-pointer shadow-2xs border border-emerald-500"
+                            title="Download this Invoice as Excel (.xlsx) - Exactly same format as PDF"
                           >
-                            <option value="Performa Invoice">Performa Invoice</option>
-                            <option value="Proforma Invoice">Proforma Invoice</option>
-                            <option value="Tax Invoice">Tax Invoice</option>
-                            <option value="Commercial Invoice">Commercial Invoice</option>
-                            <option value="Custom">Custom Text...</option>
-                          </select>
+                            <FileSpreadsheet className="w-3 h-3 text-white" />
+                            <span>Download Excel (PDF Format)</span>
+                          </button>
                         </div>
 
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editForm.documentTitle || 'Performa Invoice'}
-                            onChange={(e) => setEditForm({ ...editForm, documentTitle: e.target.value })}
-                            placeholder="Header Title (e.g. Tax Invoice / Performa Invoice)"
-                            className="px-2 py-0.5 border-2 border-slate-900 rounded font-serif font-black text-sm text-center sm:text-right uppercase tracking-wider bg-white text-slate-900 w-full sm:w-64 focus:outline-none"
-                          />
-                        ) : (
-                          <h1 className="text-lg md:text-xl font-black uppercase tracking-widest text-slate-900 font-serif">
-                            {activeDoc.documentTitle || 'Performa Invoice'}
-                          </h1>
+                        {isPoptop && (
+                          isEditing ? (
+                            <input
+                              type="text"
+                              value={editForm.documentTitle || 'Performa Invoice'}
+                              onChange={(e) => setEditForm({ ...editForm, documentTitle: e.target.value })}
+                              placeholder="Header Title (e.g. Tax Invoice / Performa Invoice)"
+                              className="px-2 py-0.5 border-2 border-slate-900 rounded font-serif font-black text-sm text-center sm:text-right uppercase tracking-wider bg-white text-slate-900 w-full sm:w-64 focus:outline-none"
+                            />
+                          ) : (
+                            <h1 className="text-lg md:text-xl font-black uppercase tracking-widest text-slate-900 font-serif">
+                              {activeDoc.documentTitle || 'Performa Invoice'}
+                            </h1>
+                          )
                         )}
                       </div>
                       <span className="text-[11px] font-bold font-mono text-slate-800 block">
@@ -2810,7 +3002,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                   {/* Supplier & Buyer Header Table */}
                   <div className="border-2 border-slate-900 text-[10.5px] mb-3 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x-2 divide-slate-900">
                     
-                    {/* Left: Supplier Details (Four Corners Carpets) */}
+                    {/* Left: Supplier Details (AIYARA TEXTILE) */}
                     <div className="p-3 space-y-1.5 bg-slate-50/50">
                       <div className="flex justify-between font-bold border-b border-slate-300 pb-1 mb-1">
                         <span className="uppercase text-slate-900 font-black">Supplier Details</span>
@@ -2858,7 +3050,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                         )}
                       </div>
 
-                       <div className="pt-1 border-t border-slate-200 grid grid-cols-2 gap-2 text-[10.5px]">
+                       <div className={`pt-1 border-t border-slate-200 ${isPoptop ? 'grid grid-cols-2 gap-2' : ''} text-[10.5px]`}>
                         <div>
                           <span className="font-bold">GSTIN: </span>
                           {isEditing ? (
@@ -2872,35 +3064,39 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                             <span className="font-mono">{activeDoc.supplierGstin}</span>
                           )}
                         </div>
-                        <div>
-                          <span className="font-bold">IEC: </span>
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={editForm.supplierIecNo || ''}
-                              onChange={(e) => setEditForm({ ...editForm, supplierIecNo: e.target.value })}
-                              className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
-                            />
-                          ) : (
-                            <span className="font-mono">{activeDoc.supplierIecNo || 'AJTPD8099G'}</span>
-                          )}
-                        </div>
+                        {isPoptop && (
+                          <div>
+                            <span className="font-bold">IEC: </span>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editForm.supplierIecNo || ''}
+                                onChange={(e) => setEditForm({ ...editForm, supplierIecNo: e.target.value })}
+                                className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
+                              />
+                            ) : (
+                              <span className="font-mono">{activeDoc.supplierIecNo || 'AJTPD8099G'}</span>
+                            )}
+                          </div>
+                        )}
                       </div>
 
-                      <div className="pt-1 grid grid-cols-2 gap-2 text-[10.5px]">
-                        <div>
-                          <span className="font-bold">REX NO: </span>
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={editForm.supplierRexNo || ''}
-                              onChange={(e) => setEditForm({ ...editForm, supplierRexNo: e.target.value })}
-                              className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
-                            />
-                          ) : (
-                            <span className="font-mono">{activeDoc.supplierRexNo || 'INREX123456789'}</span>
-                          )}
-                        </div>
+                      <div className={`pt-1 ${isPoptop ? 'grid grid-cols-2 gap-2' : ''} text-[10.5px]`}>
+                        {isPoptop && (
+                          <div>
+                            <span className="font-bold">REX NO: </span>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editForm.supplierRexNo || ''}
+                                onChange={(e) => setEditForm({ ...editForm, supplierRexNo: e.target.value })}
+                                className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
+                              />
+                            ) : (
+                              <span className="font-mono">{activeDoc.supplierRexNo || 'INREX123456789'}</span>
+                            )}
+                          </div>
+                        )}
                         <div>
                           <span className="font-bold">Contact: </span>
                           {isEditing ? (
@@ -2916,34 +3112,37 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                         </div>
                       </div>
 
-                      <div className="pt-1 grid grid-cols-2 gap-2 text-[10.5px]">
-                        <div>
-                          <span className="font-bold">SWIFT: </span>
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={editForm.supplierSwiftCode || ''}
-                              onChange={(e) => setEditForm({ ...editForm, supplierSwiftCode: e.target.value })}
-                              className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
-                            />
-                          ) : (
-                            <span className="font-mono">{activeDoc.supplierSwiftCode || 'ICICINBBCTS'}</span>
-                          )}
+                      {/* SWIFT & AD CODE (Hidden in AIYARA invoice, shown only for Poptop export) */}
+                      {isPoptop && (
+                        <div className="pt-1 grid grid-cols-2 gap-2 text-[10.5px]">
+                          <div>
+                            <span className="font-bold">SWIFT: </span>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editForm.supplierSwiftCode || ''}
+                                onChange={(e) => setEditForm({ ...editForm, supplierSwiftCode: e.target.value })}
+                                className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
+                              />
+                            ) : (
+                              <span className="font-mono">{activeDoc.supplierSwiftCode || 'ICICINBBCTS'}</span>
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-bold">AD CODE: </span>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editForm.supplierAdCode || ''}
+                                onChange={(e) => setEditForm({ ...editForm, supplierAdCode: e.target.value })}
+                                className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
+                              />
+                            ) : (
+                              <span className="font-mono">{activeDoc.supplierAdCode || '6390001234567'}</span>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <span className="font-bold">AD CODE: </span>
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={editForm.supplierAdCode || ''}
-                              onChange={(e) => setEditForm({ ...editForm, supplierAdCode: e.target.value })}
-                              className="w-full px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
-                            />
-                          ) : (
-                            <span className="font-mono">{activeDoc.supplierAdCode || '6390001234567'}</span>
-                          )}
-                        </div>
-                      </div>
+                      )}
 
                       <div className="pt-1 text-[10.5px]">
                         <span className="font-bold">ATTENTION: </span>
@@ -3027,7 +3226,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                       </div>
 
                       {/* Consignee details conditional fields: Poptop format hides GST, EORI/VAT, Email, Phone, Attention */}
-                      {((isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) === 'POPTOP' || (activeDoc?.buyerName || '').toLowerCase().includes('poptop')) ? null : (
+                      {isPoptop ? null : (
                         <>
                           <div className="pt-1 border-t border-slate-200 grid grid-cols-2 gap-2 text-[10.5px]">
                             <div>
@@ -3092,7 +3291,12 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                   </div>
 
                   {/* Shipping & Transport Details Grid (Matching Export & Poptop Standards) */}
-                  <div className="mb-4 border-2 border-slate-900 rounded-lg overflow-hidden shadow-xs bg-white">
+                  <div 
+                    className="mb-4 border-2 border-slate-900 rounded-lg overflow-hidden shadow-xs bg-white"
+                    style={{ 
+                      display: isPoptop ? 'block' : 'none' 
+                    }}
+                  >
                     <div className="bg-slate-900 text-white text-[11px] font-mono font-bold px-3 py-1.5 flex items-center justify-between uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Globe className="w-3.5 h-3.5 text-amber-400" />
@@ -3363,8 +3567,12 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                           <th className="p-1.5 border-r border-slate-900">SPECIFICATION</th>
                           <th className="p-1.5 border-r border-slate-900">PRODUCT CODE</th>
                           <th className="p-1.5 border-r border-slate-900">SIZES In cm</th>
-                          <th className="p-1.5 border-r border-slate-900">PALLET DIMENSION</th>
-                          <th className="p-1.5 border-r border-slate-900">WEIGHT (Kg)</th>
+                          {isPoptop && (
+                            <>
+                              <th className="p-1.5 border-r border-slate-900">PALLET DIMENSION</th>
+                              <th className="p-1.5 border-r border-slate-900">WEIGHT (Kg)</th>
+                            </>
+                          )}
                           <th className="p-1.5 border-r border-slate-900 w-20">CBM (m³)</th>
                           {((isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) === 'POPTOP' || (activeDoc?.buyerName || '').toLowerCase().includes('poptop')) ? (
                             <>
@@ -3460,35 +3668,37 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                               )}
                             </td>
 
-                            {/* Pallet Dimension */}
-                            <td className="p-1.5 border-r border-slate-900 text-center font-mono font-bold">
-                              {isEditing ? (
-                                <input
-                                  type="text"
-                                  value={item.palletDimension || ''}
-                                  onChange={(e) => handleItemChange(idx, 'palletDimension', e.target.value)}
-                                  placeholder="145x70x85"
-                                  className="w-full text-center px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
-                                />
-                              ) : (
-                                item.palletDimension || '-'
-                              )}
-                            </td>
-
-                            {/* Weight (Kg) */}
-                            <td className="p-1.5 border-r border-slate-900 text-center font-mono font-bold">
-                              {isEditing ? (
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  value={item.weightKg || ''}
-                                  onChange={(e) => handleItemChange(idx, 'weightKg', Number(e.target.value))}
-                                  className="w-full text-center px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
-                                />
-                              ) : (
-                                item.weightKg || '-'
-                              )}
-                            </td>
+                            {/* Pallet Dimension & Weight only for Poptop export; removed from Aiyara */}
+                            {isPoptop && (
+                              <>
+                                <td className="p-1.5 border-r border-slate-900 text-center font-mono font-bold">
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={item.palletDimension || ''}
+                                      onChange={(e) => handleItemChange(idx, 'palletDimension', e.target.value)}
+                                      placeholder="145x70x85"
+                                      className="w-full text-center px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
+                                    />
+                                  ) : (
+                                    item.palletDimension || '-'
+                                  )}
+                                </td>
+                                <td className="p-1.5 border-r border-slate-900 text-center font-mono font-bold">
+                                  {isEditing ? (
+                                    <input
+                                      type="number"
+                                      step="0.1"
+                                      value={item.weightKg || ''}
+                                      onChange={(e) => handleItemChange(idx, 'weightKg', Number(e.target.value))}
+                                      className="w-full text-center px-1 py-0.5 border border-slate-300 rounded font-mono text-[10px] bg-white"
+                                    />
+                                  ) : (
+                                    item.weightKg || '-'
+                                  )}
+                                </td>
+                              </>
+                            )}
 
                             {/* CBM (m³) */}
                             <td className="p-1.5 border-r border-slate-900 text-center font-mono font-bold text-slate-900">
@@ -3639,13 +3849,28 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
 
                     {/* Add Line Item Button in Edit Mode */}
                     {isEditing && (
-                      <div className="p-2 bg-slate-100 border-t border-slate-900 flex justify-center print:hidden">
+                      <div className="p-2 bg-slate-100 border-t border-slate-900 flex justify-center items-center gap-2 print:hidden">
                         <button
                           onClick={handleAddLineItem}
                           className="px-3 py-1 bg-[#E4002B] text-white font-bold text-xs rounded-lg hover:bg-rose-700 transition flex items-center gap-1 cursor-pointer shadow-sm"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>Add Line Item Row</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (editForm) {
+                              const clonedItems = JSON.parse(JSON.stringify(UPDATED_PO_17_ITEMS_INVOICE.items));
+                              updateFormTotals(clonedItems, 5, 25);
+                              setToastMessage({ type: 'success', text: 'Populated all 17 updated PO items (317 Pcs, ₹11.27 Lakhs)!' });
+                            }
+                          }}
+                          className="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg transition flex items-center gap-1 cursor-pointer shadow-sm"
+                          title="Fill table with the 17 updated PO items (317 Pcs, ₹11,27,934.99)"
+                        >
+                          <Package className="w-3.5 h-3.5" />
+                          <span>Fill 17 Items (317 Pcs)</span>
                         </button>
                       </div>
                     )}
@@ -3656,7 +3881,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                     
                     {/* Left: Total Pallets, Total Rug Pcs, Total Sq Meters & Total CBM */}
                     <div className="flex items-center space-x-6 border-b md:border-b-0 md:border-r border-slate-300 pr-6 pb-2 md:pb-0 w-full md:w-auto justify-between md:justify-start">
-                      {((isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) === 'POPTOP' || (activeDoc?.buyerName || '').toLowerCase().includes('poptop')) && (
+                      {isPoptop && (
                         <div className="text-center">
                           <span className="block text-[10px] text-slate-500 font-mono font-bold uppercase">Total Pallets</span>
                           <strong className="text-sm font-mono font-black text-slate-900">
@@ -3685,9 +3910,36 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
 
                     {/* Right: Sub Total, IGST / Pallet Charge, Advance, Total Amount */}
                     <div className="w-full md:w-88 space-y-1.5 font-mono text-[11px]">
-                      <div className="flex justify-between py-0.5 border-b border-slate-200">
+                      <div className="flex items-center justify-between py-0.5 border-b border-slate-200">
                         <span className="font-bold text-slate-700">Sub Total</span>
-                        <span className="font-extrabold">{formatINR(isEditing ? editForm.subTotal : activeDoc.subTotal)}</span>
+                        {isEditing ? (
+                          <div className="flex items-center gap-1">
+                            <span className="font-bold text-slate-600">₹</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editForm.subTotal}
+                              onChange={(e) => {
+                                const newSub = Number(e.target.value) || 0;
+                                const igstPct = editForm.igstPercent ?? 5;
+                                const advPct = editForm.advancePercent ?? 25;
+                                const newIgst = parseFloat(((newSub * igstPct) / 100).toFixed(2));
+                                const newTotal = parseFloat((newSub + newIgst).toFixed(2));
+                                const newAdv = parseFloat(((newSub * advPct) / 100).toFixed(2));
+                                setEditForm({
+                                  ...editForm,
+                                  subTotal: newSub,
+                                  igstAmount: newIgst,
+                                  totalAmount: newTotal,
+                                  advanceAmount: newAdv
+                                });
+                              }}
+                              className="w-32 px-1.5 py-0.5 border border-slate-300 rounded font-mono font-extrabold text-xs text-right bg-white focus:ring-1 focus:ring-slate-900"
+                            />
+                          </div>
+                        ) : (
+                          <span className="font-extrabold">{formatINR(activeDoc.subTotal)}</span>
+                        )}
                       </div>
 
                       {/* Sub Total Amount in Words */}
@@ -3699,7 +3951,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                       </div>
 
                       {/* IGST or Per Pallet Charge depending on Poptop vs Standard */}
-                      {((isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) === 'POPTOP' || (activeDoc?.buyerName || '').toLowerCase().includes('poptop')) ? (
+                      {isPoptop ? (
                         <div className="flex items-center justify-between py-0.5 border-b border-slate-200 text-slate-800">
                           <div className="flex items-center gap-1">
                             <span className="font-bold text-slate-900">Per Pallet Charge</span>
@@ -3820,7 +4072,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                       <div className="py-0.5 flex justify-center items-center">
                         <img 
                           src="https://i.postimg.cc/tJynktRD/f4C-stamp.png" 
-                          alt="Four Corners Carpets Official Stamp" 
+                          alt="AIYARA TEXTILE Official Stamp" 
                           className="h-14 max-h-16 w-auto object-contain mix-blend-multiply drop-shadow-sm select-none"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
@@ -3853,6 +4105,13 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>Upload PO File</span>
+                  </button>
+                  <button
+                    onClick={handleLoadUpdated17ItemPo}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition cursor-pointer shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    <Package className="w-3.5 h-3.5" />
+                    <span>Load Updated PO (17 Items)</span>
                   </button>
                   <button
                     onClick={handleCreateNewInvoice}
@@ -3946,7 +4205,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                 Clear All POs
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Are you sure you want to remove all <strong className="text-[#E4002B]">{invoices.length} invoices / POs</strong> from the Aiyara Invoice Module?
+                Are you sure you want to remove all <strong className="text-[#E4002B]">{invoices.length} invoices / POs</strong> from the POPTOP INVOICE Module?
               </p>
               <p className="text-[11px] text-slate-400 font-mono">
                 All records will be permanently cleared from the database.

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Plus, Trash2 } from 'lucide-react';
+import { Search, Plus, Trash2, Sparkles } from 'lucide-react';
 import { PurchaseOrder } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -14,6 +14,7 @@ interface ControlsBarProps {
   adminMode: boolean;
   onOpenCreatePo: () => void;
   onClearData?: () => void;
+  onOpenLeadApi?: () => void;
 }
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({
@@ -27,6 +28,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   adminMode,
   onOpenCreatePo,
   onClearData,
+  onOpenLeadApi,
 }) => {
   const { t } = useLanguage();
 
@@ -47,7 +49,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-[#E4002B] focus:ring-1 focus:ring-[#E4002B] transition font-mono placeholder:text-slate-400"
           />
         </div>
-
+        
         {/* PO Filter Dropdown */}
         <select
           id="poFilter"
@@ -79,6 +81,19 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           <option value="Shipped" className="bg-white text-slate-800">{t.shippedStatus}</option>
           <option value="On Hold" className="bg-white text-slate-800">On Hold</option>
         </select>
+
+        {/* Lead Generate API Shortcut (Admin Only) */}
+        {adminMode && onOpenLeadApi && (
+          <button
+            id="leadApiControlsBtn"
+            onClick={onOpenLeadApi}
+            className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs rounded-xl px-3 py-2.5 font-black transition flex items-center gap-1.5 cursor-pointer shadow-xs border border-amber-300 shrink-0"
+            title="Open Live Lead Generate API & Buyer Intelligence"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-rose-700 animate-pulse" />
+            <span>Lead Generate API</span>
+          </button>
+        )}
       </div>
 
       {/* Admin Actions (Visible when Admin Mode is ON) */}

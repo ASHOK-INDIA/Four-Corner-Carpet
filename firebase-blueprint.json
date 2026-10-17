@@ -127,7 +127,8 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "invoiceNo", "date", "poNumber", "buyerName", "items", "totalAmount"]
-    }
+    },
+
   },
   "firestore": {
     "/purchase_orders/{poId}": {

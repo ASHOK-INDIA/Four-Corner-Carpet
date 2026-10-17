@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X } from 'lucide-react';
 
 interface PageFlipModalProps {
   isOpen: boolean;
@@ -17,30 +16,68 @@ export const PageFlipModal: React.FC<PageFlipModalProps> = ({
   maxWidthClass = 'max-w-6xl',
   id,
 }) => {
+  const [position, setPosition] = useState({ x: 60, y: 60 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number }>({
+    startX: 0,
+    startY: 0,
+    initialX: 60,
+    initialY: 60,
+  });
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: position.x,
+      initialY: position.y,
+    };
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      setPosition({
+        x: Math.max(0, dragRef.current.initialX + dx),
+        y: Math.max(0, dragRef.current.initialY + dy),
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          id={id}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 md:p-6 lg:p-8 overflow-hidden"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 15, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className={`w-full h-full ${maxWidthClass} bg-white/95 backdrop-blur-xl flex flex-col overflow-hidden text-slate-800 shadow-2xl border border-rose-100/50 rounded-2xl`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {children}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      id={id}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+      }}
+      className={`fixed z-40 w-[95vw] h-[90vh] bg-transparent backdrop-blur-2xl flex flex-col overflow-hidden text-slate-800 shadow-2xl border border-slate-300 rounded-2xl animate-in fade-in zoom-in-95 duration-150`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div
+        onMouseDown={handleMouseDown}
+        className="cursor-move absolute top-0 left-0 right-0 h-8 z-10 opacity-0"
+        title="Drag Window"
+      />
+      {children}
+    </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Route, Pencil, Trash2, FolderOpen } from 'lucide-react';
+import { Eye, Route, Pencil, Trash2, FolderOpen, ShieldCheck, Globe } from 'lucide-react';
 import { PurchaseOrder } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -11,6 +11,8 @@ interface ProductionTableProps {
   onSelectShipmentPo: (po: string) => void;
   onEditOrder: (index: number) => void;
   onDeleteOrder: (index: number) => void;
+  onOpenQcForPo?: (po: string) => void;
+  onOpenBuyerPortalForPo?: (po: string) => void;
 }
 
 export function getStatusBadgeClass(status: string): string {
@@ -42,6 +44,8 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
   onSelectShipmentPo,
   onEditOrder,
   onDeleteOrder,
+  onOpenQcForPo,
+  onOpenBuyerPortalForPo,
 }) => {
   const { t } = useLanguage();
 
@@ -58,6 +62,7 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
               <th className="py-4 px-4 text-right">{t.totalUnits}</th>
               <th className="py-4 px-4">{t.primaryStatus}</th>
               <th className="py-4 px-4">{t.shipmentMilestone}</th>
+              <th className="py-4 px-4 text-center">QC & Track</th>
               <th className="py-4 px-4">{t.estDelivery}</th>
               <th className="py-4 px-4 text-center">{t.actions}</th>
             </tr>
@@ -113,6 +118,30 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
                     >
                       <Route className="w-3.5 h-3.5 text-indigo-200" /> {currentMilestone}
                     </button>
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {onOpenQcForPo && (
+                        <button
+                          onClick={() => onOpenQcForPo(item.po)}
+                          className="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 transition flex items-center gap-1 cursor-pointer"
+                          title="Open Digital QC & Pre-Shipment Pallet Inspection Studio"
+                        >
+                          <ShieldCheck className="w-3 h-3 text-emerald-700" />
+                          <span>QC Audit</span>
+                        </button>
+                      )}
+                      {onOpenBuyerPortalForPo && (
+                        <button
+                          onClick={() => onOpenBuyerPortalForPo(item.po)}
+                          className="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 transition flex items-center gap-1 cursor-pointer"
+                          title="Open Buyer Live Order Tracking Portal"
+                        >
+                          <Globe className="w-3 h-3 text-sky-700" />
+                          <span>Track</span>
+                        </button>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3.5 px-4 font-mono text-slate-700 font-bold text-[11px]">{item.estDate}</td>
                   <td className="py-3.5 px-4 text-center">
@@ -199,8 +228,8 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
                 </div>
               </div>
 
-              {/* Shipment Tracking Trigger */}
-              <div className="flex flex-wrap items-center justify-between pt-1">
+              {/* Shipment Tracking Trigger & Live Quick Actions */}
+              <div className="flex flex-wrap items-center justify-between pt-1 gap-2">
                 <div className="flex items-center space-x-1.5">
                   <span className="text-[9px] text-slate-500 uppercase font-bold font-mono">Milestone:</span>
                   <button
@@ -210,7 +239,27 @@ export const ProductionTable: React.FC<ProductionTableProps> = ({
                     <Route className="w-3 h-3 text-indigo-200" /> {currentMilestone}
                   </button>
                 </div>
-                <span className="text-[10px] text-slate-500 font-mono">{item.designs.length} item(s)</span>
+
+                <div className="flex items-center gap-1.5">
+                  {onOpenQcForPo && (
+                    <button
+                      onClick={() => onOpenQcForPo(item.po)}
+                      className="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1"
+                    >
+                      <ShieldCheck className="w-3 h-3 text-emerald-700" />
+                      <span>QC</span>
+                    </button>
+                  )}
+                  {onOpenBuyerPortalForPo && (
+                    <button
+                      onClick={() => onOpenBuyerPortalForPo(item.po)}
+                      className="px-2 py-1 rounded-lg text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300 flex items-center gap-1"
+                    >
+                      <Globe className="w-3 h-3 text-sky-700" />
+                      <span>Live</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Action Buttons with 44px high-precision Touch Targets */}

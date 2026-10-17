@@ -21,10 +21,17 @@ export interface UPSCTopic {
 export const UPSC_TOPICS: UPSCTopic[] = [
   {
     id: 'all',
-    nameHi: 'समग्र मॉक टेस्ट (सभी विषय मिक्स)',
-    nameEn: 'All Topics Mixed (GS Paper-1 Complete Prelims)',
+    nameHi: 'समग्र मॉक टेस्ट (सभी विषय + गणित मिक्स)',
+    nameEn: 'All Topics Mixed (GS Paper-1 & Math CSAT)',
     icon: '🌟',
-    desc: 'UPSC CSE प्रारंभिक परीक्षा पैटर्न पर आधारित सभी विषयों के 100 मिश्रित प्रश्न'
+    desc: 'UPSC CSE प्रारंभिक परीक्षा पैटर्न पर आधारित सभी सामान्य अध्ययन एवं गणित के 100 मिश्रित प्रश्न'
+  },
+  {
+    id: 'math',
+    nameHi: 'गणित एवं संख्यात्मक अभियोग्यता (Math & CSAT)',
+    nameEn: 'Mathematics & Quantitative Aptitude',
+    icon: '🧮',
+    desc: 'संख्या पद्धति, प्रतिशत, लाभ-हानि, औसत, अनुपात, समय-कार्य, चाल-दूरी, ब्याज, प्रायिकता व ज्यामिति'
   },
   {
     id: 'polity',
@@ -88,13 +95,6 @@ export const UPSC_TOPICS: UPSCTopic[] = [
     nameEn: 'CSAT (Reasoning, Decision Making & Aptitude)',
     icon: '📊',
     desc: 'तार्किक निष्कर्ष, कथन और कारण, डेटा इंटरप्रिटेशन एवं गणितीय विश्लेषण'
-  },
-  {
-    id: 'math',
-    nameHi: 'गणित (Math & Quantitative Aptitude)',
-    nameEn: 'Mathematics & Quantitative Aptitude',
-    icon: '🧮',
-    desc: 'संख्या पद्धति, प्रतिशत, लाभ-हानि, औसत, अनुपात, समय-कार्य व ज्यामिति'
   }
 ];
 
@@ -572,24 +572,365 @@ const BASE_QUESTIONS: UPSCQuestion[] = [
   {
     id: 903,
     topic: 'math',
-    type: 'MATH-GS1',
+    type: 'MATH-PERCENTAGE',
     en: 'If the price of a commodity increases by 20%, by what percentage should a consumer reduce their consumption to keep the expenditure unchanged?',
     hi: 'यदि किसी वस्तु की कीमत में 20% की वृद्धि होती है, तो उपभोक्ता को अपनी खपत में कितने प्रतिशत की कटौती करनी चाहिए ताकि खर्च अपरिवर्तित रहे?',
-    options: ['(a) 16.66%', '(b) 20%', '(c) 25%', '(d) 15%'],
-    exam: 'UPSC CSE Prelims',
+    options: ['(a) 16.66% (16 सही 2/3%)', '(b) 20%', '(c) 25%', '(d) 15%'],
+    exam: 'UPSC CSAT / Prelims (प्रतिशत)',
     ans: 'a',
-    explanation: 'खपत में कमी = (वृद्धि / (100 + वृद्धि)) * 100 = (20 / 120) * 100 = 100 / 6 = 16.66%।'
+    explanation: 'खपत में कमी = [r / (100 + r)] * 100 = [20 / 120] * 100 = 100 / 6 = 16.66%।'
   },
   {
     id: 904,
     topic: 'math',
-    type: 'MATH-GS1',
+    type: 'MATH-SI',
     en: 'A sum of money doubles itself in 5 years at simple interest. In how many years will it become 4 times itself?',
     hi: 'साधारण ब्याज पर एक धनराशि 5 वर्षों में स्वयं की दोगुनी हो जाती है। यह कितने वर्षों में स्वयं की 4 गुना हो जाएगी?',
-    options: ['(a) 10 years', '(b) 12 years', '(c) 15 years', '(d) 20 years'],
-    exam: 'UPSC CSE Prelims',
+    options: ['(a) 10 वर्ष', '(b) 12 वर्ष', '(c) 15 वर्ष', '(d) 20 वर्ष'],
+    exam: 'UPSC CSAT / Prelims (साधारण ब्याज)',
     ans: 'c',
-    explanation: 'दोगुना (2 गुना) होने में 5 वर्ष (ब्याज 1 गुना)। 4 गुना होने के लिए ब्याज 3 गुना चाहिए। 3 गुना ब्याज = 3 * 5 = 15 वर्ष।'
+    explanation: '2 गुना होने में 5 वर्ष (ब्याज 1 गुना)। 4 गुना होने के लिए 3 गुना ब्याज चाहिए। समय = 3 * 5 = 15 वर्ष।'
+  },
+  {
+    id: 905,
+    topic: 'math',
+    type: 'MATH-NUMBER-SYSTEM',
+    en: 'What is the unit digit of the expression 7^95 - 3^58?',
+    hi: 'व्यंजक 7^95 - 3^58 के इकाई स्थान का अंक (Unit Digit) क्या होगा?',
+    options: ['(a) 4', '(b) 0', '(c) 6', '(d) 7'],
+    exam: 'UPSC CSAT / Prelims (संख्या पद्धति)',
+    ans: 'a',
+    explanation: '7 की चक्रीयता 4 है: 95 mod 4 = 3 => 7^3 का इकाई अंक 3 है। 3 की चक्रीयता 4 है: 58 mod 4 = 2 => 3^2 का इकाई अंक 9 है। इकाई अंक = 13 - 9 = 4।'
+  },
+  {
+    id: 906,
+    topic: 'math',
+    type: 'MATH-LCM-HCF',
+    en: 'Find the least number which when divided by 12, 15, 20 and 54 leaves a remainder of 4 in each case.',
+    hi: 'वह न्यूनतम संख्या कौन सी है जिसे 12, 15, 20 और 54 से विभाजित करने पर प्रत्येक दशा में 4 शेषफल बचता है?',
+    options: ['(a) 544', '(b) 540', '(c) 536', '(d) 548'],
+    exam: 'UPSC CSAT / Prelims (ल.स.प. एवं म.स.प.)',
+    ans: 'a',
+    explanation: '12, 15, 20 और 54 का ल.स.प. (LCM) = 540 है। अभीष्ट संख्या = LCM + 4 = 540 + 4 = 544।'
+  },
+  {
+    id: 907,
+    topic: 'math',
+    type: 'MATH-NUMBER-SYSTEM',
+    en: 'What is the total number of trailing zeros in 100! (100 factorial)?',
+    hi: '100! (100 फैक्टोरियल) के अंत में आने वाले अनुगामी शून्यों (Trailing Zeros) की कुल संख्या क्या है?',
+    options: ['(a) 24', '(b) 20', '(c) 25', '(d) 22'],
+    exam: 'UPSC CSAT / Prelims (फैक्टोरियल व शून्य)',
+    ans: 'a',
+    explanation: 'शून्यों की संख्या = [100/5] + [100/25] = 20 + 4 = 24 शून्य।'
+  },
+  {
+    id: 908,
+    topic: 'math',
+    type: 'MATH-PROFIT-LOSS',
+    en: 'A dishonest dealer uses a weight of 900 grams instead of 1 kilogram. What is his actual profit percentage?',
+    hi: 'एक बेईमान दुकानदार 1 किलोग्राम के स्थान पर 900 ग्राम के गलत बाट का उपयोग करता है। उसका वास्तविक लाभ प्रतिशत क्या है?',
+    options: ['(a) 11.11% (11 सही 1/9%)', '(b) 10%', '(c) 12.5%', '(d) 9.09%'],
+    exam: 'UPSC CSAT / Prelims (लाभ और हानि)',
+    ans: 'a',
+    explanation: 'लाभ % = [त्रुटि / (सही मान - त्रुटि)] * 100 = [100 / 900] * 100 = 100/9 = 11.11%।'
+  },
+  {
+    id: 909,
+    topic: 'math',
+    type: 'MATH-PROFIT-LOSS',
+    en: 'Two successive discounts of 20% and 10% are equivalent to a single discount of:',
+    hi: '20% और 10% की दो क्रमिक छूटें (Successive Discounts) किस एकल छूट के समतुल्य हैं?',
+    options: ['(a) 28%', '(b) 30%', '(c) 25%', '(d) 27%'],
+    exam: 'UPSC CSAT / Prelims (बट्टा / छूट)',
+    ans: 'a',
+    explanation: 'समतुल्य छूट = d1 + d2 - (d1 * d2)/100 = 20 + 10 - 200/100 = 30 - 2 = 28%।'
+  },
+  {
+    id: 910,
+    topic: 'math',
+    type: 'MATH-PROFIT-LOSS',
+    en: 'By selling an article for Rs. 720, a shopkeeper gains 20%. At what price should he sell it to incur a loss of 10%?',
+    hi: 'किसी वस्तु को 720 रुपये में बेचने पर 20% का लाभ होता है। 10% की हानि उठाने के लिए उसे किस मूल्य पर बेचना चाहिए?',
+    options: ['(a) 540 रुपये', '(b) 600 रुपये', '(c) 580 रुपये', '(d) 520 रुपये'],
+    exam: 'UPSC CSAT / Prelims (क्रय-विक्रय मूल्य)',
+    ans: 'a',
+    explanation: 'क्रय मूल्य (CP) = 720 / 1.20 = 600 रुपये। 10% हानि पर विक्रय मूल्य = 600 * 0.90 = 540 रुपये।'
+  },
+  {
+    id: 911,
+    topic: 'math',
+    type: 'MATH-CI-SI',
+    en: 'The difference between compound interest and simple interest on Rs. 10,000 for 2 years at 10% per annum is:',
+    hi: '10,000 रुपये पर 10% वार्षिक ब्याज की दर से 2 वर्ष के चक्रवृद्धि ब्याज और साधारण ब्याज का अंतर कितना होगा?',
+    options: ['(a) 100 रुपये', '(b) 200 रुपये', '(c) 150 रुपये', '(d) 50 रुपये'],
+    exam: 'UPSC CSAT / Prelims (चक्रवृद्धि व साधारण ब्याज)',
+    ans: 'a',
+    explanation: '2 वर्ष का अंतर = P * (R/100)^2 = 10,000 * (10/100)^2 = 10,000 * 0.01 = 100 रुपये।'
+  },
+  {
+    id: 912,
+    topic: 'math',
+    type: 'MATH-RATIO',
+    en: 'If A : B = 2 : 3 and B : C = 4 : 5, then find the ratio of A : B : C.',
+    hi: 'यदि A : B = 2 : 3 और B : C = 4 : 5 है, तो A : B : C का संयुक्त अनुपात क्या होगा?',
+    options: ['(a) 8 : 12 : 15', '(b) 6 : 9 : 15', '(c) 8 : 10 : 15', '(d) 4 : 6 : 10'],
+    exam: 'UPSC CSAT / Prelims (अनुपात एवं समानुपात)',
+    ans: 'a',
+    explanation: 'A : B : C = (2 * 4) : (3 * 4) : (3 * 5) = 8 : 12 : 15।'
+  },
+  {
+    id: 913,
+    topic: 'math',
+    type: 'MATH-RATIO',
+    en: 'A bag contains 1 rupee, 50 paise and 25 paise coins in the ratio 2 : 3 : 4. If total value is Rs. 216, find the number of 50 paise coins.',
+    hi: 'एक थैले में 1 रुपये, 50 पैसे और 25 पैसे के सिक्के 2 : 3 : 4 के अनुपात में हैं। यदि कुल धनराशि 216 रुपये है, तो 50 पैसे के सिक्कों की संख्या क्या है?',
+    options: ['(a) 144 सिक्के', '(b) 120 सिक्के', '(c) 96 सिक्के', '(d) 160 सिक्के'],
+    exam: 'UPSC CSAT / Prelims (सिक्कों संबंधी अनुपात)',
+    ans: 'a',
+    explanation: 'मूल्य अनुपात = 2*1 + 3*0.5 + 4*0.25 = 2 + 1.5 + 1 = 4.5 इकाई। 4.5 इकाई = 216 => 1 इकाई = 48। 50 पैसे के सिक्के = 3 * 48 = 144।'
+  },
+  {
+    id: 914,
+    topic: 'math',
+    type: 'MATH-TIME-WORK',
+    en: 'A can do a piece of work in 12 days and B can do it in 18 days. Working together, how many days will they take to complete it?',
+    hi: 'A किसी कार्य को 12 दिनों में और B उसी कार्य को 18 दिनों में कर सकता है। दोनों मिलकर उस कार्य को कितने दिनों में पूरा करेंगे?',
+    options: ['(a) 7.2 दिन (7 सही 1/5 दिन)', '(b) 8 दिन', '(c) 6 दिन', '(d) 9 दिन'],
+    exam: 'UPSC CSAT / Prelims (समय और कार्य)',
+    ans: 'a',
+    explanation: 'कुल काम (12, 18 का LCM) = 36 इकाई। A की कार्यक्षमता = 3, B की = 2। संयुक्त कार्यक्षमता = 5। समय = 36 / 5 = 7.2 दिन।'
+  },
+  {
+    id: 915,
+    topic: 'math',
+    type: 'MATH-TIME-WORK',
+    en: '15 men can complete a project in 20 days. How many days will 12 men take to complete the same work?',
+    hi: '15 पुरुष किसी कार्य को 20 दिनों में पूरा कर सकते हैं। उसी कार्य को 12 पुरुष कितने दिनों में पूरा करेंगे?',
+    options: ['(a) 25 दिन', '(b) 24 दिन', '(c) 20 दिन', '(d) 30 दिन'],
+    exam: 'UPSC CSAT / Prelims (कार्य एवं पुरुष-दिन)',
+    ans: 'a',
+    explanation: 'M1 * D1 = M2 * D2 => 15 * 20 = 12 * D2 => 300 = 12 * D2 => D2 = 25 दिन।'
+  },
+  {
+    id: 916,
+    topic: 'math',
+    type: 'MATH-PIPES',
+    en: 'Pipe A can fill a tank in 20 minutes and Pipe B can fill it in 30 minutes. If both pipes are opened together, in how many minutes will the tank be full?',
+    hi: 'दो नल A और B एक टंकी को क्रमशः 20 मिनट और 30 मिनट में भर सकते हैं। यदि दोनों नलों को एक साथ खोल दिया जाए, तो टंकी कितने समय में भर जाएगी?',
+    options: ['(a) 12 मिनट', '(b) 15 मिनट', '(c) 10 मिनट', '(d) 14 मिनट'],
+    exam: 'UPSC CSAT / Prelims (नल एवं टंकी)',
+    ans: 'a',
+    explanation: 'समय = (xy) / (x + y) = (20 * 30) / (20 + 30) = 600 / 50 = 12 मिनट।'
+  },
+  {
+    id: 917,
+    topic: 'math',
+    type: 'MATH-SPEED-TIME',
+    en: 'A car covers a certain distance in 4 hours at 60 km/h. To cover the same distance in 3 hours, what should be its speed?',
+    hi: 'एक कार 60 किमी/घंटा की चाल से एक निश्चित दूरी 4 घंटे में तय करती है। उसी दूरी को 3 घंटे में तय करने के लिए कार की चाल कितनी होनी चाहिए?',
+    options: ['(a) 80 किमी/घंटा', '(b) 75 किमी/घंटा', '(c) 90 किमी/घंटा', '(d) 85 किमी/घंटा'],
+    exam: 'UPSC CSAT / Prelims (चाल, समय एवं दूरी)',
+    ans: 'a',
+    explanation: 'कुल दूरी = चाल * समय = 60 * 4 = 240 किमी। नई चाल = 240 / 3 = 80 किमी/घंटा।'
+  },
+  {
+    id: 918,
+    topic: 'math',
+    type: 'MATH-TRAINS',
+    en: 'A train 300 metres long crosses a 200 metre long platform at a speed of 54 km/h. In how many seconds does it cross?',
+    hi: '300 मीटर लंबी एक रेलगाड़ी 54 किमी/घंटा की चाल से 200 मीटर लंबे प्लेटफॉर्म को कितने सेकंड में पार करेगी?',
+    options: ['(a) 33.33 सेकंड (100/3 सेकंड)', '(b) 25 सेकंड', '(c) 30 सेकंड', '(d) 40 सेकंड'],
+    exam: 'UPSC CSAT / Prelims (रेलगाड़ी संबंधी प्रश्न)',
+    ans: 'a',
+    explanation: 'चाल = 54 * (5/18) = 15 मी/सेकंड। कुल दूरी = 300 + 200 = 500 मीटर। समय = 500 / 15 = 33.33 सेकंड।'
+  },
+  {
+    id: 919,
+    topic: 'math',
+    type: 'MATH-BOATS',
+    en: 'The speed of a boat in still water is 10 km/h and speed of stream is 2 km/h. How much time will it take to go 36 km downstream?',
+    hi: 'एक नाव की शांत जल में चाल 10 किमी/घंटा है और धारा की चाल 2 किमी/घंटा है। धारा के अनुकूल (Downstream) 36 किमी जाने में उसे कितना समय लगेगा?',
+    options: ['(a) 3 घंटे', '(b) 4 घंटे', '(c) 4.5 घंटे', '(d) 2.5 घंटे'],
+    exam: 'UPSC CSAT / Prelims (नाव एवं धारा)',
+    ans: 'a',
+    explanation: 'धारा के अनुकूल प्रभावी चाल = 10 + 2 = 12 किमी/घंटा। समय = दूरी / चाल = 36 / 12 = 3 घंटे।'
+  },
+  {
+    id: 920,
+    topic: 'math',
+    type: 'MATH-AVERAGES',
+    en: 'The average of 5 consecutive even numbers is 34. What is the largest of these numbers?',
+    hi: '5 क्रमागत सम संख्याओं का औसत 34 है। इनमें से सबसे बड़ी संख्या कौन सी है?',
+    options: ['(a) 38', '(b) 36', '(c) 40', '(d) 34'],
+    exam: 'UPSC CSAT / Prelims (औसत)',
+    ans: 'a',
+    explanation: 'औसत मध्य संख्या (तीसरी संख्या) होती है = 34। संख्याएं हैं: 30, 32, 34, 36, 38। सबसे बड़ी संख्या 38 है।'
+  },
+  {
+    id: 921,
+    topic: 'math',
+    type: 'MATH-AGES',
+    en: 'The ratio of present ages of father and son is 5 : 2. After 4 years, sum of their ages will be 64 years. What is the father’s present age?',
+    hi: 'पिता और पुत्र की वर्तमान आयु का अनुपात 5 : 2 है। 4 वर्ष बाद उनकी आयु का योग 64 वर्ष होगा। पिता की वर्तमान आयु क्या है?',
+    options: ['(a) 40 वर्ष', '(b) 45 वर्ष', '(c) 35 वर्ष', '(d) 50 वर्ष'],
+    exam: 'UPSC CSAT / Prelims (आयु संबंधी प्रश्न)',
+    ans: 'a',
+    explanation: 'वर्तमान आयु का योग = 64 - (4 + 4) = 56 वर्ष। 5x + 2x = 56 => 7x = 56 => x = 8। पिता की वर्तमान आयु = 5 * 8 = 40 वर्ष।'
+  },
+  {
+    id: 922,
+    topic: 'math',
+    type: 'MATH-MIXTURES',
+    en: 'A vessel contains milk and water in the ratio 3 : 1. If 6 litres of water is added, the ratio becomes 3 : 2. What was the initial quantity of milk?',
+    hi: 'एक बर्तन में दूध और पानी का अनुपात 3 : 1 है। यदि इसमें 6 लीटर पानी मिला दिया जाए तो अनुपात 3 : 2 हो जाता है। बर्तन में दूध की प्रारंभिक मात्रा क्या थी?',
+    options: ['(a) 18 लीटर', '(b) 24 लीटर', '(c) 15 लीटर', '(d) 12 लीटर'],
+    exam: 'UPSC CSAT / Prelims (मिश्रण एवं अनुपात)',
+    ans: 'a',
+    explanation: 'दूध की मात्रा = 3x, पानी = x। 3x / (x + 6) = 3/2 => 6x = 3x + 18 => 3x = 18 लीटर दूध।'
+  },
+  {
+    id: 923,
+    topic: 'math',
+    type: 'MATH-PERMUTATION',
+    en: 'In how many different ways can the letters of the word "DELHI" be arranged?',
+    hi: 'शब्द "DELHI" के अक्षरों से कुल कितने भिन्न-भिन्न क्रमचय (शब्द) बनाए जा सकते हैं?',
+    options: ['(a) 120 शब्द', '(b) 60 शब्द', '(c) 24 शब्द', '(d) 720 शब्द'],
+    exam: 'UPSC CSAT / Prelims (क्रमचय एवं संचय)',
+    ans: 'a',
+    explanation: 'DELHI में 5 अलग-अलग अक्षर हैं। कुल क्रमचय = 5! = 5 * 4 * 3 * 2 * 1 = 120।'
+  },
+  {
+    id: 924,
+    topic: 'math',
+    type: 'MATH-PROBABILITY',
+    en: 'When two unbiased dice are thrown simultaneously, what is the probability of getting a sum of 7?',
+    hi: 'दो निष्पक्ष पासों (Dice) को एक साथ फेंकने पर उनके फलकों पर आने वाले अंकों का योग 7 होने की प्रायिकता क्या है?',
+    options: ['(a) 1/6 (6/36)', '(b) 1/12', '(c) 5/36', '(d) 1/4'],
+    exam: 'UPSC CSAT / Prelims (प्रायिकता)',
+    ans: 'a',
+    explanation: 'योग 7 के अनुकूल युग्म: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1) = 6। कुल परिणाम = 36। प्रायिकता = 6/36 = 1/6।'
+  },
+  {
+    id: 925,
+    topic: 'math',
+    type: 'MATH-MENSURATION',
+    en: 'If the radius of a circle is increased by 20%, by what percentage does its area increase?',
+    hi: 'यदि किसी वृत्त की त्रिज्या में 20% की वृद्धि की जाती है, तो उसके क्षेत्रफल में कितने प्रतिशत की वृद्धि होगी?',
+    options: ['(a) 44%', '(b) 40%', '(c) 20%', '(d) 42%'],
+    exam: 'UPSC CSAT / Prelims (क्षेत्रमिति - क्षेत्रफल)',
+    ans: 'a',
+    explanation: 'क्षेत्रफल में प्रतिशत वृद्धि = 20 + 20 + (20 * 20)/100 = 40 + 4 = 44%।'
+  },
+  {
+    id: 926,
+    topic: 'math',
+    type: 'MATH-GEOMETRY',
+    en: 'The length of a rectangle is 40 m and breadth is 30 m. Find the length of its diagonal.',
+    hi: 'एक आयताकार मैदान की लंबाई 40 मीटर और चौड़ाई 30 मीटर है। इसके विकर्ण की लंबाई क्या होगी?',
+    options: ['(a) 50 मीटर', '(b) 45 मीटर', '(c) 55 मीटर', '(d) 60 मीटर'],
+    exam: 'UPSC CSAT / Prelims (ज्यामिति एवं विकर्ण)',
+    ans: 'a',
+    explanation: 'पाइथागोरस प्रमेय से: विकर्ण = √(40^2 + 30^2) = √(1600 + 900) = √2500 = 50 मीटर।'
+  },
+  {
+    id: 927,
+    topic: 'math',
+    type: 'MATH-ALGEBRA',
+    en: 'If x + 1/x = 4, what is the value of x^2 + 1/x^2?',
+    hi: 'यदि x + 1/x = 4 है, तो x^2 + 1/x^2 का मान क्या होगा?',
+    options: ['(a) 14', '(b) 16', '(c) 12', '(d) 18'],
+    exam: 'UPSC CSAT / Prelims (बीजगणित)',
+    ans: 'a',
+    explanation: '(x + 1/x)^2 = x^2 + 1/x^2 + 2 => 4^2 = x^2 + 1/x^2 + 2 => x^2 + 1/x^2 = 16 - 2 = 14।'
+  },
+  {
+    id: 928,
+    topic: 'math',
+    type: 'MATH-NUMBER-SYSTEM',
+    en: 'What is the sum of all natural numbers from 1 to 100?',
+    hi: '1 से लेकर 100 तक की सभी प्राकृतिक संख्याओं का कुल योग कितना है?',
+    options: ['(a) 5050', '(b) 5000', '(c) 5100', '(d) 5150'],
+    exam: 'UPSC CSAT / Prelims (संख्या पद्धति)',
+    ans: 'a',
+    explanation: 'n प्राकृतिक संख्याओं का योग = [n(n + 1)] / 2 = (100 * 101) / 2 = 5050।'
+  },
+  {
+    id: 929,
+    topic: 'math',
+    type: 'MATH-PARTNERSHIP',
+    en: 'A and B invested Rs. 30,000 and Rs. 45,000 in a business. In an annual profit of Rs. 25,000, what is A’s share?',
+    hi: 'A और B ने क्रमशः 30,000 रुपये और 45,000 रुपये लगाकर एक व्यापार शुरू किया। 25,000 रुपये के वार्षिक लाभ में से A का हिस्सा कितना होगा?',
+    options: ['(a) 10,000 रुपये', '(b) 15,000 रुपये', '(c) 12,500 रुपये', '(d) 8,000 रुपये'],
+    exam: 'UPSC CSAT / Prelims (साझेदारी)',
+    ans: 'a',
+    explanation: 'पूंजी का अनुपात = 30000 : 45000 = 2 : 3। A का लाभ = [2 / (2 + 3)] * 25000 = (2/5) * 25000 = 10,000 रुपये।'
+  },
+  {
+    id: 930,
+    topic: 'math',
+    type: 'MATH-CLOCKS',
+    en: 'At what angle do the hands of a clock stand at 3:40?',
+    hi: 'एक घड़ी में 3 बजकर 40 मिनट पर घंटे और मिनट की सुइयों के बीच कितने अंश का कोण बनेगा?',
+    options: ['(a) 130°', '(b) 120°', '(c) 140°', '(d) 125°'],
+    exam: 'UPSC CSAT / Prelims (घड़ी एवं कोण)',
+    ans: 'a',
+    explanation: 'कोण = |30 * H - (11/2) * M| = |30 * 3 - (11/2) * 40| = |90 - 220| = 130°।'
+  },
+  {
+    id: 931,
+    topic: 'math',
+    type: 'MATH-CALENDAR',
+    en: 'If 1st January 2024 was a Monday, what day of the week was 31st December 2024?',
+    hi: 'यदि 1 जनवरी 2024 को सोमवार था, तो 31 दिसंबर 2024 को सप्ताह का कौन सा दिन था?',
+    options: ['(a) मंगलवार (Tuesday)', '(b) सोमवार', '(c) बुधवार', '(d) रविवार'],
+    exam: 'UPSC CSAT / Prelims (कैलेंडर एवं लीप वर्ष)',
+    ans: 'a',
+    explanation: 'वर्ष 2024 एक लीप वर्ष है (366 दिन)। लीप वर्ष जिस दिन शुरू होता है, उसके अगले दिन समाप्त होता है। अतः 31 दिसंबर को मंगलवार था।'
+  },
+  {
+    id: 932,
+    topic: 'math',
+    type: 'MATH-SERIES',
+    en: 'Find the next term in the series: 3, 8, 15, 24, 35, ?',
+    hi: 'संख्या श्रृंखला में अगला पद ज्ञात कीजिए: 3, 8, 15, 24, 35, ?',
+    options: ['(a) 48 (7^2 - 1)', '(b) 46', '(c) 50', '(d) 52'],
+    exam: 'UPSC CSAT / Prelims (संख्यात्मक श्रृंखला)',
+    ans: 'a',
+    explanation: 'पैटर्न: n^2 - 1 (2^2-1=3, 3^2-1=8, 4^2-1=15, 5^2-1=24, 6^2-1=35, 7^2-1 = 49 - 1 = 48)।'
+  },
+  {
+    id: 933,
+    topic: 'math',
+    type: 'MATH-PERCENTAGE',
+    en: 'A student scored 32% marks in an exam and failed by 16 marks. Another student scored 40% and got 16 marks more than passing marks. Find the maximum marks.',
+    hi: 'एक परीक्षा में एक छात्र ने 32% अंक प्राप्त किए और वह 16 अंकों से अनुत्तीर्ण हो गया। दूसरे छात्र ने 40% अंक प्राप्त किए जो उत्तीर्णांक से 16 अंक अधिक थे। परीक्षा के पूर्णांक क्या थे?',
+    options: ['(a) 400 अंक', '(b) 500 अंक', '(c) 300 अंक', '(d) 450 अंक'],
+    exam: 'UPSC CSAT / Prelims (परीक्षा उत्तीर्णांक)',
+    ans: 'a',
+    explanation: 'प्रतिशत अंतर = 40% - 32% = 8%। अंकों का अंतर = 16 + 16 = 32 अंक। 8% = 32 अंक => 100% (पूर्णांक) = (32 / 8) * 100 = 400 अंक।'
+  },
+  {
+    id: 934,
+    topic: 'math',
+    type: 'MATH-MENSURATION',
+    en: 'If the edge of a cube is doubled, how many times does its volume become?',
+    hi: 'यदि किसी घन (Cube) की प्रत्येक भुजा को दोगुना कर दिया जाए, तो उसका आयतन कितने गुना हो जाएगा?',
+    options: ['(a) 8 गुना', '(b) 4 गुना', '(c) 6 गुना', '(d) 2 गुना'],
+    exam: 'UPSC CSAT / Prelims (घन का आयतन)',
+    ans: 'a',
+    explanation: 'घन का आयतन = a^3। भुजा दोगुनी (2a) होने पर नया आयतन = (2a)^3 = 8a^3, अर्थात 8 गुना।'
+  },
+  {
+    id: 935,
+    topic: 'math',
+    type: 'MATH-PROBABILITY',
+    en: 'From a standard pack of 52 cards, one card is drawn at random. What is the probability that it is a King or an Ace?',
+    hi: '52 ताश के पत्तों की एक गड्डी से एक पत्ता यादृच्छिक रूप से निकाला जाता है। उसके बादशाह (King) या इक्का (Ace) होने की प्रायिकता क्या है?',
+    options: ['(a) 2/13 (8/52)', '(b) 1/13', '(c) 4/13', '(d) 1/26'],
+    exam: 'UPSC CSAT / Prelims (ताश के पत्ते व प्रायिकता)',
+    ans: 'a',
+    explanation: '4 बादशाह + 4 इक्के = 8 अनुकूल पत्ते। प्रायिकता = 8 / 52 = 2 / 13।'
   }
 ];
 
@@ -925,6 +1266,56 @@ const TEMPLATES: Record<string, any[]> = {
       exam: "UPSC CSAT (Clock Problem)",
       expl: "कोण = |30H - 5.5M| = |30*4 - 5.5*30| = |120 - 165| = 45°।"
     }
+  ],
+  math: [
+    {
+      qHi: "दो संख्याओं का महत्तम समापवर्तक (HCF) 12 है और उनका लघुत्तम समापवर्त्य (LCM) 288 है। यदि एक संख्या 36 है, तो दूसरी संख्या क्या होगी?",
+      qEn: "The HCF of two numbers is 12 and their LCM is 288. If one of the numbers is 36, what is the other number?",
+      opts: ["(a) 96", "(b) 84", "(c) 72", "(d) 108"],
+      ans: "a",
+      exam: "UPSC CSAT / Prelims (ल.स.प. व म.स.प.)",
+      expl: "पहली संख्या * दूसरी संख्या = HCF * LCM => 36 * N = 12 * 288 => N = (12 * 288) / 36 = 96।"
+    },
+    {
+      qHi: "एक व्यक्ति अपनी मासिक आय का 20% किराए पर, 30% भोजन पर तथा शेष का 50% बच्चों की शिक्षा पर खर्च करता है। यदि उसके पास 7,000 रुपये बचते हैं, तो उसकी कुल मासिक आय क्या है?",
+      qEn: "A man spends 20% on rent, 30% on food and 50% of remainder on education. If he saves Rs. 7,000, find his total monthly income.",
+      opts: ["(a) 28,000 रुपये", "(b) 30,000 रुपये", "(c) 25,000 रुपये", "(d) 35,000 रुपये"],
+      ans: "a",
+      exam: "UPSC CSAT / Prelims (प्रतिशत एवं शेष बचत)",
+      expl: "किराया + भोजन = 50%। शेष = 50%। शिक्षा पर खर्च = 50% का 50% = 25%। कुल बचत = 25%। 25% = 7,000 => 100% (कुल आय) = 4 * 7,000 = 28,000 रुपये।"
+    },
+    {
+      qHi: "यदि 12 बंदर 12 केले 12 मिनट में खा सकते हैं, तो 4 बंदर 4 केले कितने मिनट में खाएंगे?",
+      qEn: "If 12 monkeys can eat 12 bananas in 12 minutes, in how many minutes can 4 monkeys eat 4 bananas?",
+      opts: ["(a) 12 मिनट", "(b) 4 मिनट", "(c) 16 मिनट", "(d) 1 मिनट"],
+      ans: "a",
+      exam: "UPSC CSAT / Prelims (समय, कार्य व दक्षता)",
+      expl: "(M1 * T1) / W1 = (M2 * T2) / W2 => (12 * 12) / 12 = (4 * T2) / 4 => 12 = T2। अतः 12 मिनट लगेंगे।"
+    },
+    {
+      qHi: "एक 250 मीटर लंबी रेलगाड़ी एक बिजली के खंभे को 15 सेकंड में पार करती है। रेलगाड़ी की चाल किमी/घंटे में क्या होगी?",
+      qEn: "A 250 m long train passes a telegraph post in 15 seconds. Find the speed of the train in km/h.",
+      opts: ["(a) 60 किमी/घंटा", "(b) 54 किमी/घंटा", "(c) 72 किमी/घंटा", "(d) 65 किमी/घंटा"],
+      ans: "a",
+      exam: "UPSC CSAT / Prelims (चाल व रेलगाड़ी)",
+      expl: "चाल = दूरी / समय = 250 / 15 मी/सेकंड = (50 / 3) * (18 / 5) = 60 किमी/घंटा।"
+    },
+    {
+      qHi: "यदि किसी वृत्त की परिधि 44 सेमी है, तो उसका क्षेत्रफल कितना होगा?",
+      qEn: "If the circumference of a circle is 44 cm, find its area.",
+      opts: ["(a) 154 वर्ग सेमी", "(b) 144 वर्ग सेमी", "(c) 160 वर्ग सेमी", "(d) 132 वर्ग सेमी"],
+      ans: "a",
+      exam: "UPSC CSAT / Prelims (क्षेत्रमिति - वृत्त)",
+      expl: "2 * (22/7) * r = 44 => r = 7 सेमी। क्षेत्रफल = π * r^2 = (22/7) * 7 * 7 = 154 वर्ग सेमी।"
+    },
+    {
+      qHi: "प्रथम 20 विषम प्राकृतिक संख्याओं का औसत क्या होगा?",
+      qEn: "What is the average of the first 20 odd natural numbers?",
+      opts: ["(a) 20", "(b) 21", "(c) 19", "(d) 40"],
+      ans: "a",
+      exam: "UPSC CSAT / Prelims (विषम संख्याओं का औसत)",
+      expl: "प्रथम n विषम प्राकृतिक संख्याओं का औसत सदैव n ही होता है। अतः प्रथम 20 विषम संख्याओं का औसत 20 होगा।"
+    }
   ]
 };
 
@@ -965,6 +1356,7 @@ export function generateRandomUPSC100Questions(selectedTopicId: string = 'all'):
   // Generate extended UPSC items up to 100
   // Standard topics list for procedural diversity
   const fallbackTopics = [
+    { id: 'math', name: 'Mathematics & CSAT', hiName: 'गणित एवं संख्यात्मक अभियोग्यता' },
     { id: 'polity', name: 'Polity & Constitution', hiName: 'राजव्यवस्था' },
     { id: 'history', name: 'Indian History', hiName: 'इतिहास' },
     { id: 'geography', name: 'Geography', hiName: 'भूगोल' },
@@ -1293,6 +1685,173 @@ export function generateRandomUPSC100Questions(selectedTopicId: string = 'all'):
         ans: 'a',
         explanation: 'अंतर क्रमशः 4, 6, 8, 10, 12 बढ़ रहा है: 30 + 12 = 42 (या n*(n+1) जहां n=6, 6*7 = 42)।'
       }
+    ],
+    math: () => [
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-NUMBER-SYSTEM',
+        hi: 'चार घंटियां क्रमशः 6, 8, 12 और 18 सेकंड के अंतराल पर बजती हैं। यदि वे एक साथ बजना शुरू करें, तो वे 6 मिनट में कुल कितनी बार एक साथ बजेंगी?',
+        en: 'Four bells toll at intervals of 6, 8, 12 and 18 seconds respectively. In 6 minutes, how many times will they toll together?',
+        options: ['(a) 6 बार (प्रत्येक 72 सेकंड पर + 1 प्रारंभिक)', '(b) 5 बार', '(c) 7 बार', '(d) 4 बार'],
+        exam: 'UPSC CSAT / Prelims (घंटियां व ल.स.प.)',
+        ans: 'a',
+        explanation: '6, 8, 12, 18 का LCM = 72 सेकंड। 6 मिनट = 360 सेकंड। 360 / 72 = 5 बार + 1 बार शुरुआत में = कुल 6 बार।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-NUMBER-SYSTEM',
+        hi: 'संख्या 3^41 * 7^42 * 8^43 के इकाई अंक (Unit Digit) का मान क्या होगा?',
+        en: 'What is the unit digit in the product 3^41 * 7^42 * 8^43?',
+        options: ['(a) 8', '(b) 4', '(c) 6', '(d) 2'],
+        exam: 'UPSC CSAT / Prelims (इकाई अंक)',
+        ans: 'a',
+        explanation: '3^41 का इकाई अंक = 3^1 = 3। 7^42 का = 7^2 = 9। 8^43 का = 8^3 = 2। गुणनफल: 3 * 9 * 2 = 54 => 4 * 2 = 8।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-PERCENTAGE',
+        hi: 'किसी शहर की जनसंख्या 80,000 है। यदि पहले वर्ष इसमें 10% की वृद्धि और दूसरे वर्ष 20% की वृद्धि हो, तो 2 वर्ष बाद जनसंख्या कितनी होगी?',
+        en: 'The population of a town is 80,000. If it increases by 10% in 1st year and 20% in 2nd year, what is population after 2 years?',
+        options: ['(a) 1,05,600', '(b) 1,04,000', '(c) 1,02,400', '(d) 1,08,000'],
+        exam: 'UPSC CSAT / Prelims (जनसंख्या वृद्धि)',
+        ans: 'a',
+        explanation: 'जनसंख्या = 80000 * 1.10 * 1.20 = 88000 * 1.20 = 1,05,600।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-PROFIT-LOSS',
+        hi: 'एक दुकानदार अपनी वस्तुओं पर क्रय मूल्य से 40% अधिक अंकित करता है और फिर 25% की छूट देता है। उसका वास्तविक लाभ प्रतिशत क्या है?',
+        en: 'A shopkeeper marks his goods 40% above cost price and allows a discount of 25%. What is his profit percentage?',
+        options: ['(a) 5% लाभ', '(b) 15% लाभ', '(c) 10% लाभ', '(d) कोई लाभ या हानि नहीं'],
+        exam: 'UPSC CSAT / Prelims (अंकित मूल्य व छूट)',
+        ans: 'a',
+        explanation: 'माना CP = 100 रुपये। MP = 140 रुपये। SP = 140 * 0.75 = 105 रुपये। लाभ = 105 - 100 = 5%।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-PROFIT-LOSS',
+        hi: 'दो घड़ियां प्रत्येक 990 रुपये में बेची गईं। एक पर 10% का लाभ हुआ और दूसरी पर 10% की हानि हुई। पूरे सौदे में कुल कितना प्रतिशत लाभ या हानि हुई?',
+        en: 'Two watches are sold for Rs. 990 each, one at 10% gain and other at 10% loss. What is the net percentage result?',
+        options: ['(a) 1% हानि', '(b) 1% लाभ', '(c) कोई लाभ-हानि नहीं', '(d) 2% हानि'],
+        exam: 'UPSC CSAT / Prelims (समान विक्रय मूल्य व हानि)',
+        ans: 'a',
+        explanation: 'जब दो वस्तुओं का विक्रय मूल्य समान हो और लाभ/हानि x% हो, तो सदैव हानि = (x/10)^2 % = (10/10)^2 = 1% हानि होती है।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-CI-SI',
+        hi: 'किस वार्षिक ब्याज की दर से कोई धनराशि 10 वर्षों में साधारण ब्याज पर स्वयं की तिगुनी (3 गुना) हो जाएगी?',
+        en: 'At what annual rate of simple interest will a sum become three times itself in 10 years?',
+        options: ['(a) 20% वार्षिक', '(b) 15% वार्षिक', '(c) 25% वार्षिक', '(d) 30% वार्षिक'],
+        exam: 'UPSC CSAT / Prelims (ब्याज की दर)',
+        ans: 'a',
+        explanation: '3 गुना होने पर ब्याज = 2 गुना (200%)। दर = 200% / 10 वर्ष = 20% वार्षिक।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-RATIO',
+        hi: 'तीन संख्याओं का अनुपात 3 : 4 : 5 है और उनके वर्गों का योग 1250 है। इनमें सबसे बड़ी संख्या क्या होगी?',
+        en: 'Three numbers are in the ratio 3 : 4 : 5 and sum of their squares is 1250. What is the largest number?',
+        options: ['(a) 25', '(b) 20', '(c) 15', '(d) 30'],
+        exam: 'UPSC CSAT / Prelims (अनुपात व वर्ग)',
+        ans: 'a',
+        explanation: '(3x)^2 + (4x)^2 + (5x)^2 = 9x^2 + 16x^2 + 25x^2 = 50x^2 = 1250 => x^2 = 25 => x = 5। सबसे बड़ी संख्या = 5 * 5 = 25।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-TIME-WORK',
+        hi: 'A की कार्यक्षमता B से दुगुनी है। यदि दोनों मिलकर किसी कार्य को 14 दिनों में पूरा करते हैं, तो A अकेला उस कार्य को कितने दिनों में पूरा करेगा?',
+        en: 'A is twice as efficient as B. If both together complete a work in 14 days, in how many days can A alone do it?',
+        options: ['(a) 21 दिन', '(b) 28 दिन', '(c) 42 दिन', '(d) 18 दिन'],
+        exam: 'UPSC CSAT / Prelims (कार्यक्षमता अनुपात)',
+        ans: 'a',
+        explanation: 'A = 2 इकाई/दिन, B = 1 इकाई/दिन। कुल दक्षता = 3 इकाई। कुल कार्य = 14 * 3 = 42 इकाई। A का समय = 42 / 2 = 21 दिन।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-SPEED-TIME',
+        hi: 'एक व्यक्ति अपनी वास्तविक चाल की 3/4 चाल से चलकर अपने कार्यालय 20 मिनट देरी से पहुंचता है। उसके कार्यालय पहुंचने का सामान्य समय कितना है?',
+        en: 'Walking at 3/4 of his usual speed, a person is 20 minutes late to office. Find his usual time.',
+        options: ['(a) 60 मिनट (1 घंटा)', '(b) 45 मिनट', '(c) 80 मिनट', '(d) 50 मिनट'],
+        exam: 'UPSC CSAT / Prelims (चाल में कमी व समय)',
+        ans: 'a',
+        explanation: 'चाल 3/4 होने पर समय 4/3 हो जाता है। अतिरिक्त समय = (4/3 - 1) = 1/3 = 20 मिनट => सामान्य समय = 20 * 3 = 60 मिनट।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-TRAINS',
+        hi: 'दो रेलगाड़ियां जिनकी लंबाइयां क्रमशः 120 मीटर और 180 मीटर हैं, विपरीत दिशाओं में 40 किमी/घंटा और 50 किमी/घंटा की चाल से चल रही हैं। वे एक-दूसरे को कितने सेकंड में पार करेंगी?',
+        en: 'Two trains 120 m and 180 m long travel in opposite directions at 40 km/h and 50 km/h. In how many seconds will they pass each other?',
+        options: ['(a) 12 सेकंड', '(b) 10 सेकंड', '(c) 15 सेकंड', '(d) 8 सेकंड'],
+        exam: 'UPSC CSAT / Prelims (सापेक्ष चाल व रेलगाड़ी)',
+        ans: 'a',
+        explanation: 'सापेक्ष चाल = 40 + 50 = 90 किमी/घंटा = 90 * (5/18) = 25 मी/सेकंड। कुल दूरी = 120 + 180 = 300 मीटर। समय = 300 / 25 = 12 सेकंड।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-AVERAGES',
+        hi: '10 छात्रों के औसत अंक 65 थे। बाद में पता चला कि एक छात्र के अंक 36 के स्थान पर गलती से 86 पढ़ लिए गए थे। सही औसत क्या होगा?',
+        en: 'Average marks of 10 students were 65. Later found one student’s mark 36 was misread as 86. What is correct average?',
+        options: ['(a) 60', '(b) 62', '(c) 63', '(d) 58'],
+        exam: 'UPSC CSAT / Prelims (त्रुटिपूर्ण औसत सुधार)',
+        ans: 'a',
+        explanation: 'त्रुटि = 86 - 36 = 50 अंक अधिक पढ़ लिए गए। औसत में कमी = 50 / 10 = 5 अंक। सही औसत = 65 - 5 = 60।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-MIXTURES',
+        hi: '20 रुपये प्रति किलोग्राम और 30 रुपये प्रति किलोग्राम की दो प्रकार की चाय को किस अनुपात में मिलाया जाए ताकि मिश्रण का मूल्य 26 रुपये प्रति किलोग्राम हो जाए?',
+        en: 'In what ratio must two types of tea at Rs. 20/kg and Rs. 30/kg be mixed so that mixture is worth Rs. 26/kg?',
+        options: ['(a) 2 : 3', '(b) 3 : 2', '(c) 1 : 2', '(d) 3 : 4'],
+        exam: 'UPSC CSAT / Prelims (मिश्रण का नियम / Alligation)',
+        ans: 'a',
+        explanation: 'मिश्रण नियम: (30 - 26) : (26 - 20) = 4 : 6 = 2 : 3।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-PERMUTATION',
+        hi: '7 पुरुषों और 5 महिलाओं में से 5 व्यक्तियों की एक समिति बनानी है जिसमें ठीक 3 पुरुष और 2 महिलाएं हों। यह कितने प्रकार से किया जा सकता है?',
+        en: 'In how many ways can a committee of 5 persons with 3 men and 2 women be formed from 7 men and 5 women?',
+        options: ['(a) 350 प्रकार', '(b) 210 प्रकार', '(c) 420 प्रकार', '(d) 300 प्रकार'],
+        exam: 'UPSC CSAT / Prelims (संचय व समिति गठन)',
+        ans: 'a',
+        explanation: '7C3 * 5C2 = 35 * 10 = 350 प्रकार।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-GEOMETRY',
+        hi: 'एक पहिए की त्रिज्या 35 सेमी है। 440 मीटर की दूरी तय करने में यह पहिया कुल कितने चक्कर लगाएगा?',
+        en: 'The radius of a wheel is 35 cm. How many revolutions will it make to cover 440 metres?',
+        options: ['(a) 200 चक्कर', '(b) 250 चक्कर', '(c) 150 चक्कर', '(d) 300 चक्कर'],
+        exam: 'UPSC CSAT / Prelims (पहिए की परिधि व चक्कर)',
+        ans: 'a',
+        explanation: 'पहिए की परिधि = 2 * (22/7) * 35 = 220 सेमी = 2.2 मीटर। चक्कर = 440 / 2.2 = 200 चक्कर।'
+      },
+      {
+        id: 0,
+        topic: 'math',
+        type: 'MATH-ALGEBRA',
+        hi: 'यदि a + b + c = 0 हो, तो (a^3 + b^3 + c^3) / (abc) का मान क्या होगा?',
+        en: 'If a + b + c = 0, what is the value of (a^3 + b^3 + c^3) / (abc)?',
+        options: ['(a) 3', '(b) 1', '(c) 0', '(d) -3'],
+        exam: 'UPSC CSAT / Prelims (बीजगणितीय सर्वसमिका)',
+        ans: 'a',
+        explanation: 'यदि a + b + c = 0, तो सर्वसमिका के अनुसार a^3 + b^3 + c^3 = 3abc। अतः (3abc) / (abc) = 3।'
+      }
     ]
   };
 
@@ -1312,14 +1871,14 @@ export function generateRandomUPSC100Questions(selectedTopicId: string = 'all'):
   masterCandidates.forEach((item, idx) => {
     currentList.push({
       id: timestamp + idx + 1,
-      type: item.type || 'UPSC-GS1',
+      type: item.type || (selectedTopicId === 'math' ? 'MATH-CSAT' : 'UPSC-GS1'),
       topic: item.topic || selectedTopicId,
       en: item.en || item.qEn || '',
       hi: item.hi || item.qHi || '',
-      options: item.options || item.opts || ['(a) Option A', '(b) Option B', '(c) Option C', '(d) Option D'],
-      exam: item.exam || 'UPSC CSE Prelims',
+      options: item.options || item.opts || ['(a) विकल्प 1', '(b) विकल्प 2', '(c) विकल्प 3', '(d) विकल्प 4'],
+      exam: item.exam || (selectedTopicId === 'math' ? 'UPSC CSAT / प्रारंभिक परीक्षा (गणित)' : 'UPSC CSE Prelims'),
       ans: (item.ans || 'a') as 'a' | 'b' | 'c' | 'd',
-      explanation: item.explanation || item.expl || 'UPSC Prelims Official Key & Context Reference'
+      explanation: item.explanation || item.expl || 'UPSC प्रारंभिक परीक्षा संदर्भ व्याख्या'
     });
   });
 
@@ -1329,17 +1888,17 @@ export function generateRandomUPSC100Questions(selectedTopicId: string = 'all'):
     const pick = masterCandidates[currentList.length % masterCandidates.length];
     const newId = timestamp + currentList.length + 1000;
     
-    // Add variations if needed to make exactly 100 unique items
+    // Add variations if needed to make exactly 100 unique items in Hindi
     currentList.push({
       id: newId,
-      type: pick.type || `UPSC-SET-${cycle}`,
+      type: pick.type || (selectedTopicId === 'math' ? `MATH-अभ्यास-${cycle}` : `UPSC-SET-${cycle}`),
       topic: pick.topic || selectedTopicId,
-      en: pick.en || pick.qEn || `UPSC Standard Question Set #${currentList.length + 1}`,
-      hi: pick.hi || pick.qHi || `UPSC प्रारंभिक परीक्षा प्रश्न #${currentList.length + 1}`,
-      options: pick.options || pick.opts || ['(a) Option A', '(b) Option B', '(c) Option C', '(d) Option D'],
-      exam: pick.exam || `UPSC CSE Prelims Mock Set ${cycle}`,
+      en: pick.en || pick.qEn || `UPSC Model Paper Question #${currentList.length + 1}`,
+      hi: pick.hi || pick.qHi || (selectedTopicId === 'math' ? `गणित एवं संख्यात्मक अभियोग्यता प्रश्न #${currentList.length + 1}` : `UPSC प्रारंभिक परीक्षा प्रश्न #${currentList.length + 1}`),
+      options: pick.options || pick.opts || ['(a) विकल्प A', '(b) विकल्प B', '(c) विकल्प C', '(d) विकल्प D'],
+      exam: pick.exam || (selectedTopicId === 'math' ? `UPSC CSAT गणित मॉक टेस्ट सेट ${cycle}` : `UPSC CSE Prelims Mock Set ${cycle}`),
       ans: (pick.ans || (['a', 'b', 'c', 'd'][currentList.length % 4])) as 'a' | 'b' | 'c' | 'd',
-      explanation: pick.explanation || pick.expl || 'UPSC CSE Prelims Standard Answer & Reference Note'
+      explanation: pick.explanation || pick.expl || 'UPSC परीक्षा आधिकारिक व्याख्या एवं विश्लेषण'
     });
     cycle++;
   }

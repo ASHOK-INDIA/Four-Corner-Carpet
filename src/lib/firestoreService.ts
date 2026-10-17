@@ -8,7 +8,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem, SampleItem, AiyaraInvoice, WorkerSmsAlert, ManufacturerWorker, LedgerEntry } from '../types';
+import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem, SampleItem, AiyaraInvoice, WorkerSmsAlert, ManufacturerWorker, LedgerEntry, QcInspectionReport, VoiceRugItem } from '../types';
 
 const PO_COLLECTION = 'purchase_orders';
 const PPWR_COLLECTION = 'ppwr_files';
@@ -19,6 +19,39 @@ const AIYARA_INVOICES_COLLECTION = 'aiyara_invoices';
 const WORKER_SMS_COLLECTION = 'worker_sms_alerts';
 const WORKERS_COLLECTION = 'manufacturer_workers';
 const LEDGER_COLLECTION = 'ledger_entries';
+const QC_INSPECTIONS_COLLECTION = 'qc_inspections';
+const LEADS_COLLECTION = 'generated_leads';
+const VOICE_RUGS_COLLECTION = 'voice_rug_items';
+
+/**
+ * Save generated leads to Firestore
+ */
+export async function saveLeadsToFirestore(leads: any[]): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    for (const lead of leads) {
+      const leadRef = doc(collection(db, LEADS_COLLECTION), lead.id || `lead-${Date.now()}-${Math.random()}`);
+      batch.set(leadRef, { ...lead, savedAt: new Date().toISOString() });
+    }
+    await batch.commit();
+  } catch (error) {
+    console.error('Error saving leads to Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all saved leads from Firestore
+ */
+export async function fetchSavedLeadsFromFirestore(): Promise<any[]> {
+  try {
+    const snapshot = await getDocs(collection(db, LEADS_COLLECTION));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Error fetching leads from Firestore:', error);
+    return [];
+  }
+}
 
 /**
  * Sanitize Firestore document IDs by replacing slashes or invalid characters
@@ -436,7 +469,60 @@ export async function deleteSampleItemFromFirestore(id: string): Promise<void> {
 /**
  * Default Aiyara Invoice Templates from attached PDF
  */
+export const UPDATED_PO_17_ITEMS_INVOICE: AiyaraInvoice = {
+  id: 'aiyara-po-updated-17items',
+  invoiceNo: 'PO # 1128405 (Updated 17 Items)',
+  date: '13-10-2026',
+  poNumber: '1128405',
+  poTitle: 'Terra & Nordic Rugs PO (17 Items - 317 Pcs)',
+  supplierName: 'FOUR CORNERS CARPETS',
+  supplierAddress: 'WARD NO. 4 NEHARU NAGAR FATTUPUR NAI BAZAR, BHADOHI 221401, UTTAR PRADESH, INDIA',
+  supplierGstin: '09AJTPD8099G1ZH',
+  supplierContact: '8188887223',
+  supplierAttention: 'Mr. Danish',
+  supplierBankDetails: 'Axis Bank, Station Road., 922020057882560',
+  supplierIfsc: 'AXISINBBA04',
+  buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+  buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
+  buyerGstin: '26AAVCA3353L1Z6',
+  buyerPhone: '9173722468',
+  buyerEmail: 'sale@aiyaratextile.in',
+  buyerAttention: 'Mr. Om Prakash',
+  currency: 'INR (₹)',
+  invoiceType: 'AIYARA',
+  notes: '25 % Advance Paid Already & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.',
+  items: [
+    { id: 'item-up-1', itemNo: '458712', description: 'Terra Outdoor Rug Brown', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '75 x 150 cm', qtyPcs: 36, totalSqMeter: 40.5, sqMtrPrice: 1175, totalAmount: 47587.50 },
+    { id: 'item-up-2', itemNo: '458713', description: 'Terra Outdoor Rug Brown', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '75 x 250 cm', qtyPcs: 36, totalSqMeter: 67.5, sqMtrPrice: 1175, totalAmount: 79312.50 },
+    { id: 'item-up-3', itemNo: '458714', description: 'Terra Outdoor Rug Brown', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '180 x 270 cm', qtyPcs: 21, totalSqMeter: 102.06, sqMtrPrice: 1175, totalAmount: 119920.50 },
+    { id: 'item-up-4', itemNo: '458715', description: 'Terra Outdoor Rug Green', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '75 x 150 cm', qtyPcs: 36, totalSqMeter: 40.5, sqMtrPrice: 1175, totalAmount: 47587.50 },
+    { id: 'item-up-5', itemNo: '458716', description: 'Terra Outdoor Rug Green', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '75 x 250 cm', qtyPcs: 36, totalSqMeter: 67.5, sqMtrPrice: 1175, totalAmount: 79312.50 },
+    { id: 'item-up-6', itemNo: '458717', description: 'Terra Outdoor Rug Green', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '180 x 270 cm', qtyPcs: 21, totalSqMeter: 102.06, sqMtrPrice: 1175, totalAmount: 119920.50 },
+    { id: 'item-up-7', itemNo: '458718', description: 'Terra Outdoor Rug Beige', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '75 x 150 cm', qtyPcs: 36, totalSqMeter: 40.5, sqMtrPrice: 1175, totalAmount: 47587.50 },
+    { id: 'item-up-8', itemNo: '458719', description: 'Terra Outdoor Rug Beige', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '75 x 250 cm', qtyPcs: 36, totalSqMeter: 67.5, sqMtrPrice: 1175, totalAmount: 79312.50 },
+    { id: 'item-up-9', itemNo: '458720', description: 'Terra Outdoor Rug Beige', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '180 x 270 cm', qtyPcs: 21, totalSqMeter: 102.06, sqMtrPrice: 1175, totalAmount: 119920.50 },
+    { id: 'item-up-10', itemNo: '391923', description: 'Nordic Plain Wool Rug Rust', specification: '100% Wool Tufted', productCode: 'Tufted', sizesCm: '250X350', qtyPcs: 4, totalSqMeter: 35, sqMtrPrice: 1033, totalAmount: 36155 },
+    { id: 'item-up-11', itemNo: '391924', description: 'Nordic Plain Wool Rug Rust', specification: '100% Wool Tufted', productCode: 'Tufted', sizesCm: '300X400', qtyPcs: 4, totalSqMeter: 48, sqMtrPrice: 1033, totalAmount: 49584 },
+    { id: 'item-up-12', itemNo: '391928', description: 'Nordic Plain Wool Rug Off-White', specification: '100% Wool Tufted', productCode: 'Tufted', sizesCm: '180X270', qtyPcs: 4, totalSqMeter: 19.44, sqMtrPrice: 1033, totalAmount: 20081.52 },
+    { id: 'item-up-13', itemNo: '399793', description: 'Dotted Ullmatta', specification: '100% Wool Tufted', productCode: 'Natural', sizesCm: '60X90', qtyPcs: 4, totalSqMeter: 2.16, sqMtrPrice: 1033, totalAmount: 2231.28 },
+    { id: 'item-up-14', itemNo: '439547', description: 'Nordic Plain Wool Rug Dark Brown', specification: '100% Wool Tufted', productCode: 'Tufted', sizesCm: '250X350', qtyPcs: 10, totalSqMeter: 87.5, sqMtrPrice: 1033, totalAmount: 90387.50 },
+    { id: 'item-up-15', itemNo: '439548', description: 'Nordic Plain Wool Rug Dark Brown', specification: '100% Wool Tufted', productCode: 'Tufted', sizesCm: '300X400', qtyPcs: 4, totalSqMeter: 48, sqMtrPrice: 1033, totalAmount: 49584 },
+    { id: 'item-up-16', itemNo: '439551', description: 'Nordic Plain Wool Rug Dusty Rose', specification: '100% Wool Tufted', productCode: 'Tufted', sizesCm: '300X400', qtyPcs: 4, totalSqMeter: 48, sqMtrPrice: 1033, totalAmount: 49584 },
+    { id: 'item-up-17', itemNo: '421998', description: 'Nordic Plain Ullmatta Moss', specification: '100% Wool Tufted', productCode: 'Tufted', sizesCm: '250X350', qtyPcs: 4, totalSqMeter: 35, sqMtrPrice: 1033, totalAmount: 36155 }
+  ],
+  totalPcs: 317,
+  totalSqMeter: 953.28,
+  subTotal: 1074223.80,
+  igstPercent: 5,
+  igstAmount: 53711.19,
+  advancePercent: 25,
+  advanceAmount: 281983.75,
+  totalAmount: 1127934.99,
+  createdAt: '2026-10-13T10:30:00.000Z'
+};
+
 export const DEFAULT_AIYARA_INVOICES: AiyaraInvoice[] = [
+  UPDATED_PO_17_ITEMS_INVOICE,
   {
     id: 'aiyara-po-1128405-1st',
     invoiceNo: 'PO # 1128405 (1st PO)',
@@ -456,6 +542,8 @@ export const DEFAULT_AIYARA_INVOICES: AiyaraInvoice[] = [
     buyerPhone: '9173722468',
     buyerEmail: 'sale@aiyaratextile.in',
     buyerAttention: 'Mr. Om Prakash',
+    currency: 'INR (₹)',
+    invoiceType: 'AIYARA',
     notes: '25 % Advance & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.',
     items: [
       { id: 'item-1', itemNo: '391912', description: 'Checks Wool rug Gray', specification: '100% Wool', productCode: 'Tufted', sizesCm: '300x400', qtyPcs: 6, totalSqMeter: 72, sqMtrPrice: 1096, totalAmount: 78912 },
@@ -500,6 +588,8 @@ export const DEFAULT_AIYARA_INVOICES: AiyaraInvoice[] = [
     buyerPhone: '9173722468',
     buyerEmail: 'sale@aiyaratextile.in',
     buyerAttention: 'Mr. Om Prakash',
+    currency: 'INR (₹)',
+    invoiceType: 'AIYARA',
     notes: '25 % Advance & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.',
     items: [
       { id: 'item-201', itemNo: '454016', description: 'Field Wool Rug Natural', specification: '100% Wool', productCode: 'Hand Woven', sizesCm: '180x270', qtyPcs: 8, totalSqMeter: 39, sqMtrPrice: 1950, totalAmount: 75816 },
@@ -1052,3 +1142,194 @@ export async function deleteLedgerEntryFromFirestore(id: string): Promise<void> 
   await deleteDoc(docRef);
 }
 
+
+
+export const DEFAULT_QC_REPORTS: QcInspectionReport[] = [
+  {
+    id: 'qc_poptop_1128405',
+    poNumber: '1128405',
+    buyerName: 'poptop Handels GmbH',
+    inspectionDate: '2025-05-18',
+    inspectorName: 'Sanjay Kumar (Senior QC Auditor)',
+    inspectionStage: 'PRE_SHIPMENT',
+    aqlStandard: 'AQL 2.5 Major / 4.0 Minor (ISO 2859-1)',
+    totalLotPieces: 320,
+    samplePiecesChecked: 32,
+    moisturePercent: 8.4,
+    pileHeightMm: 12.0,
+    weightPerSqMtrGsm: 2450,
+    overallGrade: 'PASS',
+    minorDefectsCount: 1,
+    majorDefectsCount: 0,
+    criticalDefectsCount: 0,
+    certificateNo: 'QC-FCC-2025-0589',
+    verifiedBy: 'Ashok Maurya (Factory Quality Head)',
+    inspectorRemarks: 'All 32 inspected rugs conform to poptop approved master samples. Zero shedding, perfect latex cure. Moisture 8.4% well below 12% ceiling. Pallets wrapped with 200 gauge polythene, heavy edge protectors, and desiccant gel bags.',
+    palletCondition: 'EXCELLENT',
+    cornerProtectorsPresent: true,
+    strappingTensionOk: true,
+    isLockedApproved: true,
+    createdAt: '2025-05-18T14:30:00.000Z',
+    checks: [
+      { id: 'c1', title: 'Length & Width Tolerance', category: 'DIMENSIONS', standard: '±1.0% Max variance', status: 'PASS', remarks: '200x300cm actual: 200.2 x 299.8cm' },
+      { id: 'c2', title: 'Corner Diagonal Squareness', category: 'DIMENSIONS', standard: 'Diagonal diff < 1.5 cm', status: 'PASS', remarks: '0.6 cm difference' },
+      { id: 'c3', title: 'Pile Height & Density', category: 'WEAVE', standard: '12.0 mm ± 1 mm, dense tufting', status: 'PASS', remarks: 'Uniform 12.1 mm' },
+      { id: 'c4', title: 'Color Shading vs Approved Master', category: 'COLOR', standard: 'Color Match Grade 4-5', status: 'PASS', remarks: '100% matched to master swatch' },
+      { id: 'c5', title: 'Secondary Latex Backing Cure', category: 'BACKING', standard: 'High adhesion, zero chalking', status: 'PASS', remarks: 'Natural latex cured properly' },
+      { id: 'c6', title: 'Edge Binding / Serging Stitches', category: 'FINISHING', standard: 'Heavy thread, zero skips', status: 'PASS', remarks: 'Neat double needle serging' },
+      { id: 'c7', title: 'Moisture Content Meter Check', category: 'FINISHING', standard: 'Must be < 12.0%', status: 'PASS', remarks: '8.4% RH safe for container transit' },
+      { id: 'c8', title: 'Foreign Debris & Needle Detection', category: 'FINISHING', standard: 'Metal detector scan pass', status: 'PASS', remarks: 'Clean and metal free' },
+      { id: 'c9', title: 'Pallet Waterproof Shrink Wrapping', category: 'PACKAGING', standard: '200 Gauge UV wrap + Top cap', status: 'PASS', remarks: 'Waterproof pallet wrap complete' },
+      { id: 'c10', title: 'Heavy Cross Strapping & Corner Guards', category: 'PACKAGING', standard: '4 corner rigid guards + 4 straps', status: 'PASS', remarks: 'High tension strap with corner protection' },
+      { id: 'c11', title: 'Shipping Marks: F4C / Austria', category: 'LABELING', standard: 'Barcode, SKU, Gross/Net Weight', status: 'PASS', remarks: 'All labels clear and scannable' }
+    ],
+    photos: [
+      { id: 'p1', caption: 'Full Rug Face & Pile Texture Check', url: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=800&q=80', tag: 'FACE', uploadedAt: '2025-05-18T14:15:00.000Z' },
+      { id: 'p2', caption: 'Latex Backing & Edge Serging Examination', url: 'https://images.unsplash.com/photo-1579656381226-5fc0f0100c3b?auto=format&fit=crop&w=800&q=80', tag: 'BACKING', uploadedAt: '2025-05-18T14:18:00.000Z' },
+      { id: 'p3', caption: 'Finished Pallet with Heavy Wrap & Corner Protectors', url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80', tag: 'PALLET', uploadedAt: '2025-05-18T14:22:00.000Z' }
+    ]
+  }
+];
+
+/**
+ * Subscribe to QC Inspection Reports
+ */
+export function subscribeQcInspections(
+  onUpdate: (reports: QcInspectionReport[]) => void,
+  onError?: (error: Error) => void
+): () => void {
+  const collRef = collection(db, QC_INSPECTIONS_COLLECTION);
+  return onSnapshot(
+    collRef,
+    async (snapshot) => {
+      if (snapshot.empty) {
+        // Seed initial default report if empty
+        try {
+          const batch = writeBatch(db);
+          DEFAULT_QC_REPORTS.forEach((report) => {
+            const docRef = doc(db, QC_INSPECTIONS_COLLECTION, report.id);
+            batch.set(docRef, report);
+          });
+          await batch.commit();
+        } catch (e) {
+          console.warn('Could not seed default QC reports:', e);
+        }
+        onUpdate(DEFAULT_QC_REPORTS);
+        return;
+      }
+
+      const items: QcInspectionReport[] = [];
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data() as QcInspectionReport;
+        items.push({
+          ...d,
+          id: docSnap.id
+        });
+      });
+      items.sort((a, b) => new Date(b.inspectionDate || b.createdAt).getTime() - new Date(a.inspectionDate || a.createdAt).getTime());
+      onUpdate(items);
+    },
+    (err) => {
+      console.error('Firestore QC snapshot error:', err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Save QC Inspection Report to Firestore
+ */
+export async function saveQcInspectionToFirestore(report: QcInspectionReport): Promise<void> {
+  const docId = sanitizeDocId(report.id || `qc_${report.poNumber}_${Date.now()}`);
+  const docRef = doc(db, QC_INSPECTIONS_COLLECTION, docId);
+  const cleanData: Record<string, any> = {};
+  for (const [key, val] of Object.entries(report)) {
+    if (val !== undefined) {
+      cleanData[key] = val;
+    }
+  }
+  cleanData.id = docId;
+  await setDoc(docRef, cleanData, { merge: true });
+}
+
+/**
+ * Delete QC Inspection Report from Firestore
+ */
+export async function deleteQcInspectionFromFirestore(id: string): Promise<void> {
+  const docId = sanitizeDocId(id);
+  const docRef = doc(db, QC_INSPECTIONS_COLLECTION, docId);
+  await deleteDoc(docRef);
+}
+
+/**
+ * Subscribe to real-time changes of Voice Rug Gallery Items
+ */
+export function subscribeVoiceRugItems(
+  onUpdate: (data: VoiceRugItem[]) => void,
+  onError?: (error: Error) => void
+) {
+  const colRef = collection(db, VOICE_RUGS_COLLECTION);
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      if (snapshot.empty) {
+        onUpdate([]);
+        return;
+      }
+      const items: VoiceRugItem[] = [];
+      snapshot.forEach((docSnap) => {
+        items.push({
+          ...(docSnap.data() as VoiceRugItem),
+          id: docSnap.id
+        });
+      });
+      items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      onUpdate(items);
+    },
+    (err) => {
+      console.error('Voice Rug snapshot error:', err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Save single Voice Rug Item
+ */
+export async function saveVoiceRugItemToFirestore(item: VoiceRugItem): Promise<void> {
+  const docId = sanitizeDocId(item.id || `voice_rug_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
+  const docRef = doc(db, VOICE_RUGS_COLLECTION, docId);
+  const cleanData: Record<string, any> = {};
+  for (const [key, val] of Object.entries(item)) {
+    if (val !== undefined) cleanData[key] = val;
+  }
+  cleanData.id = docId;
+  await setDoc(docRef, cleanData, { merge: true });
+}
+
+/**
+ * Save multiple Voice Rug Items in bulk batch
+ */
+export async function saveVoiceRugItemsBatchToFirestore(items: VoiceRugItem[]): Promise<void> {
+  const batch = writeBatch(db);
+  for (const item of items) {
+    const docId = sanitizeDocId(item.id || `voice_rug_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
+    const docRef = doc(db, VOICE_RUGS_COLLECTION, docId);
+    const cleanData: Record<string, any> = {};
+    for (const [key, val] of Object.entries(item)) {
+      if (val !== undefined) cleanData[key] = val;
+    }
+    cleanData.id = docId;
+    batch.set(docRef, cleanData, { merge: true });
+  }
+  await batch.commit();
+}
+
+/**
+ * Delete a Voice Rug Item
+ */
+export async function deleteVoiceRugItemFromFirestore(id: string): Promise<void> {
+  const docId = sanitizeDocId(id);
+  const docRef = doc(db, VOICE_RUGS_COLLECTION, docId);
+  await deleteDoc(docRef);
+}

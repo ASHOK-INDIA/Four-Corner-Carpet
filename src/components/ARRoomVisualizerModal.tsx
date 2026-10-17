@@ -453,8 +453,14 @@ export const ARRoomVisualizerModal: React.FC<ARRoomVisualizerModalProps> = ({
     : activeSample.imageUrl;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn select-none">
-      <div className="bg-[#150A0C] border-2 border-[#E4002B]/60 w-full max-w-6xl rounded-3xl shadow-[0_25px_80px_rgba(228,0,43,0.35)] flex flex-col h-[94vh] overflow-hidden text-[#FFF0F2]">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn select-none"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#150A0C] border-2 border-[#E4002B]/60 w-full max-w-6xl rounded-3xl shadow-[0_25px_80px_rgba(228,0,43,0.35)] flex flex-col h-[94vh] overflow-hidden text-[#FFF0F2]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top Header - Signature Red Luxury Atelier Styling */}
         <div className="bg-gradient-to-r from-[#240A0D] via-[#380E14] to-[#240A0D] border-b border-[#E4002B]/40 px-4 md:px-6 py-3 flex items-center justify-between shrink-0 shadow-sm">
           <div className="flex items-center gap-3">

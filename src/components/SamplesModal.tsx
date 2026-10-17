@@ -314,10 +314,14 @@ export const SamplesModal: React.FC<SamplesModalProps> = ({ isOpen, onClose, adm
     : '';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-6 bg-slate-950/60 backdrop-blur-md">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-6 bg-slate-950/60 backdrop-blur-md"
+      onClick={onClose}
+    >
       {/* Main Container */}
       <div 
         id="samples-modal-container"
+        onClick={(e) => e.stopPropagation()}
         className={`relative w-full h-full md:max-w-6xl md:h-[86vh] bg-white/95 backdrop-blur-xl md:rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-red-500/30 transition-all duration-300 ${
           isFullscreen ? 'md:max-w-full md:h-full md:rounded-none' : ''
         }`}

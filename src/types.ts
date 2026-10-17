@@ -147,7 +147,7 @@ export interface AiyaraInvoice {
   buyerAttention: string;
 
   // Export Shipping & Terms details
-  invoiceType?: 'STANDARD' | 'POPTOP'; // Dedicated Poptop invoice format vs Standard export
+  invoiceType?: 'STANDARD' | 'POPTOP' | 'AIYARA'; // Dedicated Poptop invoice format vs Standard export
   priceMode?: 'PER_SQM' | 'PER_PCS'; // Price per Sq.M vs Price per Piece
   perPalletCharge?: number; // Per Pallet Charge amount
   totalPallets?: number; // Total number of pallets
@@ -229,4 +229,84 @@ export interface LedgerEntry {
   createdAt: string;
 }
 
+export interface QcCheckItem {
+  id: string;
+  title: string;
+  category: 'DIMENSIONS' | 'COLOR' | 'WEAVE' | 'BACKING' | 'FINISHING' | 'PACKAGING' | 'LABELING';
+  standard: string;
+  status: 'PASS' | 'MINOR' | 'MAJOR' | 'NA';
+  remarks?: string;
+}
 
+export interface QcInspectionPhoto {
+  id: string;
+  caption: string;
+  url: string;
+  tag: 'FACE' | 'BACKING' | 'BINDING' | 'PALLET' | 'LABEL' | 'GENERAL';
+  uploadedAt: string;
+}
+
+export interface QcInspectionReport {
+  id: string;
+  poNumber: string;
+  buyerName: string;
+  inspectionDate: string;
+  inspectorName: string;
+  inspectionStage: 'INLINE' | 'PRE_SHIPMENT' | 'PALLET_STUFFING';
+  aqlStandard: string;
+  totalLotPieces: number;
+  samplePiecesChecked: number;
+  moisturePercent: number; // Max permissible < 12%
+  pileHeightMm: number;
+  weightPerSqMtrGsm?: number;
+  overallGrade: 'PASS' | 'CONDITIONAL_PASS' | 'REWORK_REQUIRED' | 'FAIL';
+  minorDefectsCount: number;
+  majorDefectsCount: number;
+  criticalDefectsCount: number;
+  checks: QcCheckItem[];
+  photos: QcInspectionPhoto[];
+  certificateNo: string;
+  verifiedBy: string;
+  inspectorRemarks: string;
+  palletCondition: 'EXCELLENT' | 'GOOD' | 'NEEDS_REWRAP';
+  cornerProtectorsPresent: boolean;
+  strappingTensionOk: boolean;
+  isLockedApproved?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface BuyerTrackingDetails {
+  poNumber: string;
+  buyerName: string;
+  destinationPort: string;
+  loadingPort: string;
+  carrierName: string; // e.g. Maersk, MSC, Hapag-Lloyd
+  containerNumber: string;
+  sealNumber: string;
+  blNumber: string; // Bill of Lading
+  estimatedArrivalDate: string;
+  vesselName: string;
+  voyageNo: string;
+  liveStatus: 'PRODUCTION' | 'QC_APPROVED' | 'STUFFED' | 'CUSTOMS_CLEARED' | 'ON_VESSEL' | 'PORT_ARRIVED' | 'DELIVERED';
+  customsReleaseDate?: string;
+  temperatureHumidityLog?: string;
+  notes?: string;
+}
+
+export interface VoiceRugItem {
+  id: string;
+  photoUrl: string;
+  fileName: string;
+  title?: string;
+  size?: string;           // e.g. "250x350 cm" / "8x10 ft"
+  material?: string;       // e.g. "100% Wool", "PET Hand Woven"
+  pileHeight?: string;     // e.g. "12 mm", "Cut & Loop 14mm"
+  construction?: string;   // e.g. "Hand Tufted", "Hand Knotted", "Flatweave"
+  color?: string;          // e.g. "Rust Brown", "Moss Green"
+  voiceTranscript?: string;// raw spoken audio transcription
+  priceEstimate?: string;  // e.g. "₹ 1,175 / m²"
+  notes?: string;
+  recordedAt?: string;
+  createdAt: string;
+}

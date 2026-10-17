@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { PurchaseOrder, PPWRFilesStore, WeatherData, ForecastComment, SampleItem } from './types';
+import { PurchaseOrder, PPWRFilesStore, WeatherData, ForecastComment, SampleItem, QcInspectionReport, AiyaraInvoice } from './types';
 import { Header } from './components/Header';
 import { KPICards } from './components/KPICards';
 import { ControlsBar } from './components/ControlsBar';
@@ -10,6 +10,7 @@ import { PPWRModal } from './components/PPWRModal';
 import { OrderFormModal } from './components/OrderFormModal';
 import { PrintSummaryModal } from './components/PrintSummaryModal';
 import { PasswordModal } from './components/PasswordModal';
+import { ConfirmModal } from './components/ConfirmModal';
 import { ContainerStuffingModal } from './components/ContainerStuffingModal';
 
 import { SamplesModal } from './components/SamplesModal';
@@ -17,9 +18,13 @@ import { ColorwayStudioModal } from './components/ColorwayStudioModal';
 import { ARRoomVisualizerModal } from './components/ARRoomVisualizerModal';
 import { WeaverGraphModal } from './components/WeaverGraphModal';
 import { AiyaraInvoiceModal } from './components/AiyaraInvoiceModal';
+
 import { AiyaraLedgerModal } from './components/AiyaraLedgerModal';
-import { WorkerSmsModal } from './components/WorkerSmsModal';
 import { PdfStudioModal } from './components/PdfStudioModal';
+import { QcInspectionModal } from './components/QcInspectionModal';
+import { LeadGenerateApiModal } from './components/LeadGenerateApiModal';
+import { VoiceRugGalleryModal } from './components/VoiceRugGalleryModal';
+import { WindowsTaskbar } from './components/WindowsTaskbar';
 import {
   subscribePurchaseOrders,
   subscribePPWRFiles,
@@ -31,6 +36,8 @@ import {
   clearAllFirestoreData,
   subscribeForecastComments,
   saveForecastCommentToFirestore,
+  subscribeQcInspections,
+  subscribeAiyaraInvoices,
 } from './lib/firestoreService';
 
 export default function App() {
@@ -81,12 +88,18 @@ export default function App() {
   const [isSamplesOpen, setIsSamplesOpen] = useState<boolean>(false);
   const [isColorwayStudioOpen, setIsColorwayStudioOpen] = useState<boolean>(false);
   const [isAiyaraInvoiceOpen, setIsAiyaraInvoiceOpen] = useState<boolean>(false);
-  const [isAiyaraLedgerOpen, setIsAiyaraLedgerOpen] = useState<boolean>(false);
-  const [isWorkerSmsOpen, setIsWorkerSmsOpen] = useState<boolean>(false);
-  const [isPdfStudioOpen, setIsPdfStudioOpen] = useState<boolean>(false);
-  const [smsPoNumber, setSmsPoNumber] = useState<string>('');
 
-  // State: Advanced Rug Studio & Logistics Enhancements
+  const [isAiyaraLedgerOpen, setIsAiyaraLedgerOpen] = useState<boolean>(false);
+  const [isPdfStudioOpen, setIsPdfStudioOpen] = useState<boolean>(false);
+  const [isStartMenuOpen, setIsStartMenuOpen] = useState<boolean>(false);
+
+  // State: Digital QC Audit
+  const [isQcModalOpen, setIsQcModalOpen] = useState<boolean>(false);
+  const [selectedQcPo, setSelectedQcPo] = useState<string>('');
+  const [qcReports, setQcReports] = useState<QcInspectionReport[]>([]);
+  const [isLeadApiOpen, setIsLeadApiOpen] = useState<boolean>(false);
+  const [isVoiceGalleryOpen, setIsVoiceGalleryOpen] = useState<boolean>(false);
+
   const [isARVisualizerOpen, setIsARVisualizerOpen] = useState<boolean>(false);
   const [selectedARSample, setSelectedARSample] = useState<SampleItem | null>(null);
   const [isWeaverGraphOpen, setIsWeaverGraphOpen] = useState<boolean>(false);
@@ -131,10 +144,20 @@ export default function App() {
       }
     );
 
+    const unsubscribeQC = subscribeQcInspections(
+      (data) => {
+        setQcReports(data);
+      },
+      (err) => {
+        console.warn('QC subscription:', err);
+      }
+    );
+
     return () => {
       unsubscribePOs();
       unsubscribePPWR();
       unsubscribeComments();
+      unsubscribeQC();
     };
   }, []);
 
@@ -246,6 +269,9 @@ export default function App() {
     setIsAiyaraLedgerOpen(false);
     setIsWorkerSmsOpen(false);
     setIsPdfStudioOpen(false);
+    setIsQcModalOpen(false);
+    setIsLeadApiOpen(false);
+    setIsVoiceGalleryOpen(false);
   };
 
   // Admin Toggle Handler
@@ -265,14 +291,12 @@ export default function App() {
 
   // PO Detail View
   const handleViewDetails = (index: number) => {
-    closeAllModals();
     setSelectedDetailOrder(filteredData[index] || productionData[index] || null);
     setDetailModalOpen(true);
   };
 
   // Shipment Track Actions
   const handleOpenShipmentTrack = () => {
-    closeAllModals();
     if (productionData.length > 0 && !trackSelectedPo) {
       setTrackSelectedPo(productionData[0].po);
     }
@@ -280,7 +304,6 @@ export default function App() {
   };
 
   const handleSelectShipmentForPo = (po: string) => {
-    closeAllModals();
     setTrackSelectedPo(po);
     setShipmentTrackOpen(true);
   };
@@ -298,7 +321,6 @@ export default function App() {
 
   // PO CRUD Actions
   const handleOpenCreatePo = () => {
-    closeAllModals();
     if (!adminMode) {
       setIsPasswordModalOpen(true);
       return;
@@ -309,7 +331,6 @@ export default function App() {
   };
 
   const handleEditOrder = (realIndex: number) => {
-    closeAllModals();
     if (!adminMode) return;
     const targetOrder = productionData[realIndex];
     if (!targetOrder) return;
@@ -415,61 +436,6 @@ export default function App() {
         isSyncing={isSyncing}
         onToggleAdmin={handleToggleAdmin}
         onOpenCreatePo={handleOpenCreatePo}
-        onOpenAiyaraInvoice={() => {
-          closeAllModals();
-          setIsAiyaraInvoiceOpen(true);
-        }}
-        onOpenUploadInvoiceExcel={() => {
-          closeAllModals();
-          setIsAiyaraInvoiceOpen(true);
-        }}
-        onOpenLedger={() => {
-          closeAllModals();
-          setIsAiyaraLedgerOpen(true);
-        }}
-        onOpenShipmentTrack={handleOpenShipmentTrack}
-        onOpenPPWR={() => {
-          closeAllModals();
-          setPpwrModalOpen(true);
-        }}
-        onOpenPrintReport={() => {
-          closeAllModals();
-          setPrintSummaryOpen(true);
-        }}
-        onOpen3DContainer={() => {
-          closeAllModals();
-          setIs3DContainerOpen(true);
-        }}
-        onOpenSamples={() => {
-          closeAllModals();
-          setIsSamplesOpen(true);
-        }}
-        onOpenColorwayStudio={() => {
-          closeAllModals();
-          setIsColorwayStudioOpen(true);
-        }}
-        onOpenARVisualizer={() => {
-          closeAllModals();
-          setSelectedARSample(null);
-          setIsARVisualizerOpen(true);
-        }}
-        onOpenWeaverGraph={() => {
-          closeAllModals();
-          setIsWeaverGraphOpen(true);
-        }}
-        onOpenWorkerSms={() => {
-          closeAllModals();
-          setSmsPoNumber('');
-          setIsWorkerSmsOpen(true);
-        }}
-        onOpenPdfStudio={() => {
-          if (!adminMode) {
-            alert('Admin access required.');
-            return;
-          }
-          closeAllModals();
-          setIsPdfStudioOpen(true);
-        }}
       />
 
       {/* Main Dashboard Container */}
@@ -489,6 +455,9 @@ export default function App() {
           adminMode={adminMode}
           onOpenCreatePo={handleOpenCreatePo}
           onClearData={handleClearData}
+          onOpenLeadApi={() => {
+            setIsLeadApiOpen(true);
+          }}
         />
 
         {/* Main Production Orders Table */}
@@ -500,6 +469,10 @@ export default function App() {
           onSelectShipmentPo={handleSelectShipmentForPo}
           onEditOrder={handleEditOrder}
           onDeleteOrder={handleDeleteOrder}
+          onOpenQcForPo={(po) => {
+            setSelectedQcPo(po);
+            setIsQcModalOpen(true);
+          }}
         />
       </main>
 
@@ -685,13 +658,15 @@ export default function App() {
         />
       )}
 
-      {/* Aiyara INVOICE Module (Visible ONLY to ADMIN) */}
+      {/* POPTOP INVOICE Module (Visible ONLY to ADMIN) */}
       <AiyaraInvoiceModal
         isOpen={isAiyaraInvoiceOpen}
         onClose={() => setIsAiyaraInvoiceOpen(false)}
         adminMode={adminMode}
         productionData={productionData}
       />
+
+
 
       {/* Aiyara Ledger & Account Book Module */}
       <AiyaraLedgerModal
@@ -701,14 +676,6 @@ export default function App() {
         adminMode={adminMode}
       />
 
-      {/* Worker SMS Alert Gateway Modal */}
-      <WorkerSmsModal
-        isOpen={isWorkerSmsOpen}
-        onClose={() => setIsWorkerSmsOpen(false)}
-        productionData={productionData}
-        preselectedPoNumber={smsPoNumber}
-      />
-
       {/* Admin PDF Studio & Auto-Converter Module */}
       <PdfStudioModal
         isOpen={isPdfStudioOpen}
@@ -716,31 +683,99 @@ export default function App() {
         adminMode={adminMode}
       />
 
+      {/* Digital QC & Pallet Inspection Studio (Option 3) */}
+      <QcInspectionModal
+        isOpen={isQcModalOpen}
+        onClose={() => setIsQcModalOpen(false)}
+        adminMode={adminMode}
+        productionData={productionData}
+        selectedPoNumber={selectedQcPo || (productionData[0]?.po ?? '1128405')}
+      />
+
+      {/* Live Lead Generate API & Intelligence Modal */}
+      <LeadGenerateApiModal
+        isOpen={isLeadApiOpen}
+        onClose={() => setIsLeadApiOpen(false)}
+      />
+
+      {/* Voice Rug Specifier & Bulk Photo Gallery Modal */}
+      <VoiceRugGalleryModal
+        isOpen={isVoiceGalleryOpen}
+        onClose={() => setIsVoiceGalleryOpen(false)}
+        adminMode={adminMode}
+      />
+
       {/* Delete Confirmation Modal */}
-      {deleteConfirmOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl p-6 shadow-xl border border-rose-700 w-full max-w-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Confirm Deletion</h3>
-            <p className="text-sm text-slate-600">
-              Are you sure you want to delete purchase order <span className="font-bold text-rose-700">{deleteConfirmOrder.po}</span>?
-            </p>
-            <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => setDeleteConfirmOrder(null)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmDeleteOrder}
-                className="px-4 py-2 text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 rounded-lg transition"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={!!deleteConfirmOrder}
+        onClose={() => setDeleteConfirmOrder(null)}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete purchase order ${deleteConfirmOrder?.po}?`}
+        onConfirm={confirmDeleteOrder}
+      />
+
+      {/* Windows OS Taskbar at Bottom */}
+      <WindowsTaskbar
+        windows={[
+          { id: 'detail', title: 'PO Detail', colorClass: 'bg-slate-500', isOpen: detailModalOpen, isMinimized: false },
+          { id: 'shipment', title: 'Shipment Tracking', colorClass: 'bg-cyan-500', isOpen: shipmentTrackOpen, isMinimized: false },
+          { id: 'ppwr', title: 'PPWR Compliance', colorClass: 'bg-emerald-500', isOpen: ppwrModalOpen, isMinimized: false },
+          { id: 'orderForm', title: 'Order Form', colorClass: 'bg-indigo-500', isOpen: orderFormOpen, isMinimized: false },
+          { id: 'printSummary', title: 'Print Summary', colorClass: 'bg-pink-500', isOpen: printSummaryOpen, isMinimized: false },
+          { id: 'container3d', title: '3D Container CBM', colorClass: 'bg-amber-500', isOpen: is3DContainerOpen, isMinimized: false },
+          { id: 'password', title: 'Admin Passcode', colorClass: 'bg-rose-500', isOpen: isPasswordModalOpen, isMinimized: false },
+          { id: 'samples', title: 'Samples Gallery', colorClass: 'bg-blue-500', isOpen: isSamplesOpen, isMinimized: false },
+          { id: 'colorway', title: 'Colorway Studio', colorClass: 'bg-fuchsia-500', isOpen: isColorwayStudioOpen, isMinimized: false },
+          { id: 'arVisualizer', title: 'AR Room Visualizer', colorClass: 'bg-violet-500', isOpen: isARVisualizerOpen, isMinimized: false },
+          { id: 'weaverGraph', title: 'Master Weaver Graph', colorClass: 'bg-teal-500', isOpen: isWeaverGraphOpen, isMinimized: false },
+          { id: 'invoice', title: 'Poptop Invoice', colorClass: 'bg-rose-600', isOpen: isAiyaraInvoiceOpen, isMinimized: false },
+          { id: 'ledger', title: 'Account Ledger', colorClass: 'bg-indigo-600', isOpen: isAiyaraLedgerOpen, isMinimized: false, isAdminOnly: true },
+          { id: 'pdfStudio', title: 'Admin PDF Studio', colorClass: 'bg-red-500', isOpen: isPdfStudioOpen, isMinimized: false, isAdminOnly: true },
+          { id: 'qc', title: 'Digital QC Audit', colorClass: 'bg-emerald-600', isOpen: isQcModalOpen, isMinimized: false, isAdminOnly: true },
+          { id: 'leadApi', title: 'Live Lead API', colorClass: 'bg-amber-600', isOpen: isLeadApiOpen, isMinimized: false, isAdminOnly: true },
+          { id: 'voiceGallery', title: 'Voice Rug Gallery', colorClass: 'bg-purple-600', isOpen: isVoiceGalleryOpen, isMinimized: false, isAdminOnly: true },
+        ]}
+        onToggleWindow={(id) => {
+          if (id === 'detail') setDetailModalOpen(!detailModalOpen);
+          if (id === 'shipment') setShipmentTrackOpen(!shipmentTrackOpen);
+          if (id === 'ppwr') setPpwrModalOpen(!ppwrModalOpen);
+          if (id === 'orderForm') setOrderFormOpen(!orderFormOpen);
+          if (id === 'printSummary') setPrintSummaryOpen(!printSummaryOpen);
+          if (id === 'container3d') setIs3DContainerOpen(!is3DContainerOpen);
+          if (id === 'password') setIsPasswordModalOpen(!isPasswordModalOpen);
+          if (id === 'samples') setIsSamplesOpen(!isSamplesOpen);
+          if (id === 'colorway') setIsColorwayStudioOpen(!isColorwayStudioOpen);
+          if (id === 'arVisualizer') setIsARVisualizerOpen(!isARVisualizerOpen);
+          if (id === 'weaverGraph') setIsWeaverGraphOpen(!isWeaverGraphOpen);
+          if (id === 'invoice') setIsAiyaraInvoiceOpen(!isAiyaraInvoiceOpen);
+          if (id === 'ledger') {
+            if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
+            setIsAiyaraLedgerOpen(!isAiyaraLedgerOpen);
+          }
+          if (id === 'pdfStudio') {
+            if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
+            setIsPdfStudioOpen(!isPdfStudioOpen);
+          }
+          if (id === 'qc') {
+            if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
+            setSelectedQcPo(productionData[0]?.po || '1128405');
+            setIsQcModalOpen(!isQcModalOpen);
+          }
+          if (id === 'leadApi') {
+            if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
+            setIsLeadApiOpen(!isLeadApiOpen);
+          }
+          if (id === 'voiceGallery') {
+            if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
+            setIsVoiceGalleryOpen(!isVoiceGalleryOpen);
+          }
+        }}
+        onCloseAll={closeAllModals}
+        adminMode={adminMode}
+        weather={weather}
+        isStartMenuOpen={isStartMenuOpen}
+        onToggleStartMenu={() => setIsStartMenuOpen(!isStartMenuOpen)}
+      />
     </div>
   );
 }
