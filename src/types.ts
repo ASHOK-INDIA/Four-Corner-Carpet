@@ -66,7 +66,7 @@ export interface SampleItem {
   createdAt: string;
 }
 
-export interface AiyaraLineItem {
+export interface ExportLineItem {
   id: string;
   itemNo: string;
   description: string;
@@ -116,7 +116,7 @@ export interface ExporterMaster {
   branch: string;
 }
 
-export interface AiyaraInvoice {
+export interface ExportInvoice {
   id: string;
   invoiceNo: string;
   date: string;
@@ -147,7 +147,7 @@ export interface AiyaraInvoice {
   buyerAttention: string;
 
   // Export Shipping & Terms details
-  invoiceType?: 'STANDARD' | 'POPTOP' | 'AIYARA'; // Dedicated Poptop invoice format vs Standard export
+  invoiceType?: 'STANDARD' | 'POPTOP' | 'Export'; // Dedicated Poptop invoice format vs Standard export
   priceMode?: 'PER_SQM' | 'PER_PCS'; // Price per Sq.M vs Price per Piece
   perPalletCharge?: number; // Per Pallet Charge amount
   totalPallets?: number; // Total number of pallets
@@ -170,7 +170,7 @@ export interface AiyaraInvoice {
   marksAndNos?: string; // e.g. "Marks : F4C\nAustria"
   noAndKindOfPackages?: string; // e.g. "10 Pallet"
 
-  items: AiyaraLineItem[];
+  items: ExportLineItem[];
 
   totalPcs: number;
   totalSqMeter: number;

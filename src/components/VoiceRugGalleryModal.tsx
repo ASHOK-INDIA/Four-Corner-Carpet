@@ -599,7 +599,7 @@ export const VoiceRugGalleryModal: React.FC<VoiceRugGalleryModalProps> = ({
                 defaultValue="Four Corners Carpets"
               >
                 <option value="Four Corners Carpets">Four Corners Carpets</option>
-                <option value="Aiyara Textile Manufacturing">Aiyara Textile Manufacturing</option>
+                <option value="Export Textile Manufacturing">Export Textile Manufacturing</option>
               </select>
             </div>
 

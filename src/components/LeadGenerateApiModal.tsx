@@ -363,7 +363,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
         body: tableBody,
         theme: 'grid',
         headStyles: {
-          fillColor: [228, 0, 43], // AIYARA TEXTILE Crimson
+          fillColor: [228, 0, 43], // Export Crimson
           textColor: [255, 255, 255],
           fontStyle: 'bold',
           fontSize: 7.8,
@@ -520,7 +520,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
       doc.text(splitEmail.slice(0, 25), 18, currentY + 2);
 
       const safeName = lead.companyName.replace(/[^a-zA-Z0-9]/g, '_');
-      doc.save(`Aiyara_Lead_Dossier_${safeName}.pdf`);
+      doc.save(`Export_Lead_Dossier_${safeName}.pdf`);
     } catch (err: any) {
       console.error('Single lead PDF error:', err);
       alert('Failed to generate Lead PDF Dossier');
@@ -594,7 +594,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
                 </h2>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Google Search Grounding & B2B Buyer Intelligence Engine for AIYARA TEXTILE (USA, Europe, UAE, Australia)
+                Google Search Grounding & B2B Buyer Intelligence Engine for Export Unit (USA, Europe, UAE, Australia)
               </p>
             </div>
           </div>
@@ -1196,7 +1196,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
                         {/* Why Good Fit */}
                         <div className="text-xs text-slate-400 space-y-1">
                           <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-                            Why They Fit AIYARA TEXTILE:
+                            Why They Fit Our Company:
                           </div>
                           <p className="line-clamp-2 text-slate-300 text-[11px]">
                             {lead.whyGoodFit}
@@ -1734,7 +1734,7 @@ Hi ${selectedPitchLead.contactName || selectedPitchLead.keyPerson.split('(')[0].
 
 I noticed your work leading ${selectedPitchLead.contactDesignation || 'sourcing & floor coverings'} at ${selectedPitchLead.companyName}.
 
-At AIYARA TEXTILE (Bhadohi, India), we are direct loom manufacturers specializing in:
+At our manufacturing unit (Bhadohi, India), we are direct loom manufacturers specializing in:
 • High-density Hand-Knotted New Zealand wool rugs
 • Modern Hand-Tufted textured collections
 • Certified sustainable flatweaves & GRS recycled PET runners
@@ -1746,12 +1746,12 @@ Would you be open to reviewing our 2026 export catalog?
 
 Best regards,
 Ashok Kumar
-AIYARA TEXTILE (Bhadohi, India)
+Export House (Bhadohi, India)
 support@aiyaratextile.com`}
                     </div>
                     <button
                       onClick={() => {
-                        const inMailFull = `Subject: Handcrafted Wool & Custom Tufted Rugs from Bhadohi for ${selectedPitchLead.companyName}\n\nHi ${selectedPitchLead.contactName || selectedPitchLead.keyPerson.split('(')[0].trim()},\n\nI noticed your work leading ${selectedPitchLead.contactDesignation || 'sourcing'} at ${selectedPitchLead.companyName}.\n\nAt AIYARA TEXTILE (Bhadohi, India), we are direct loom manufacturers specializing in certified New Zealand wool hand-knotted & tufted rugs with strict EU PPWR compliance.\n\nBest regards,\nAshok Kumar\nAIYARA TEXTILE`;
+                        const inMailFull = `Subject: Handcrafted Wool & Custom Tufted Rugs from Bhadohi for ${selectedPitchLead.companyName}\n\nHi ${selectedPitchLead.contactName || selectedPitchLead.keyPerson.split('(')[0].trim()},\n\nI noticed your work leading ${selectedPitchLead.contactDesignation || 'sourcing'} at ${selectedPitchLead.companyName}.\n\nAt our factory (Bhadohi, India), we are direct loom manufacturers specializing in certified New Zealand wool hand-knotted & tufted rugs with strict EU PPWR compliance.\n\nBest regards,\nAshok Kumar`;
                         copyToClipboard(inMailFull, 'inmail-copied');
                       }}
                       className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-1.5 cursor-pointer border border-slate-700"

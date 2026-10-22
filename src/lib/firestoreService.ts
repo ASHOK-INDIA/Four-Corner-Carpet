@@ -8,14 +8,14 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem, SampleItem, AiyaraInvoice, WorkerSmsAlert, ManufacturerWorker, LedgerEntry, QcInspectionReport, VoiceRugItem } from '../types';
+import { PurchaseOrder, PPWRFile, PPWRFilesStore, ForecastComment, CargoItem, SampleItem, ExportInvoice, WorkerSmsAlert, ManufacturerWorker, LedgerEntry, QcInspectionReport, VoiceRugItem } from '../types';
 
 const PO_COLLECTION = 'purchase_orders';
 const PPWR_COLLECTION = 'ppwr_files';
 const COMMENTS_COLLECTION = 'forecast_comments';
 const CARGO_COLLECTION = 'container_items';
 const SAMPLE_ITEMS_COLLECTION = 'sample_items';
-const AIYARA_INVOICES_COLLECTION = 'aiyara_invoices';
+const EXPORT_INVOICES_COLLECTION = 'aiyara_invoices';
 const WORKER_SMS_COLLECTION = 'worker_sms_alerts';
 const WORKERS_COLLECTION = 'manufacturer_workers';
 const LEDGER_COLLECTION = 'ledger_entries';
@@ -467,9 +467,9 @@ export async function deleteSampleItemFromFirestore(id: string): Promise<void> {
 }
 
 /**
- * Default Aiyara Invoice Templates from attached PDF
+ * Default Export Invoice Templates from attached PDF
  */
-export const UPDATED_PO_17_ITEMS_INVOICE: AiyaraInvoice = {
+export const UPDATED_PO_17_ITEMS_INVOICE: ExportInvoice = {
   id: 'aiyara-po-updated-17items',
   invoiceNo: 'PO # 1128405 (Updated 17 Items)',
   date: '13-10-2026',
@@ -482,14 +482,14 @@ export const UPDATED_PO_17_ITEMS_INVOICE: AiyaraInvoice = {
   supplierAttention: 'Mr. Danish',
   supplierBankDetails: 'Axis Bank, Station Road., 922020057882560',
   supplierIfsc: 'AXISINBBA04',
-  buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+  buyerName: 'Export Unit',
   buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
   buyerGstin: '26AAVCA3353L1Z6',
   buyerPhone: '9173722468',
-  buyerEmail: 'sale@aiyaratextile.in',
+  buyerEmail: 'sale@ourexport.in',
   buyerAttention: 'Mr. Om Prakash',
   currency: 'INR (₹)',
-  invoiceType: 'AIYARA',
+  invoiceType: 'Export',
   notes: '25 % Advance Paid Already & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.',
   items: [
     { id: 'item-up-1', itemNo: '458712', description: 'Terra Outdoor Rug Brown', specification: '100% Pet Hand Woven', productCode: 'Hand Woven', sizesCm: '75 x 150 cm', qtyPcs: 36, totalSqMeter: 40.5, sqMtrPrice: 1175, totalAmount: 47587.50 },
@@ -521,7 +521,7 @@ export const UPDATED_PO_17_ITEMS_INVOICE: AiyaraInvoice = {
   createdAt: '2026-10-13T10:30:00.000Z'
 };
 
-export const DEFAULT_AIYARA_INVOICES: AiyaraInvoice[] = [
+export const DEFAULT_EXPORT_INVOICES: ExportInvoice[] = [
   UPDATED_PO_17_ITEMS_INVOICE,
   {
     id: 'aiyara-po-1128405-1st',
@@ -536,14 +536,14 @@ export const DEFAULT_AIYARA_INVOICES: AiyaraInvoice[] = [
     supplierAttention: 'Mr. Danish',
     supplierBankDetails: 'Axis Bank, Station Road., 922020057882560',
     supplierIfsc: 'AXISINBBA04',
-    buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+    buyerName: 'Export Unit',
     buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
     buyerGstin: '26AAVCA3353L1Z6',
     buyerPhone: '9173722468',
-    buyerEmail: 'sale@aiyaratextile.in',
+    buyerEmail: 'sale@ourexport.in',
     buyerAttention: 'Mr. Om Prakash',
     currency: 'INR (₹)',
-    invoiceType: 'AIYARA',
+    invoiceType: 'Export',
     notes: '25 % Advance & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.',
     items: [
       { id: 'item-1', itemNo: '391912', description: 'Checks Wool rug Gray', specification: '100% Wool', productCode: 'Tufted', sizesCm: '300x400', qtyPcs: 6, totalSqMeter: 72, sqMtrPrice: 1096, totalAmount: 78912 },
@@ -582,14 +582,14 @@ export const DEFAULT_AIYARA_INVOICES: AiyaraInvoice[] = [
     supplierAttention: 'Mr. Danish',
     supplierBankDetails: 'Axis Bank, Station Road., 922020057882560',
     supplierIfsc: 'AXISINBBA04',
-    buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+    buyerName: 'Export Unit',
     buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
     buyerGstin: '26AAVCA3353L1Z6',
     buyerPhone: '9173722468',
-    buyerEmail: 'sale@aiyaratextile.in',
+    buyerEmail: 'sale@ourexport.in',
     buyerAttention: 'Mr. Om Prakash',
     currency: 'INR (₹)',
-    invoiceType: 'AIYARA',
+    invoiceType: 'Export',
     notes: '25 % Advance & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.',
     items: [
       { id: 'item-201', itemNo: '454016', description: 'Field Wool Rug Natural', specification: '100% Wool', productCode: 'Hand Woven', sizesCm: '180x270', qtyPcs: 8, totalSqMeter: 39, sqMtrPrice: 1950, totalAmount: 75816 },
@@ -619,11 +619,11 @@ export const DEFAULT_AIYARA_INVOICES: AiyaraInvoice[] = [
 ];
 
 /**
- * Purge dummy / template Aiyara invoices from Firestore
+ * Purge dummy / template Export invoices from Firestore
  */
-export async function purgeDummyAiyaraInvoicesFromFirestore(): Promise<void> {
+export async function purgeDummyExportInvoicesFromFirestore(): Promise<void> {
   try {
-    const invSnap = await getDocs(collection(db, AIYARA_INVOICES_COLLECTION));
+    const invSnap = await getDocs(collection(db, EXPORT_INVOICES_COLLECTION));
     if (!invSnap.empty) {
       for (const docSnap of invSnap.docs) {
         const docId = docSnap.id.toLowerCase();
@@ -644,22 +644,22 @@ export async function purgeDummyAiyaraInvoicesFromFirestore(): Promise<void> {
       }
     }
   } catch (e) {
-    console.warn('Purge dummy Aiyara invoices error:', e);
+    console.warn('Purge dummy Export invoices error:', e);
   }
 }
 
 /**
- * Subscribe to real-time changes of Aiyara Invoices in Firestore.
+ * Subscribe to real-time changes of Export Invoices in Firestore.
  * ONLY loads uploaded and user-saved invoices.
  */
-export function subscribeAiyaraInvoices(
-  onUpdate: (data: AiyaraInvoice[]) => void,
+export function subscribeExportInvoices(
+  onUpdate: (data: ExportInvoice[]) => void,
   onError?: (error: Error) => void
 ) {
   // Purge any legacy dummy invoices on start
-  purgeDummyAiyaraInvoicesFromFirestore();
+  purgeDummyExportInvoicesFromFirestore();
 
-  const colRef = collection(db, AIYARA_INVOICES_COLLECTION);
+  const colRef = collection(db, EXPORT_INVOICES_COLLECTION);
   return onSnapshot(
     colRef,
     (snapshot) => {
@@ -668,10 +668,10 @@ export function subscribeAiyaraInvoices(
         return;
       }
 
-      const items: AiyaraInvoice[] = [];
+      const items: ExportInvoice[] = [];
       snapshot.forEach((docSnap) => {
         const docId = docSnap.id.toLowerCase();
-        const d = docSnap.data() as AiyaraInvoice;
+        const d = docSnap.data() as ExportInvoice;
         const invNo = (d.invoiceNo || '').toLowerCase();
 
         // Skip dummy templates
@@ -694,18 +694,18 @@ export function subscribeAiyaraInvoices(
       onUpdate(items);
     },
     (err) => {
-      console.error('Aiyara Invoices snapshot error:', err);
+      console.error('Export Invoices snapshot error:', err);
       if (onError) onError(err);
     }
   );
 }
 
 /**
- * Save or update an Aiyara Invoice in Firestore
+ * Save or update an Export Invoice in Firestore
  */
-export async function saveAiyaraInvoiceToFirestore(invoice: AiyaraInvoice): Promise<void> {
+export async function saveExportInvoiceToFirestore(invoice: ExportInvoice): Promise<void> {
   const docId = sanitizeDocId(invoice.id || `aiyara_inv_${Date.now()}`);
-  const docRef = doc(db, AIYARA_INVOICES_COLLECTION, docId);
+  const docRef = doc(db, EXPORT_INVOICES_COLLECTION, docId);
 
   // Clean undefined values recursively and ensure robust defaults
   const cleanedItems = (invoice.items || []).map((item, idx) => ({
@@ -804,11 +804,11 @@ export async function saveAiyaraInvoiceToFirestore(invoice: AiyaraInvoice): Prom
 }
 
 /**
- * Delete an Aiyara Invoice from Firestore
+ * Delete an Export Invoice from Firestore
  */
-export async function deleteAiyaraInvoiceFromFirestore(id: string): Promise<void> {
+export async function deleteExportInvoiceFromFirestore(id: string): Promise<void> {
   try {
-    const rawRef = doc(db, AIYARA_INVOICES_COLLECTION, id);
+    const rawRef = doc(db, EXPORT_INVOICES_COLLECTION, id);
     await deleteDoc(rawRef);
   } catch (e) {
     console.warn('Direct deleteDoc failed:', e);
@@ -816,7 +816,7 @@ export async function deleteAiyaraInvoiceFromFirestore(id: string): Promise<void
   try {
     const docId = sanitizeDocId(id);
     if (docId !== id) {
-      const docRef = doc(db, AIYARA_INVOICES_COLLECTION, docId);
+      const docRef = doc(db, EXPORT_INVOICES_COLLECTION, docId);
       await deleteDoc(docRef);
     }
   } catch (e) {
@@ -1009,7 +1009,7 @@ const DEFAULT_LEDGER_ENTRIES: LedgerEntry[] = [
     id: 'led-1',
     date: '21-01-2026',
     voucherNo: 'VCH-001',
-    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyName: 'Export Unit',
     partyType: 'SUPPLIER',
     transactionType: 'CREDIT',
     particulars: 'Advance by RTGS',
@@ -1022,7 +1022,7 @@ const DEFAULT_LEDGER_ENTRIES: LedgerEntry[] = [
     id: 'led-2',
     date: '06-03-2026',
     voucherNo: 'VCH-002',
-    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyName: 'Export House MANUFACTURING PRIVATE LIMITED',
     partyType: 'SUPPLIER',
     transactionType: 'CREDIT',
     particulars: 'Advance by RTGS',
@@ -1035,7 +1035,7 @@ const DEFAULT_LEDGER_ENTRIES: LedgerEntry[] = [
     id: 'led-3',
     date: '18-04-2026',
     voucherNo: 'VCH-003',
-    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyName: 'Export House MANUFACTURING PRIVATE LIMITED',
     partyType: 'SUPPLIER',
     transactionType: 'CREDIT',
     particulars: 'Advance by RTGS',
@@ -1048,7 +1048,7 @@ const DEFAULT_LEDGER_ENTRIES: LedgerEntry[] = [
     id: 'led-4',
     date: '26-03-2026',
     voucherNo: 'VCH-004',
-    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyName: 'Export House MANUFACTURING PRIVATE LIMITED',
     partyType: 'SUPPLIER',
     transactionType: 'DEBIT',
     particulars: 'Invoice against Purchase Orders',
@@ -1061,7 +1061,7 @@ const DEFAULT_LEDGER_ENTRIES: LedgerEntry[] = [
     id: 'led-5',
     date: '02-03-2026',
     voucherNo: 'VCH-005',
-    partyName: 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED',
+    partyName: 'Export House MANUFACTURING PRIVATE LIMITED',
     partyType: 'SUPPLIER',
     transactionType: 'DEBIT',
     particulars: 'Photosample development',

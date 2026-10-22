@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { PurchaseOrder, PPWRFilesStore, WeatherData, ForecastComment, SampleItem, QcInspectionReport, AiyaraInvoice } from './types';
+import { PurchaseOrder, PPWRFilesStore, WeatherData, ForecastComment, SampleItem, QcInspectionReport, ExportInvoice } from './types';
 import { Header } from './components/Header';
 import { KPICards } from './components/KPICards';
 import { ControlsBar } from './components/ControlsBar';
@@ -17,9 +17,9 @@ import { SamplesModal } from './components/SamplesModal';
 import { ColorwayStudioModal } from './components/ColorwayStudioModal';
 import { ARRoomVisualizerModal } from './components/ARRoomVisualizerModal';
 import { WeaverGraphModal } from './components/WeaverGraphModal';
-import { AiyaraInvoiceModal } from './components/AiyaraInvoiceModal';
+import { ExportInvoiceModal } from './components/ExportInvoiceModal';
 
-import { AiyaraLedgerModal } from './components/AiyaraLedgerModal';
+import { ExportLedgerModal } from './components/ExportLedgerModal';
 import { PdfStudioModal } from './components/PdfStudioModal';
 import { QcInspectionModal } from './components/QcInspectionModal';
 import { LeadGenerateApiModal } from './components/LeadGenerateApiModal';
@@ -39,7 +39,7 @@ import {
   subscribeForecastComments,
   saveForecastCommentToFirestore,
   subscribeQcInspections,
-  subscribeAiyaraInvoices,
+  subscribeExportInvoices,
 } from './lib/firestoreService';
 
 export default function App() {
@@ -89,9 +89,9 @@ export default function App() {
   const [is3DContainerOpen, setIs3DContainerOpen] = useState<boolean>(false);
   const [isSamplesOpen, setIsSamplesOpen] = useState<boolean>(false);
   const [isColorwayStudioOpen, setIsColorwayStudioOpen] = useState<boolean>(false);
-  const [isAiyaraInvoiceOpen, setIsAiyaraInvoiceOpen] = useState<boolean>(false);
+  const [isExportInvoiceOpen, setIsExportInvoiceOpen] = useState<boolean>(false);
 
-  const [isAiyaraLedgerOpen, setIsAiyaraLedgerOpen] = useState<boolean>(false);
+  const [isExportLedgerOpen, setIsExportLedgerOpen] = useState<boolean>(false);
   const [isWorkerSmsOpen, setIsWorkerSmsOpen] = useState<boolean>(false);
   const [isPdfStudioOpen, setIsPdfStudioOpen] = useState<boolean>(false);
   const [isStartMenuOpen, setIsStartMenuOpen] = useState<boolean>(false);
@@ -270,8 +270,8 @@ export default function App() {
     setIsColorwayStudioOpen(false);
     setIsARVisualizerOpen(false);
     setIsWeaverGraphOpen(false);
-    setIsAiyaraInvoiceOpen(false);
-    setIsAiyaraLedgerOpen(false);
+    setIsExportInvoiceOpen(false);
+    setIsExportLedgerOpen(false);
     setIsWorkerSmsOpen(false);
     setIsPdfStudioOpen(false);
     setIsQcModalOpen(false);
@@ -673,19 +673,19 @@ export default function App() {
       )}
 
       {/* POPTOP INVOICE Module (Visible ONLY to ADMIN) */}
-      <AiyaraInvoiceModal
-        isOpen={isAiyaraInvoiceOpen}
-        onClose={() => setIsAiyaraInvoiceOpen(false)}
+      <ExportInvoiceModal
+        isOpen={isExportInvoiceOpen}
+        onClose={() => setIsExportInvoiceOpen(false)}
         adminMode={adminMode}
         productionData={productionData}
       />
 
 
 
-      {/* Aiyara Ledger & Account Book Module */}
-      <AiyaraLedgerModal
-        isOpen={isAiyaraLedgerOpen}
-        onClose={() => setIsAiyaraLedgerOpen(false)}
+      {/* Export Ledger & Account Book Module */}
+      <ExportLedgerModal
+        isOpen={isExportLedgerOpen}
+        onClose={() => setIsExportLedgerOpen(false)}
         productionData={productionData}
         adminMode={adminMode}
       />
@@ -758,9 +758,9 @@ export default function App() {
           { id: 'colorway', title: 'Colorway Studio', colorClass: 'bg-fuchsia-500', isOpen: isColorwayStudioOpen, isMinimized: false },
           { id: 'arVisualizer', title: 'AR Room Visualizer', colorClass: 'bg-violet-500', isOpen: isARVisualizerOpen, isMinimized: false },
           { id: 'weaverGraph', title: 'Master Weaver Graph', colorClass: 'bg-teal-500', isOpen: isWeaverGraphOpen, isMinimized: false },
-          { id: 'invoice', title: 'Poptop Invoice', colorClass: 'bg-rose-600', isOpen: isAiyaraInvoiceOpen, isMinimized: false },
+          { id: 'invoice', title: 'Poptop Invoice', colorClass: 'bg-rose-600', isOpen: isExportInvoiceOpen, isMinimized: false },
           { id: 'poptopDirect', title: 'Poptop Direct Invoice', colorClass: 'bg-indigo-600', isOpen: isPoptopDirectInvoiceOpen, isMinimized: false },
-          { id: 'ledger', title: 'Account Ledger', colorClass: 'bg-indigo-600', isOpen: isAiyaraLedgerOpen, isMinimized: false, isAdminOnly: true },
+          { id: 'ledger', title: 'Account Ledger', colorClass: 'bg-indigo-600', isOpen: isExportLedgerOpen, isMinimized: false, isAdminOnly: true },
           { id: 'pdfStudio', title: 'Admin PDF Studio', colorClass: 'bg-red-500', isOpen: isPdfStudioOpen, isMinimized: false, isAdminOnly: true },
           { id: 'qc', title: 'Digital QC Audit', colorClass: 'bg-emerald-600', isOpen: isQcModalOpen, isMinimized: false, isAdminOnly: true },
           { id: 'leadApi', title: 'Live Lead API', colorClass: 'bg-amber-600', isOpen: isLeadApiOpen, isMinimized: false, isAdminOnly: true },
@@ -779,11 +779,11 @@ export default function App() {
           if (id === 'colorway') setIsColorwayStudioOpen(!isColorwayStudioOpen);
           if (id === 'arVisualizer') setIsARVisualizerOpen(!isARVisualizerOpen);
           if (id === 'weaverGraph') setIsWeaverGraphOpen(!isWeaverGraphOpen);
-          if (id === 'invoice') setIsAiyaraInvoiceOpen(!isAiyaraInvoiceOpen);
+          if (id === 'invoice') setIsExportInvoiceOpen(!isExportInvoiceOpen);
           if (id === 'poptopDirect') setIsPoptopDirectInvoiceOpen(!isPoptopDirectInvoiceOpen);
           if (id === 'ledger') {
             if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
-            setIsAiyaraLedgerOpen(!isAiyaraLedgerOpen);
+            setIsExportLedgerOpen(!isExportLedgerOpen);
           }
           if (id === 'pdfStudio') {
             if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }

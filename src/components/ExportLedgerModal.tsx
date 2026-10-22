@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 import { LedgerEntry, PurchaseOrder } from '../types';
 import { subscribeLedgerEntries, saveLedgerEntryToFirestore, deleteLedgerEntryFromFirestore } from '../lib/firestoreService';
 
-interface AiyaraLedgerModalProps {
+interface ExportLedgerModalProps {
   isOpen: boolean;
   onClose: () => void;
   productionData: PurchaseOrder[];
@@ -51,7 +51,7 @@ function convertNumberToWords(num: number): string {
   return result + ' only';
 }
 
-export const AiyaraLedgerModal: React.FC<AiyaraLedgerModalProps> = ({
+export const ExportLedgerModal: React.FC<ExportLedgerModalProps> = ({
   isOpen,
   onClose,
   productionData,
@@ -90,7 +90,7 @@ export const AiyaraLedgerModal: React.FC<AiyaraLedgerModalProps> = ({
   
   const [entryDate, setEntryDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [voucherNo, setVoucherNo] = useState<string>(`VCH-${Math.floor(100 + Math.random() * 900)}`);
-  const [partyName, setPartyName] = useState<string>('AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED');
+  const [partyName, setPartyName] = useState<string>('Export Unit');
   const [partyType, setPartyType] = useState<LedgerEntry['partyType']>('SUPPLIER');
   const [transactionType, setTransactionType] = useState<LedgerEntry['transactionType']>('CREDIT');
   const [particulars, setParticulars] = useState<string>('Advance by RTGS');
@@ -164,7 +164,7 @@ export const AiyaraLedgerModal: React.FC<AiyaraLedgerModalProps> = ({
     setEditingEntryId(null);
     setEntryDate(new Date().toISOString().split('T')[0]);
     setVoucherNo(`VCH-${Math.floor(100 + Math.random() * 900)}`);
-    setPartyName('AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED');
+    setPartyName('Export Unit');
     setPartyType('SUPPLIER');
     setTransactionType('CREDIT');
     setParticulars('Advance by RTGS');
@@ -364,7 +364,7 @@ export const AiyaraLedgerModal: React.FC<AiyaraLedgerModalProps> = ({
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(15, 23, 42);
-      const partyTitle = selectedParty === 'ALL' ? 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED' : selectedParty;
+      const partyTitle = selectedParty === 'ALL' ? 'Export Unit' : selectedParty;
       doc.text(partyTitle, 14, 39);
 
       doc.setFont('helvetica', 'normal');
@@ -633,7 +633,7 @@ export const AiyaraLedgerModal: React.FC<AiyaraLedgerModalProps> = ({
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-extrabold font-sans tracking-wide">Aiyara Corporate Ledger &amp; Statement Suite</h2>
+              <h2 className="text-lg font-extrabold font-sans tracking-wide">Corporate Ledger &amp; Statement Suite</h2>
               <p className="text-xs text-rose-100 font-medium">Professional Account Book with Real-Time Firestore Sync &amp; Editing</p>
             </div>
           </div>
@@ -834,7 +834,7 @@ export const AiyaraLedgerModal: React.FC<AiyaraLedgerModalProps> = ({
               <div className="bg-white p-4 rounded-xl border border-amber-200 shadow-xs">
                 <span className="text-[10px] font-black text-[#E4002B] uppercase tracking-wider block mb-1">Statement For / Party Account</span>
                 <p className="font-extrabold text-slate-900 text-sm mt-0.5 uppercase tracking-tight">
-                  {selectedParty === 'ALL' ? 'AIYARA TEXTILE MANUFACTURING PRIVATE LIMITED' : selectedParty}
+                  {selectedParty === 'ALL' ? 'Export Unit' : selectedParty}
                 </p>
                 <p className="text-slate-600 text-xs mt-1 font-medium flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>

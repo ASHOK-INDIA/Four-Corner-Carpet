@@ -91,8 +91,8 @@
       },
       "required": ["id", "title", "imageUrl", "createdAt"]
     },
-    "AiyaraInvoice": {
-      "title": "Aiyara Invoice",
+    "ExportInvoice": {
+      "title": "Export Invoice",
       "description": "Official Performa Invoice generated from uploaded files, POs, or custom editor.",
       "type": "object",
       "properties": {
@@ -152,8 +152,8 @@
       "description": "Uploaded sample images for the full image flip carousel viewer"
     },
     "/aiyara_invoices/{invoiceId}": {
-      "entity": "AiyaraInvoice",
-      "description": "Uploaded and user-created Aiyara performa invoices"
+      "entity": "ExportInvoice",
+      "description": "Uploaded and user-created Export performa invoices"
     }
   }
 }

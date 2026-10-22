@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import * as pdfjsLib from 'pdfjs-dist';
-import { AiyaraInvoice, AiyaraLineItem, PurchaseOrder, CargoItem } from '../types';
+import { ExportInvoice, ExportLineItem, PurchaseOrder, CargoItem } from '../types';
 
 // Setup pdfjs worker in browser
 if (typeof window !== 'undefined' && 'GlobalWorkerOptions' in pdfjsLib) {
@@ -44,10 +44,10 @@ if (typeof window !== 'undefined' && 'GlobalWorkerOptions' in pdfjsLib) {
   }
 }
 import { 
-  subscribeAiyaraInvoices, 
-  saveAiyaraInvoiceToFirestore, 
-  deleteAiyaraInvoiceFromFirestore,
-  DEFAULT_AIYARA_INVOICES,
+  subscribeExportInvoices, 
+  saveExportInvoiceToFirestore, 
+  deleteExportInvoiceFromFirestore,
+  DEFAULT_EXPORT_INVOICES,
   UPDATED_PO_17_ITEMS_INVOICE,
   subscribeContainerItems
 } from '../lib/firestoreService';
@@ -186,30 +186,30 @@ export const calculateSqMeters = (sizesCm: string, qtyPcs: number, invoiceType?:
   return 0;
 };
 
-interface AiyaraInvoiceModalProps {
+interface ExportInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   adminMode: boolean;
   productionData?: PurchaseOrder[];
 }
 
-export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
+export const ExportInvoiceModal: React.FC<ExportInvoiceModalProps> = ({
   isOpen,
   onClose,
   adminMode,
   productionData = []
 }) => {
-  const [invoices, setInvoices] = useState<AiyaraInvoice[]>([]);
-  const [selectedInvoice, setSelectedInvoice] = useState<AiyaraInvoice | null>(null);
+  const [invoices, setInvoices] = useState<ExportInvoice[]>([]);
+  const [selectedInvoice, setSelectedInvoice] = useState<ExportInvoice | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Editable Form State (complete copy of active invoice)
-  const [editForm, setEditForm] = useState<AiyaraInvoice | null>(null);
+  const [editForm, setEditForm] = useState<ExportInvoice | null>(null);
 
   // In-app Delete Confirmation & Notification States (No window.confirm/alert)
-  const [deleteTarget, setDeleteTarget] = useState<AiyaraInvoice | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ExportInvoice | null>(null);
   const [isClearAllModalOpen, setIsClearAllModalOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -313,7 +313,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       setToastMessage({ type: 'error', text: 'No matching PO found to reset to defaults.' });
       return;
     }
-    const newItems: AiyaraLineItem[] = matchingPo.designs.map((d, idx) => {
+    const newItems: ExportLineItem[] = matchingPo.designs.map((d, idx) => {
       const descLower = (d.name || '').toLowerCase();
       let hsn = '57050039';
       if (descLower.includes('tufted')) hsn = '57021000';
@@ -431,7 +431,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   }, [matchingPo]);
 
   // Compare each line item with PO designs
-  const getPoItemComparison = (item: AiyaraLineItem, idx: number) => {
+  const getPoItemComparison = (item: ExportLineItem, idx: number) => {
     if (!matchingPo || !matchingPo.designs || matchingPo.designs.length === 0) {
       return null;
     }
@@ -494,7 +494,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const unsubscribe = subscribeAiyaraInvoices(
+    const unsubscribe = subscribeExportInvoices(
       (data) => {
         // Ensure missing sq.meter or totals have fallback values without overwriting user-saved meters
         const sanitized = data.map(inv => {
@@ -512,7 +512,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
           if (hasDiff) {
             const newTotSqM = parseFloat(fixedItems.reduce((s, it) => s + (Number(it.totalSqMeter) || 0), 0).toFixed(2));
             const updatedInv = { ...inv, items: fixedItems, totalSqMeter: newTotSqM };
-            saveAiyaraInvoiceToFirestore(updatedInv).catch(() => {});
+            saveExportInvoiceToFirestore(updatedInv).catch(() => {});
             return updatedInv;
           }
           return inv;
@@ -534,7 +534,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
         }
       },
       (err) => {
-        console.error('Error fetching Aiyara invoices:', err);
+        console.error('Error fetching Export invoices:', err);
       }
     );
 
@@ -543,7 +543,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Access check: Only Admin can view Aiyara Invoice Module
+  // Access check: Only Admin can view Export Invoice Module
   if (!adminMode) {
     return (
       <div 
@@ -591,7 +591,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   const formatINR = (val: number) => formatCurrency(val);
 
   // Auto calculate CBM for a line item based on pallet dimension, explicit cbmVolume, or dimensions
-  const calculateLineItemCbm = (item: AiyaraLineItem): number => {
+  const calculateLineItemCbm = (item: ExportLineItem): number => {
     if (item.cbmVolume !== undefined && Number(item.cbmVolume) > 0) {
       return Number(item.cbmVolume);
     }
@@ -614,15 +614,15 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
 
   // Recalculate totals for editForm (Supports Standard Sq.M vs Poptop Per Pcs & Pallet Charge)
   const updateFormTotals = (
-    updatedItems: AiyaraLineItem[], 
+    updatedItems: ExportLineItem[], 
     customIgst?: number, 
     customAdvance?: number,
-    overrideType?: 'STANDARD' | 'POPTOP' | 'AIYARA',
+    overrideType?: 'STANDARD' | 'POPTOP' | 'Our Export',
     customPalletCharge?: number,
     customTotalPallets?: number,
     customPcsPerPallet?: number
   ) => {
-    const invType = overrideType ?? editForm?.invoiceType ?? (editForm?.buyerName?.toLowerCase().includes('poptop') ? 'POPTOP' : 'AIYARA');
+    const invType = overrideType ?? editForm?.invoiceType ?? (editForm?.buyerName?.toLowerCase().includes('poptop') ? 'POPTOP' : 'Our Export');
     const isPoptop = invType === 'POPTOP';
 
     // Calculate line item amounts based on Poptop vs Standard mode and ensure accurate Sq.Meter
@@ -710,7 +710,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   };
 
   // Handle line item change
-  const handleItemChange = (index: number, field: keyof AiyaraLineItem, value: any) => {
+  const handleItemChange = (index: number, field: keyof ExportLineItem, value: any) => {
     if (!editForm) return;
     const isPoptop = editForm.invoiceType === 'POPTOP' || editForm.buyerName?.toLowerCase().includes('poptop');
     const newItems = [...editForm.items];
@@ -786,7 +786,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   const handleAddLineItem = () => {
     if (!editForm) return;
     const isPoptop = editForm.invoiceType === 'POPTOP' || editForm.buyerName?.toLowerCase().includes('poptop');
-    const newItem: AiyaraLineItem = {
+    const newItem: ExportLineItem = {
       id: `item-${Date.now()}-${editForm.items.length + 1}`,
       itemNo: `3919${20 + editForm.items.length}`,
       description: 'New Wool Rug Design',
@@ -822,7 +822,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     if (!editForm) return;
     try {
       setIsSaving(true);
-      await saveAiyaraInvoiceToFirestore(editForm);
+      await saveExportInvoiceToFirestore(editForm);
       setSelectedInvoice(editForm);
       setIsEditing(false);
       setToastMessage({ type: 'success', text: `Invoice ${editForm.invoiceNo} saved successfully!` });
@@ -835,7 +835,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   };
 
   // Prompt delete dialog
-  const handlePromptDelete = (invoice: AiyaraInvoice, e?: React.MouseEvent) => {
+  const handlePromptDelete = (invoice: ExportInvoice, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
       e.preventDefault();
@@ -863,7 +863,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       }
       
       setDeleteTarget(null);
-      await deleteAiyaraInvoiceFromFirestore(targetId);
+      await deleteExportInvoiceFromFirestore(targetId);
       setToastMessage({ type: 'success', text: `${label} was removed successfully.` });
     } catch (err) {
       console.error('Error deleting invoice:', err);
@@ -892,7 +892,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       setIsClearAllModalOpen(false);
 
       for (const inv of toDelete) {
-        await deleteAiyaraInvoiceFromFirestore(inv.id);
+        await deleteExportInvoiceFromFirestore(inv.id);
       }
       setToastMessage({ type: 'success', text: 'All invoices have been removed.' });
     } catch (err) {
@@ -903,7 +903,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     }
   };
 
-  // File Upload Handler (PDF, Image, Excel, CSV) -> Auto-generates Aiyara Invoice from REAL data
+  // File Upload Handler (PDF, Image, Excel, CSV) -> Auto-generates Export Invoice from REAL data
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -926,7 +926,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       let detectedBuyerName = '';
       let detectedSupplierName = '';
       let detectedNotes = '';
-      let extractedItems: AiyaraLineItem[] = [];
+      let extractedItems: ExportLineItem[] = [];
 
       const filePoMatch = file.name.match(/(?:po|order|inv)[_\s#-]*(\d+)/i) || file.name.match(/(\d{5,8})/);
       if (filePoMatch) {
@@ -1283,7 +1283,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
         ];
       }
 
-      const template = DEFAULT_AIYARA_INVOICES[0] || {
+      const template = DEFAULT_EXPORT_INVOICES[0] || {
         supplierName: 'FOUR CORNERS CARPETS',
         supplierAddress: 'WARD NO. 4 NEHARU NAGAR FATTUPUR NAI BAZAR, BHADOHI 221401, UTTAR PRADESH, INDIA',
         supplierGstin: '09AJTPD8099G1ZH',
@@ -1291,7 +1291,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
         supplierAttention: 'Mr. Danish',
         supplierBankDetails: 'Axis Bank, Station Road., 922020057882560',
         supplierIfsc: 'AXISINBBA04',
-        buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+        buyerName: 'Export Textile Manufacturing PVT LTD',
         buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
         buyerGstin: '26AAVCA3353L1Z6',
         buyerPhone: '9173722468',
@@ -1303,7 +1303,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       };
 
       const finalPoNumber = detectedPoNumber || file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9\-_/]/g, '') || `PO-${Date.now()}`;
-      const newInvoice: AiyaraInvoice = {
+      const newInvoice: ExportInvoice = {
         ...JSON.parse(JSON.stringify(template)),
         id: `aiyara_inv_${Date.now()}`,
         invoiceNo: `PO # ${finalPoNumber}`,
@@ -1331,7 +1331,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       newInvoice.totalAmount = totalAmount;
       newInvoice.advanceAmount = advanceAmount;
 
-      await saveAiyaraInvoiceToFirestore(newInvoice);
+      await saveExportInvoiceToFirestore(newInvoice);
       setSelectedInvoice(newInvoice);
       setEditForm(newInvoice);
       setIsEditing(false);
@@ -1347,10 +1347,10 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     }
   };
 
-  // Convert System Purchase Order into Aiyara Invoice
+  // Convert System Purchase Order into Export Invoice
   const handleImportSystemPo = async (po: PurchaseOrder) => {
     try {
-      const template = DEFAULT_AIYARA_INVOICES[0] || {
+      const template = DEFAULT_EXPORT_INVOICES[0] || {
         supplierName: 'FOUR CORNERS CARPETS',
         supplierAddress: 'WARD NO. 4 NEHARU NAGAR FATTUPUR NAI BAZAR, BHADOHI 221401, UTTAR PRADESH, INDIA',
         supplierGstin: '09AJTPD8099G1ZH',
@@ -1358,7 +1358,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
         supplierAttention: 'Mr. Danish',
         supplierBankDetails: 'Axis Bank, Station Road., 922020057882560',
         supplierIfsc: 'AXISINBBA04',
-        buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+        buyerName: 'Export Textile Manufacturing PVT LTD',
         buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
         buyerGstin: '26AAVCA3353L1Z6',
         buyerPhone: '9173722468',
@@ -1369,7 +1369,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
         notes: '25 % Advance & Balance Payment: The remaining 75% balance must be cleared within 90 days from the date of this invoice.'
       };
 
-      const itemsFromPo: AiyaraLineItem[] = po.designs.map((d, idx) => {
+      const itemsFromPo: ExportLineItem[] = po.designs.map((d, idx) => {
         const sizesCm = d.size || '250x350';
         const qtyPcs = Number(d.qty) || 1;
         const totalSqMeter = calculateSqMeters(sizesCm, qtyPcs) || 8.75;
@@ -1390,7 +1390,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
         };
       });
 
-      const newInvoice: AiyaraInvoice = {
+      const newInvoice: ExportInvoice = {
         ...JSON.parse(JSON.stringify(template)),
         id: `aiyara_inv_${Date.now()}`,
         invoiceNo: `PO # ${po.po}`,
@@ -1424,11 +1424,11 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       newInvoice.totalAmount = parseFloat((newInvoice.subTotal + newInvoice.igstAmount).toFixed(2));
       newInvoice.advanceAmount = parseFloat(((newInvoice.subTotal * 25) / 100).toFixed(2));
 
-      await saveAiyaraInvoiceToFirestore(newInvoice);
+      await saveExportInvoiceToFirestore(newInvoice);
       setSelectedInvoice(newInvoice);
       setEditForm(newInvoice);
       setIsEditing(false);
-      alert(`Aiyara Invoice generated from Purchase Order ${po.po}!`);
+      alert(`Export Invoice generated from Purchase Order ${po.po}!`);
     } catch (err) {
       console.error('Import PO error:', err);
       alert('Failed to convert Purchase Order to Invoice.');
@@ -1437,7 +1437,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
 
   // Create new blank or template invoice
   const handleCreateNewInvoice = () => {
-    const template = DEFAULT_AIYARA_INVOICES[0] || {
+    const template = DEFAULT_EXPORT_INVOICES[0] || {
       supplierName: 'FOUR CORNERS CARPETS',
       supplierAddress: 'WARD NO. 4 NEHARU NAGAR FATTUPUR NAI BAZAR, BHADOHI 221401, UTTAR PRADESH, INDIA',
       supplierGstin: '09AJTPD8099G1ZH',
@@ -1445,7 +1445,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       supplierAttention: 'Mr. Danish',
       supplierBankDetails: 'Axis Bank, Station Road., 922020057882560',
       supplierIfsc: 'AXISINBBA04',
-      buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+      buyerName: 'Export Textile Manufacturing PVT LTD',
       buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
       buyerGstin: '26AAVCA3353L1Z6',
       buyerPhone: '9173722468',
@@ -1457,7 +1457,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     };
 
     const randomPo = Math.floor(100000 + Math.random() * 900000).toString();
-    const newInv: AiyaraInvoice = {
+    const newInv: ExportInvoice = {
       ...JSON.parse(JSON.stringify(template)),
       id: `aiyara_inv_${Date.now()}`,
       invoiceNo: `PO # ${randomPo}`,
@@ -1497,7 +1497,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   // Create a dedicated Poptop GmbH Invoice (Per Pcs Pricing, Pallet Charges, No IGST, Simplified Consignee)
   const handleCreatePoptopInvoice = () => {
     const randomPo = Math.floor(100000 + Math.random() * 900000).toString();
-    const newInv: AiyaraInvoice = {
+    const newInv: ExportInvoice = {
       id: `poptop_inv_${Date.now()}`,
       invoiceNo: `PO # ${randomPo}`,
       poNumber: randomPo,
@@ -1586,12 +1586,12 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   const handleLoadUpdated17ItemPo = async () => {
     try {
       setIsSaving(true);
-      const invoiceToSave: AiyaraInvoice = {
+      const invoiceToSave: ExportInvoice = {
         ...JSON.parse(JSON.stringify(UPDATED_PO_17_ITEMS_INVOICE)),
         id: `po_1128405_17items_${Date.now()}`,
         createdAt: new Date().toISOString()
       };
-      await saveAiyaraInvoiceToFirestore(invoiceToSave);
+      await saveExportInvoiceToFirestore(invoiceToSave);
       setSelectedInvoice(invoiceToSave);
       setEditForm(JSON.parse(JSON.stringify(invoiceToSave)));
       setIsEditing(false);
@@ -1601,7 +1601,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       });
     } catch (err) {
       console.error('Error loading updated PO:', err);
-      const fallback: AiyaraInvoice = {
+      const fallback: ExportInvoice = {
         ...JSON.parse(JSON.stringify(UPDATED_PO_17_ITEMS_INVOICE)),
         id: `po_1128405_17items_${Date.now()}`
       };
@@ -1631,7 +1631,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     } catch (err) {
       console.error('Error generating PDF-matched Excel, falling back:', err);
       // Fallback export with basic sheet
-      const isExcelPoptop = active.invoiceType !== 'AIYARA' && !(active.buyerName || '').toLowerCase().includes('aiyara') && (active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop'));
+      const isExcelPoptop = active.invoiceType !== 'Our Export' && !(active.buyerName || '').toLowerCase().includes('aiyara') && (active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop'));
       const sheetData: any[][] = [
         isExcelPoptop ? [(active.documentTitle || "PERFORMA / COMMERCIAL INVOICE").toUpperCase()] : ["FOUR CORNERS CARPETS — INVOICE"],
         ["FOUR CORNERS CARPETS — EXPORT DEPT."],
@@ -1752,7 +1752,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
     let contentHtml = '';
 
     if (docType === 'COMMERCIAL') {
-      const isPrintPoptop = active.invoiceType !== 'AIYARA' && !(active.buyerName || '').toLowerCase().includes('aiyara') && (active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop'));
+      const isPrintPoptop = active.invoiceType !== 'Our Export' && !(active.buyerName || '').toLowerCase().includes('aiyara') && (active.invoiceType === 'POPTOP' || (active.buyerName || '').toLowerCase().includes('poptop'));
 
       contentHtml = `
         <div style="padding:15px; font-family: system-ui, sans-serif; color:#0f172a;">
@@ -2293,11 +2293,11 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   const currentInvoiceType = isEditing ? editForm?.invoiceType : activeDoc?.invoiceType;
   const currentBuyerName = ((isEditing ? editForm?.buyerName : activeDoc?.buyerName) || '').toLowerCase();
   
-  // Explicitly AIYARA if typed as AIYARA or buyer contains aiyara
-  const isAiyara = currentInvoiceType === 'AIYARA' || (!currentInvoiceType && currentBuyerName.includes('aiyara')) || (currentInvoiceType !== 'POPTOP' && currentBuyerName.includes('aiyara'));
+  // Explicitly Our Export if typed as Our Export or buyer contains aiyara
+  const isExport = currentInvoiceType === 'Our Export' || (!currentInvoiceType && currentBuyerName.includes('aiyara')) || (currentInvoiceType !== 'POPTOP' && currentBuyerName.includes('aiyara'));
   
-  // isPoptop is true ONLY if POPTOP format (never true for AIYARA)
-  const isPoptop = !isAiyara && Boolean(
+  // isPoptop is true ONLY if POPTOP format (never true for Our Export)
+  const isPoptop = !isExport && Boolean(
     currentInvoiceType === 'POPTOP' || currentBuyerName.includes('poptop')
   );
 
@@ -2396,7 +2396,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
             <button
               onClick={() => setIsMasterRecordsModalOpen(true)}
               className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer border border-indigo-400"
-              title="View/Edit Master Records for Consignee (Poptop GmbH) & Exporter (AIYARA TEXTILE)"
+              title="View/Edit Master Records for Consignee (Poptop GmbH) & Exporter (Our Export House)"
             >
               <Building2 className="w-3.5 h-3.5 text-white" />
               <span>Master Records</span>
@@ -2711,7 +2711,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                       </span>
                     )}
 
-                    {/* Invoice Format Combo Selector (AIYARA vs POPTOP) */}
+                    {/* Invoice Format Combo Selector (Our Export vs POPTOP) */}
                     <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-300">
                       <button
                         type="button"
@@ -2719,31 +2719,31 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                           if (isEditing && editForm) {
                             const updatedEdit = {
                               ...editForm,
-                              invoiceType: 'AIYARA' as const,
+                              invoiceType: 'Our Export' as const,
                               priceMode: 'PER_SQM' as const,
                               currency: 'INR (₹)',
-                              buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+                              buyerName: 'Export Textile Manufacturing PVT LTD',
                               buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
                               buyerGstin: '26AAVCA3353L1Z6',
                               igstPercent: 5
                             };
                             setEditForm(updatedEdit);
-                            updateFormTotals(updatedEdit.items, 5, updatedEdit.advancePercent, 'AIYARA');
+                            updateFormTotals(updatedEdit.items, 5, updatedEdit.advancePercent, 'Our Export');
                           } else if (activeDoc) {
-                            const updated: AiyaraInvoice = { 
+                            const updated: ExportInvoice = { 
                               ...activeDoc, 
-                              invoiceType: 'AIYARA', 
+                              invoiceType: 'Our Export', 
                               priceMode: 'PER_SQM', 
                               currency: 'INR (₹)',
-                              buyerName: 'Aiyara Textile Manufacturing PVT LTD',
+                              buyerName: 'Export Textile Manufacturing PVT LTD',
                               buyerAddress: '706, IVY BUILDING-A, &PARK CITY, & ADDRESS:- SRV NO-8 & NAGAR HAVELI, IND&82/1/1/2. H NO-3227/42,SILVASSA-396230,DADRA IA',
                               buyerGstin: '26AAVCA3353L1Z6',
                               igstPercent: 5
                             };
                             setSelectedInvoice(updated);
-                            saveAiyaraInvoiceToFirestore(updated);
+                            saveExportInvoiceToFirestore(updated);
                           }
-                          setToastMessage({ type: 'success', text: 'Switched to AIYARA Format (INR ₹, Rate / M², IGST 5%).' });
+                          setToastMessage({ type: 'success', text: 'Switched to Our Export Format (INR ₹, Rate / M², IGST 5%).' });
                         }}
                         className={`px-3 py-1 text-xs font-black rounded-lg transition cursor-pointer flex items-center gap-1 ${
                           (isEditing ? editForm?.invoiceType : activeDoc?.invoiceType) !== 'POPTOP'
@@ -2752,7 +2752,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                         }`}
                       >
                         <Building2 className="w-3 h-3" />
-                        <span>AIYARA</span>
+                        <span>Our Export</span>
                       </button>
                       <button
                         type="button"
@@ -2772,7 +2772,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                             setEditForm(updatedEdit);
                             updateFormTotals(updatedEdit.items, 0, updatedEdit.advancePercent, 'POPTOP');
                           } else if (activeDoc) {
-                            const updated: AiyaraInvoice = { 
+                            const updated: ExportInvoice = { 
                               ...activeDoc, 
                               invoiceType: 'POPTOP', 
                               priceMode: 'PER_PCS', 
@@ -2784,7 +2784,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                               igstAmount: 0
                             };
                             setSelectedInvoice(updated);
-                            saveAiyaraInvoiceToFirestore(updated);
+                            saveExportInvoiceToFirestore(updated);
                           }
                           setToastMessage({ type: 'success', text: 'Switched to POPTOP Format (USD $, Price Per Pcs, Pallet Charges).' });
                         }}
@@ -2811,7 +2811,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                           } else if (activeDoc) {
                             const updated = { ...activeDoc, currency: newCurr };
                             setSelectedInvoice(updated);
-                            saveAiyaraInvoiceToFirestore(updated);
+                            saveExportInvoiceToFirestore(updated);
                           }
                           setToastMessage({ type: 'success', text: `Currency changed to ${newCurr}` });
                         }}
@@ -2950,7 +2950,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                                     } else if (activeDoc) {
                                       const updated = { ...activeDoc, documentTitle: val };
                                       setSelectedInvoice(updated);
-                                      await saveAiyaraInvoiceToFirestore(updated);
+                                      await saveExportInvoiceToFirestore(updated);
                                     }
                                     setToastMessage({ type: 'success', text: `Header Title set to ${val}` });
                                   }
@@ -3002,7 +3002,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                   {/* Supplier & Buyer Header Table */}
                   <div className="border-2 border-slate-900 text-[10.5px] mb-3 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x-2 divide-slate-900">
                     
-                    {/* Left: Supplier Details (AIYARA TEXTILE) */}
+                    {/* Left: Supplier Details (Our Export House) */}
                     <div className="p-3 space-y-1.5 bg-slate-50/50">
                       <div className="flex justify-between font-bold border-b border-slate-300 pb-1 mb-1">
                         <span className="uppercase text-slate-900 font-black">Supplier Details</span>
@@ -3112,7 +3112,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                         </div>
                       </div>
 
-                      {/* SWIFT & AD CODE (Hidden in AIYARA invoice, shown only for Poptop export) */}
+                      {/* SWIFT & AD CODE (Hidden in Our Export invoice, shown only for Poptop export) */}
                       {isPoptop && (
                         <div className="pt-1 grid grid-cols-2 gap-2 text-[10.5px]">
                           <div>
@@ -3189,7 +3189,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Right: Buyer Details (Aiyara Textile Manufacturing PVT LTD) */}
+                    {/* Right: Buyer Details (Export Textile Manufacturing PVT LTD) */}
                     <div className="p-3 space-y-1.5 bg-white">
                       <div className="font-bold border-b border-slate-300 pb-1 mb-1 text-slate-900 uppercase">
                         BUYER / CUSTOMER DETAILS
@@ -3668,7 +3668,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                               )}
                             </td>
 
-                            {/* Pallet Dimension & Weight only for Poptop export; removed from Aiyara */}
+                            {/* Pallet Dimension & Weight only for Poptop export; removed from Export */}
                             {isPoptop && (
                               <>
                                 <td className="p-1.5 border-r border-slate-900 text-center font-mono font-bold">
@@ -4072,7 +4072,7 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
                       <div className="py-0.5 flex justify-center items-center">
                         <img 
                           src="https://i.postimg.cc/tJynktRD/f4C-stamp.png" 
-                          alt="AIYARA TEXTILE Official Stamp" 
+                          alt="Our Export House Official Stamp" 
                           className="h-14 max-h-16 w-auto object-contain mix-blend-multiply drop-shadow-sm select-none"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
@@ -4461,4 +4461,4 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
   );
 };
 
-export default AiyaraInvoiceModal;
+export default ExportInvoiceModal;

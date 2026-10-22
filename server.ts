@@ -54,7 +54,7 @@ app.post('/api/extract-invoice', async (req, res) => {
       }
     });
 
-    const prompt = `You are a high-precision Purchase Order & Performa Invoice Data Extractor for the Rug, Carpet, and Textile Manufacturing industry (AIYARA TEXTILE & Aiyara Textile).
+    const prompt = `You are a high-precision Purchase Order & Performa Invoice Data Extractor for the Rug, Carpet, and Textile Manufacturing industry.
 
 CRITICAL EXTRACTION REQUIREMENTS:
 1. Extract the COMPLETE, ACCURATE, UNTRUNCATED list of line items from this document (${fileName || 'document'}).
@@ -463,7 +463,6 @@ app.post('/api/analyze-trade', async (req, res) => {
         temperature: 0.2
       }
     });
-
     const responseText = response.text || '';
     return res.json({ success: true, text: responseText });
 
@@ -488,17 +487,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/cyrus-loloi',
     companyLinkedinUrl: 'https://www.linkedin.com/company/loloi-rugs',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Cyrus, really admire Loloi\'s unmatched leadership in artisan floor coverings. At AIYARA TEXTILE (Bhadohi, India), we specialize in high-density hand-knotted wool, artisanal tufted lines, and eco flatweaves with strict AQL 2.5 QC. Would love to connect and share our 2026 export catalog!',
+    linkedinInMail: 'Hi Cyrus, really admire Loloi\'s unmatched leadership in artisan floor coverings. At our export unit (Bhadohi, India), we specialize in high-density hand-knotted wool, artisanal tufted lines, and eco flatweaves with strict AQL 2.5 QC. Would love to connect and share our 2026 export catalog!',
     keyPerson: 'Cyrus Loloi (Principal & Chief Product Officer)',
     email: 'cyrus@loloirugs.com',
     phone: '+1 972-503-5656',
     leadScore: 98,
     sourcingProducts: ['Hand-knotted Wool', 'Hand-tufted Rugs', 'Power-loomed', 'Flatweaves'],
     whyGoodFit: 'Major US distributor importing high volumes of handcrafted wool and modern tufted rugs from Bhadohi and Mirzapur.',
-    samplePitch: 'Subject: Premium Handcrafted & Custom Tufted Rugs from Bhadohi for Loloi Rugs\n\nDear Cyrus & Procurement Team at Loloi,\n\nWe admire Loloi\'s unmatched leadership in artisan floor coverings. At AIYARA TEXTILE (Bhadohi, India), we specialize in high-density hand-knotted wool, artisanal tufted collections, and sustainable PET flatweaves with strict AQL 2.5 quality control. We would love to share our latest 2026 export catalog and develop custom private-label samples for your upcoming seasonal launches.\n\nWarm regards,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Cyrus Loloi - LinkedIn Profile', uri: 'https://www.linkedin.com/in/cyrus-loloi' }, { title: 'Loloi Rugs Official Site', uri: 'https://www.loloirugs.com' }],
+    samplePitch: 'Subject: Premium Handcrafted & Custom Tufted Rugs from Bhadohi for Loloi Rugs\n\nDear Cyrus & Procurement Team at Loloi,\n\nWe admire Loloi\'s unmatched leadership in artisan floor coverings. At our export unit (Bhadohi, India), we specialize in high-density hand-knotted wool, artisanal tufted collections, and sustainable PET flatweaves with strict AQL 2.5 quality control. We would love to share our latest 2026 export catalog and develop custom private-label samples for your upcoming seasonal launches.\n\nWarm regards,\nAshok Kumar',
+    groundingSources: [{ title: 'Cyrus Loloi - LinkedIn Profile', uri: 'https://www.linkedin.com/in/cyrus-loloi' },
+  { title: 'Loloi Rugs Official Site', uri: 'https://www.loloirugs.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-real-002',
@@ -513,17 +515,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/satyatiwari',
     companyLinkedinUrl: 'https://www.linkedin.com/company/surya',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Satya, impressed by Surya\'s incredible scale in home furnishings. AIYARA TEXTILE provides weaver-direct hand-tufted wool, natural jute flatweaves, and custom hospitality rugs from Bhadohi with complete PPWR compliance. Would love to connect!',
+    linkedinInMail: 'Hi Satya, impressed by Surya\'s incredible scale in home furnishings. Our company provides weaver-direct hand-tufted wool, natural jute flatweaves, and custom hospitality rugs from Bhadohi with complete PPWR compliance. Would love to connect!',
     keyPerson: 'Satya Tiwari (President & CEO)',
     email: 'satya@surya.com',
     phone: '+1 877-275-7879',
     leadScore: 97,
     sourcingProducts: ['Hand-knotted Rugs', 'Hand-tufted', 'Jute & Natural Fiber', 'Performance Flatweaves'],
     whyGoodFit: 'One of America\'s largest rug importers with vast Indian manufacturing partnerships seeking consistent export quality and rapid sample turnaround.',
-    samplePitch: 'Subject: Direct Weaver-Direct Manufacturing for Surya Collections\n\nDear Satya and Sourcing Team,\n\nAIYARA TEXTILE operates comprehensive weaving and finishing facilities in Bhadohi. We offer competitive container-load manufacturing of hand-tufted wool, natural jute flatweaves, and custom hospitality rugs with complete PPWR compliance and on-time shipment tracking.\n\nBest regards,\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Satya Tiwari - LinkedIn Profile', uri: 'https://www.linkedin.com/in/satyatiwari' }, { title: 'Surya Official Portal', uri: 'https://www.surya.com' }],
+    samplePitch: 'Subject: Direct Weaver-Direct Manufacturing for Surya Collections\n\nDear Satya and Sourcing Team,\n\nOur unit operates comprehensive weaving and finishing facilities in Bhadohi. We offer competitive container-load manufacturing of hand-tufted wool, natural jute flatweaves, and custom hospitality rugs with complete PPWR compliance and on-time shipment tracking.\n\nBest regards,',
+    groundingSources: [{ title: 'Satya Tiwari - LinkedIn Profile', uri: 'https://www.linkedin.com/in/satyatiwari' },
+  { title: 'Surya Official Portal', uri: 'https://www.surya.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-001',
@@ -538,17 +543,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/rana-sahrai',
     companyLinkedinUrl: 'https://www.linkedin.com/company/sahrai-milano',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Rana, Sahrai\'s bespoke artistry is inspiring. AIYARA TEXTILE in Bhadohi specializes in museum-grade hand-knotted bespoke rugs with intricate custom detailing. Would be delighted to explore potential collaboration!',
+    linkedinInMail: 'Hi Rana, Sahrai\'s bespoke artistry is inspiring. Our team in Bhadohi specializes in museum-grade hand-knotted bespoke rugs with intricate custom detailing. Would be delighted to explore potential collaboration!',
     keyPerson: 'Rana Sahrai (Creative Director)',
     email: 'rana@sahrai.com',
     phone: '+39 02 7600 2369',
     leadScore: 99,
     sourcingProducts: ['Bespoke Hand-Knotted', 'Custom Shape & Size Rugs', 'Luxury Silk & Wool'],
     whyGoodFit: 'Renowned Milanese luxury rug house specializing in custom-made high-end bespoke floor art.',
-    samplePitch: 'Subject: Bespoke Hand-Knotted Rug Manufacturing Partnership for Sahrai\n\nDear Rana and Sourcing Team,\n\nWe craft museum-grade bespoke rugs in Bhadohi, India, using hand-spun wool and custom dyeing techniques to match your exact color specifications and design requirements.\n\nWarm regards,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Rana Sahrai - LinkedIn Profile', uri: 'https://www.linkedin.com/in/rana-sahrai' }, { title: 'Sahrai Milano Official', uri: 'https://www.sahrai.com' }],
+    samplePitch: 'Subject: Bespoke Hand-Knotted Rug Manufacturing Partnership for Sahrai\n\nDear Rana and Sourcing Team,\n\nWe craft museum-grade bespoke rugs in Bhadohi, India, using hand-spun wool and custom dyeing techniques to match your exact color specifications and design requirements.\n\nWarm regards,\nAshok Kumar',
+    groundingSources: [{ title: 'Rana Sahrai - LinkedIn Profile', uri: 'https://www.linkedin.com/in/rana-sahrai' },
+  { title: 'Sahrai Milano Official', uri: 'https://www.sahrai.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-002',
@@ -563,17 +571,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/mark-chen-taiping',
     companyLinkedinUrl: 'https://www.linkedin.com/company/tai-ping-carpets',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Mark, Tai Ping\'s hospitality rug projects are legendary. AIYARA TEXTILE (Bhadohi) produces high-density hand-knotted bespoke carpets and hand-tufted hospitality rugs with precision CAD yarn matching. Would love to connect!',
+    linkedinInMail: 'Hi Mark, Tai Ping\'s hospitality rug projects are legendary. Our factory (Bhadohi) produces high-density hand-knotted bespoke carpets and hand-tufted hospitality rugs with precision CAD yarn matching. Would love to connect!',
     keyPerson: 'Mark Chen (VP of Global Sourcing)',
     email: 'm.chen@taipingcarpets.com',
     phone: '+852 2848 7668',
     leadScore: 98,
     sourcingProducts: ['Hospitality Bespoke Rugs', 'High-Knot Hand-Knotted', 'Complex Tufted Carpets'],
     whyGoodFit: 'Global leader in custom hospitality carpets, consistently seeking high-spec bespoke manufacturing capacity.',
-    samplePitch: 'Subject: Bespoke Weaving Partnership for Tai Ping Hospitality Projects\n\nDear Mark and Procurement Team,\n\nAIYARA TEXTILE operates dedicated looms in Bhadohi for high-end hospitality bespoke carpet projects, offering complex tufted textures and intricate knotting with 100% CAD color precision.\n\nWarm regards,\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Mark Chen - LinkedIn Profile', uri: 'https://www.linkedin.com/in/mark-chen-taiping' }, { title: 'Tai Ping Official', uri: 'https://www.taipingcarpets.com' }],
+    samplePitch: 'Subject: Bespoke Weaving Partnership for Tai Ping Hospitality Projects\n\nDear Mark and Procurement Team,\n\nOur weavers operate dedicated looms in Bhadohi for high-end hospitality bespoke carpet projects, offering complex tufted textures and intricate knotting with 100% CAD color precision.\n\nWarm regards,',
+    groundingSources: [{ title: 'Mark Chen - LinkedIn Profile', uri: 'https://www.linkedin.com/in/mark-chen-taiping' },
+  { title: 'Tai Ping Official', uri: 'https://www.taipingcarpets.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-003',
@@ -588,17 +599,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/emre-stepevi',
     companyLinkedinUrl: 'https://www.linkedin.com/company/stepevi',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Emre, Stepevi\'s modern rug aesthetic is unique. AIYARA TEXTILE (Bhadohi) specializes in bespoke tufted designs, custom color palettes, and intricate textures. We would be thrilled to discuss custom production.',
+    linkedinInMail: 'Hi Emre, Stepevi\'s modern rug aesthetic is unique. Our workshop (Bhadohi) specializes in bespoke tufted designs, custom color palettes, and intricate textures. We would be thrilled to discuss custom production.',
     keyPerson: 'Emre Stepevi (Founder & CEO)',
     email: 'emre@stepevi.com',
     phone: '+90 212 280 23 23',
     leadScore: 97,
     sourcingProducts: ['Modern Bespoke Tufted', 'Custom Color Wool Rugs', 'Textured Area Rugs'],
     whyGoodFit: 'Global modern rug brand focused on design-led, bespoke manufacturing for interior designers.',
-    samplePitch: 'Subject: Bespoke Modern Rug Manufacturing Partnership for Stepevi\n\nDear Emre and Sourcing Team,\n\nWe manufacture bespoke tufted designs in Bhadohi, India, engineered to meet exact modern aesthetics, custom color palettes, and intricate texture requirements.\n\nBest regards,\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Emre Stepevi - LinkedIn Profile', uri: 'https://www.linkedin.com/in/emre-stepevi' }, { title: 'Stepevi Official', uri: 'https://www.stepevi.com' }],
+    samplePitch: 'Subject: Bespoke Modern Rug Manufacturing Partnership for Stepevi\n\nDear Emre and Sourcing Team,\n\nWe manufacture bespoke tufted designs in Bhadohi, India, engineered to meet exact modern aesthetics, custom color palettes, and intricate texture requirements.\n\nBest regards,',
+    groundingSources: [{ title: 'Emre Stepevi - LinkedIn Profile', uri: 'https://www.linkedin.com/in/emre-stepevi' },
+  { title: 'Stepevi Official', uri: 'https://www.stepevi.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-004',
@@ -613,17 +627,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/jurgen-dahlmanns',
     companyLinkedinUrl: 'https://www.linkedin.com/company/rug-star',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Jürgen, Rug Star\'s artistic vision is bold. AIYARA TEXTILE in Bhadohi weaves museum-grade hand-knotted bespoke pieces with vibrant, artistic designs. Would love to connect and share our capabilities!',
+    linkedinInMail: 'Hi Jürgen, Rug Star\'s artistic vision is bold. Our unit in Bhadohi weaves museum-grade hand-knotted bespoke pieces with vibrant, artistic designs. Would love to connect and share our capabilities!',
     keyPerson: 'Jürgen Dahlmanns (Founder & Designer)',
     email: 'jd@rugstar.com',
     phone: '+49 30 2859 9380',
     leadScore: 98,
     sourcingProducts: ['Artistic Hand-Knotted Rugs', 'Bespoke Wall-to-Wall', 'Luxury Silk Rugs'],
     whyGoodFit: 'High-end design brand creating artistic, one-of-a-kind bespoke rugs for global collectors.',
-    samplePitch: 'Subject: Artistic Hand-Knotted & Bespoke Manufacturing Partnership for Rug Star\n\nDear Jürgen and Design Team,\n\nWe specialize in weaving artistic, museum-grade hand-knotted bespoke rugs in Bhadohi, India, with vibrant, detailed design reproduction and obsessive color matching.\n\nWarm regards,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Jürgen Dahlmanns - LinkedIn Profile', uri: 'https://www.linkedin.com/in/jurgen-dahlmanns' }, { title: 'Rug Star Official', uri: 'https://www.rugstar.com' }],
+    samplePitch: 'Subject: Artistic Hand-Knotted & Bespoke Manufacturing Partnership for Rug Star\n\nDear Jürgen and Design Team,\n\nWe specialize in weaving artistic, museum-grade hand-knotted bespoke rugs in Bhadohi, India, with vibrant, detailed design reproduction and obsessive color matching.\n\nWarm regards,\nAshok Kumar',
+    groundingSources: [{ title: 'Jürgen Dahlmanns - LinkedIn Profile', uri: 'https://www.linkedin.com/in/jurgen-dahlmanns' },
+  { title: 'Rug Star Official', uri: 'https://www.rugstar.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-005',
@@ -638,17 +655,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/ralph-anstoetz',
     companyLinkedinUrl: 'https://www.linkedin.com/company/jab-anstoetz',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hallo Herr Anstoetz, JAB Anstoetz is iconic in high-end interiors. AIYARA TEXTILE (Bhadohi) produces bespoke hand-tufted carpets and hand-woven wool rugs with strict EU REACH & PPWR compliance. Would be honoured to connect!',
+    linkedinInMail: 'Hallo Herr Anstoetz, JAB Anstoetz is iconic in high-end interiors. Our manufacturing unit (Bhadohi) produces bespoke hand-tufted carpets and hand-woven wool rugs with strict EU REACH & PPWR compliance. Would be honoured to connect!',
     keyPerson: 'Ralph Anstoetz (Managing Partner)',
     email: 'r.anstoetz@jab.de',
     phone: '+49 521 20930',
     leadScore: 99,
     sourcingProducts: ['Premium Bespoke Carpets', 'Hand-Tufted Wool', 'Custom Woven Rugs'],
     whyGoodFit: 'Global interior furnishings leader seeking reliable, compliant Indian partners for bespoke carpet collections.',
-    samplePitch: 'Subject: Bespoke Carpet & Rug Manufacturing Partnership for JAB Anstoetz\n\nSehr geehrter Herr Anstoetz,\n\nwir produzieren hochwertige maßgefertigte handgetuftete Teppiche und gewebte Wollteppiche in Bhadohi, Indien, unter strikter Einhaltung der EU REACH- und PPWR-Richtlinien.\n\nMit freundlichen Grüßen,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Ralph Anstoetz - LinkedIn Profile', uri: 'https://www.linkedin.com/in/ralph-anstoetz' }, { title: 'JAB Anstoetz Official', uri: 'https://www.jab.de' }],
+    samplePitch: 'Subject: Bespoke Carpet & Rug Manufacturing Partnership for JAB Anstoetz\n\nSehr geehrter Herr Anstoetz,\n\nwir produzieren hochwertige maßgefertigte handgetuftete Teppiche und gewebte Wollteppiche in Bhadohi, Indien, unter strikter Einhaltung der EU REACH- und PPWR-Richtlinien.\n\nMit freundlichen Grüßen,\nAshok Kumar',
+    groundingSources: [{ title: 'Ralph Anstoetz - LinkedIn Profile', uri: 'https://www.linkedin.com/in/ralph-anstoetz' },
+  { title: 'JAB Anstoetz Official', uri: 'https://www.jab.de' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-006',
@@ -663,17 +683,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/deirdre-dyson',
     companyLinkedinUrl: 'https://www.linkedin.com/company/deirdre-dyson',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Deirdre, your rug designs are beautifully artistic. At AIYARA TEXTILE (Bhadohi), we specialize in intricate bespoke hand-knotted rugs that faithfully reproduce high-detail artistic patterns. Would love to connect!',
+    linkedinInMail: 'Hi Deirdre, your rug designs are beautifully artistic. At our factory (Bhadohi), we specialize in intricate bespoke hand-knotted rugs that faithfully reproduce high-detail artistic patterns. Would love to connect!',
     keyPerson: 'Deirdre Dyson (Founder & Designer)',
     email: 'deirdre@deirdredyson.com',
     phone: '+44 20 7384 4484',
     leadScore: 97,
     sourcingProducts: ['Intricate Bespoke Hand-Knotted', 'Artistic Silk-Wool Rugs', 'Custom Design Reproductions'],
     whyGoodFit: 'World-renowned bespoke rug designer creating high-concept, intricate floor art for discerning clients.',
-    samplePitch: 'Subject: Bespoke Hand-Knotted Manufacturing Partnership for Deirdre Dyson\n\nDear Deirdre and Design Team,\n\nWe specialize in weaving intricate, high-detail bespoke hand-knotted rugs in Bhadohi, India, ensuring flawless reproduction of your unique artistic visions.\n\nWarm regards,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Deirdre Dyson - LinkedIn Profile', uri: 'https://www.linkedin.com/in/deirdre-dyson' }, { title: 'Deirdre Dyson Official', uri: 'https://www.deirdredyson.com' }],
+    samplePitch: 'Subject: Bespoke Hand-Knotted Manufacturing Partnership for Deirdre Dyson\n\nDear Deirdre and Design Team,\n\nWe specialize in weaving intricate, high-detail bespoke hand-knotted rugs in Bhadohi, India, ensuring flawless reproduction of your unique artistic visions.\n\nWarm regards,\nAshok Kumar',
+    groundingSources: [{ title: 'Deirdre Dyson - LinkedIn Profile', uri: 'https://www.linkedin.com/in/deirdre-dyson' },
+  { title: 'Deirdre Dyson Official', uri: 'https://www.deirdredyson.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-007',
@@ -688,17 +711,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/esti-barnes',
     companyLinkedinUrl: 'https://www.linkedin.com/company/topfloor-by-esti',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Esti, Topfloor\'s textured rug collections are superb. AIYARA TEXTILE (Bhadohi) produces bespoke hand-tufted and hand-knotted textured rugs with high-precision custom detailing. Would love to connect!',
+    linkedinInMail: 'Hi Esti, Topfloor\'s textured rug collections are superb. Our export unit (Bhadohi) produces bespoke hand-tufted and hand-knotted textured rugs with high-precision custom detailing. Would love to connect!',
     keyPerson: 'Esti Barnes (Founder & Creative Director)',
     email: 'esti@topfloorbyesti.com',
     phone: '+44 20 7351 7272',
     leadScore: 97,
     sourcingProducts: ['Bespoke Textured Tufted', 'Custom Hand-Knotted', 'Designer Floor Coverings'],
     whyGoodFit: 'Award-winning London design house creating luxury, highly textured bespoke rugs for the interior design trade.',
-    samplePitch: 'Subject: Bespoke Textured Rug Manufacturing Partnership for Topfloor by Esti\n\nDear Esti and Design Team,\n\nWe manufacture luxury bespoke textured rugs in Bhadohi, India, utilizing complex tufted and knotted techniques to achieve your unique high-concept design requirements.\n\nWarm regards,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Esti Barnes - LinkedIn Profile', uri: 'https://www.linkedin.com/in/esti-barnes' }, { title: 'Topfloor by Esti Official', uri: 'https://www.topfloorbyesti.com' }],
+    samplePitch: 'Subject: Bespoke Textured Rug Manufacturing Partnership for Topfloor by Esti\n\nDear Esti and Design Team,\n\nWe manufacture luxury bespoke textured rugs in Bhadohi, India, utilizing complex tufted and knotted techniques to achieve your unique high-concept design requirements.\n\nWarm regards,\nAshok Kumar',
+    groundingSources: [{ title: 'Esti Barnes - LinkedIn Profile', uri: 'https://www.linkedin.com/in/esti-barnes' },
+  { title: 'Topfloor by Esti Official', uri: 'https://www.topfloorbyesti.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-008',
@@ -713,17 +739,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/eva-nordell',
     companyLinkedinUrl: 'https://www.linkedin.com/company/vandra-rugs',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hej Eva, Vandra Rugs\' Scandinavian aesthetic is wonderful. AIYARA TEXTILE (Bhadohi) specializes in bespoke hand-woven wool rugs and custom-colored dhurries with strict EU REACH & GoodWeave compliance. Would love to connect!',
+    linkedinInMail: 'Hej Eva, Vandra Rugs\' Scandinavian aesthetic is wonderful. Our team (Bhadohi) specializes in bespoke hand-woven wool rugs and custom-colored dhurries with strict EU REACH & GoodWeave compliance. Would love to connect!',
     keyPerson: 'Eva Nordell (Founder & Managing Director)',
     email: 'eva@vandrarugs.com',
     phone: '+46 8 551 105 10',
     leadScore: 96,
     sourcingProducts: ['Bespoke Hand-Woven Wool', 'Custom-Colored Dhurries', 'Scandinavian Minimalist Rugs'],
     whyGoodFit: 'Leading Scandinavian rug brand known for custom, hand-woven floor coverings designed in Sweden.',
-    samplePitch: 'Subject: Bespoke Hand-Woven Rug Manufacturing Partnership for Vandra Rugs\n\nHej Eva och Sourcing Team,\n\nVi tillverkar skräddarsydda handvävda ullmattor i Bhadohi, Indien, med noggrann färgmatchning och fullständig efterlevnad av EU REACH och GoodWeave.\n\nMed vänlig hälsning,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Eva Nordell - LinkedIn Profile', uri: 'https://www.linkedin.com/in/eva-nordell' }, { title: 'Vandra Rugs Official', uri: 'https://www.vandrarugs.com' }],
+    samplePitch: 'Subject: Bespoke Hand-Woven Rug Manufacturing Partnership for Vandra Rugs\n\nHej Eva och Sourcing Team,\n\nVi tillverkar skräddarsydda handvävda ullmattor i Bhadohi, Indien, med noggrann färgmatchning och fullständig efterlevnad av EU REACH och GoodWeave.\n\nMed vänlig hälsning,\nAshok Kumar',
+    groundingSources: [{ title: 'Eva Nordell - LinkedIn Profile', uri: 'https://www.linkedin.com/in/eva-nordell' },
+  { title: 'Vandra Rugs Official', uri: 'https://www.vandrarugs.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-009',
@@ -738,17 +767,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/jamestufenkian',
     companyLinkedinUrl: 'https://www.linkedin.com/company/tufenkian-artisan-carpets',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi James, Tufenkian has been a pioneer in artisan rugs for years. AIYARA TEXTILE (Bhadohi) produces bespoke hand-knotted wool rugs with uncompromising attention to artisan quality and custom dyeing. Would be thrilled to connect!',
+    linkedinInMail: 'Hi James, Tufenkian has been a pioneer in artisan rugs for years. Our workshop (Bhadohi) produces bespoke hand-knotted wool rugs with uncompromising attention to artisan quality and custom dyeing. Would be thrilled to connect!',
     keyPerson: 'James Tufenkian (Founder & CEO)',
     email: 'jt@tufenkian.com',
     phone: '+1 212-475-1050',
     leadScore: 99,
     sourcingProducts: ['Premium Bespoke Hand-Knotted', 'Artisan Wool Rugs', 'Luxury Designer Collections'],
     whyGoodFit: 'The pioneer of modern artisan carpets, setting the standard for hand-knotted quality and bespoke design.',
-    samplePitch: 'Subject: Bespoke Hand-Knotted Manufacturing Partnership for Tufenkian\n\nDear James and Sourcing Team,\n\nWe manufacture premium bespoke hand-knotted wool rugs in Bhadohi, India, dedicated to upholding the same uncompromising artisan quality and detailed hand-dyeing standards pioneered by Tufenkian.\n\nWarm regards,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'James Tufenkian - LinkedIn Profile', uri: 'https://www.linkedin.com/in/jamestufenkian' }, { title: 'Tufenkian Official', uri: 'https://www.tufenkian.com' }],
+    samplePitch: 'Subject: Bespoke Hand-Knotted Manufacturing Partnership for Tufenkian\n\nDear James and Sourcing Team,\n\nWe manufacture premium bespoke hand-knotted wool rugs in Bhadohi, India, dedicated to upholding the same uncompromising artisan quality and detailed hand-dyeing standards pioneered by Tufenkian.\n\nWarm regards,\nAshok Kumar',
+    groundingSources: [{ title: 'James Tufenkian - LinkedIn Profile', uri: 'https://www.linkedin.com/in/jamestufenkian' },
+  { title: 'Tufenkian Official', uri: 'https://www.tufenkian.com' }],
     isVerifiedLive: true
+
   },
   {
     id: 'lead-bespoke-010',
@@ -763,17 +795,20 @@ const verifiedGlobalBuyers = [
     linkedinUrl: 'https://www.linkedin.com/in/christopher-farr',
     companyLinkedinUrl: 'https://www.linkedin.com/company/christopher-farr',
     isLinkedInVerified: true,
+
     contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-    linkedinInMail: 'Hi Christopher, Christopher Farr\'s artist rug collections are iconic. AIYARA TEXTILE (Bhadohi) specializes in high-detail bespoke hand-knotted rugs that accurately represent artistic designs. Would love to connect!',
+    linkedinInMail: 'Hi Christopher, Christopher Farr\'s artist rug collections are iconic. Our factory in Bhadohi specializes in high-detail bespoke hand-knotted rugs that accurately represent artistic designs. Would love to connect!',
     keyPerson: 'Christopher Farr (Founder & Creative Director)',
     email: 'cf@christopherfarr.com',
     phone: '+44 20 7349 0888',
     leadScore: 98,
     sourcingProducts: ['Artistic Bespoke Hand-Knotted', 'High-Detail Custom Wool Rugs', 'Designer Collaborations'],
     whyGoodFit: 'Legendary designer rug brand renowned for artist collaborations and high-quality, bespoke hand-knotted carpets.',
-    samplePitch: 'Subject: Bespoke Hand-Knotted Manufacturing Partnership for Christopher Farr\n\nDear Christopher and Design Team,\n\nWe specialize in weaving high-detail bespoke hand-knotted rugs in Bhadohi, India, ensuring the exact reproduction of your artistic designer collaborations with meticulous attention to knotting precision.\n\nWarm regards,\nAshok Kumar\nAIYARA TEXTILE',
-    groundingSources: [{ title: 'Christopher Farr - LinkedIn Profile', uri: 'https://www.linkedin.com/in/christopher-farr' }, { title: 'Christopher Farr Official', uri: 'https://www.christopherfarr.com' }],
+    samplePitch: 'Subject: Bespoke Hand-Knotted Manufacturing Partnership for Christopher Farr\n\nDear Christopher and Design Team,\n\nWe specialize in weaving high-detail bespoke hand-knotted rugs in Bhadohi, India, ensuring the exact reproduction of your artistic designer collaborations with meticulous attention to knotting precision.\n\nWarm regards,\nAshok Kumar',
+    groundingSources: [{ title: 'Christopher Farr - LinkedIn Profile', uri: 'https://www.linkedin.com/in/christopher-farr' },
+  { title: 'Christopher Farr Official', uri: 'https://www.christopherfarr.com' }],
     isVerifiedLive: true
+
   }
 ];
 
@@ -891,7 +926,7 @@ app.post(['/api/leads/generate', '/api/leads/search', '/api/fetch-buyers'], asyn
 // API Documentation Endpoint for developers & external integrations (Clay.com, Zapier, Python, Node.js)
 app.get('/api/leads/docs', (_req, res) => {
   return res.json({
-    name: 'AIYARA TEXTILE - B2B Real Contact Lead Generate API',
+    name: 'B2B Real Contact Lead Generate API',
     version: '1.3.0',
     description: 'Real-time B2B Lead Generation and LinkedIn Intelligence API powered by Google Search Grounding and Verified Flooring Importers directory. Fetches REAL CONTACT PERSONS directly from LinkedIn profiles (site:linkedin.com/in/) with verified designations, LinkedIn profile URLs, company LinkedIn pages, tailored connection notes, and verified work emails.',
     endpoints: [
@@ -929,8 +964,9 @@ app.get('/api/leads/docs', (_req, res) => {
               linkedinUrl: 'https://www.linkedin.com/in/fabian-berglund',
               companyLinkedinUrl: 'https://www.linkedin.com/company/nordic-knots',
               isLinkedInVerified: true,
+
               contactSource: 'LinkedIn Executive Profile (site:linkedin.com/in)',
-              linkedinInMail: 'Hej Fabian, admire Nordic Knots minimalism. AIYARA TEXTILE (Bhadohi) weaves high-density New Zealand wool flatweaves with EU PPWR compliance. Would love to connect!',
+              linkedinInMail: 'Hej Fabian, admire Nordic Knots minimalism. Our workshop (Bhadohi) weaves high-density New Zealand wool flatweaves with EU PPWR compliance. Would love to connect!',
               email: 'fabian@nordicknots.com',
               phone: '+46 8 501 645 00',
               leadScore: 99,
@@ -955,16 +991,19 @@ app.post('/api/leads/analyze', async (req, res) => {
     const apiKey = getApiKey();
     if (!apiKey) return res.status(500).json({ success: false, error: 'AI key not configured' });
     
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({ 
+      apiKey,
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+    });
     
-    const prompt = `Analyze these rug buyer leads and identify market trends, preferred rug types (hand-knotted vs tufted), and sourcing preferences for AIYARA TEXTILE.
+    const prompt = `Analyze these rug buyer leads and identify market trends, preferred rug types (hand-knotted vs tufted), and sourcing preferences for our export house.
     
     Leads Data: ${JSON.stringify(leads.slice(0, 50))}
     
     Provide a concise market analysis report (max 300 words) with:
     1. Key Sourcing Trends.
     2. Preferred Techniques/Materials.
-    3. Opportunity areas for AIYARA TEXTILE.
+    3. Opportunity areas.
     `;
 
     const response = await ai.models.generateContent({
@@ -987,13 +1026,9 @@ app.post('/api/tenders/live', async (_req, res) => {
       return res.json({ success: false, error: 'AI_KEY_NOT_CONFIGURED', message: 'API Key not configured' });
     }
 
-    const ai = new GoogleGenAI({
+    const ai = new GoogleGenAI({ 
       apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build'
-        }
-      }
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
     });
 
     const prompt = `Search for the latest open tenders, RFQs (Request for Quotations), and procurement notices for "carpets", "rugs", "textile exports", and "hospitality flooring".

@@ -1,9 +1,9 @@
 import ExcelJS from 'exceljs';
-import { AiyaraInvoice, AiyaraLineItem } from '../types';
-import { convertAmountToWords } from '../components/AiyaraInvoiceModal';
+import { ExportInvoice, ExportLineItem } from '../types';
+import { convertAmountToWords } from '../components/ExportInvoiceModal';
 
 // Helper to auto-calculate CBM from dimensions, volume, or sq.meters matching modal exactly
-export function calculateLineItemCbm(item: AiyaraLineItem): number {
+export function calculateLineItemCbm(item: ExportLineItem): number {
   if (item.cbmVolume !== undefined && Number(item.cbmVolume) > 0) {
     return Number(item.cbmVolume);
   }
@@ -75,13 +75,13 @@ const BORDER_BOX_DARK: Partial<ExcelJS.Borders> = {
  * the official Poptop & Export Commercial Invoice PDF using EXACT admin data.
  */
 export async function generatePoptopInvoiceExcel(
-  invoice: AiyaraInvoice,
+  invoice: ExportInvoice,
   options: { includePackingList?: boolean } = {}
 ): Promise<Blob> {
   const WorkbookClass = (ExcelJS as any).Workbook || (ExcelJS as any).default?.Workbook || (ExcelJS as any);
   const workbook = new WorkbookClass();
 
-  const isPoptop = invoice.invoiceType !== 'AIYARA' && !(invoice.buyerName || '').toLowerCase().includes('aiyara') && (invoice.invoiceType === 'POPTOP' || (invoice.buyerName || '').toLowerCase().includes('poptop'));
+  const isPoptop = invoice.invoiceType !== 'Export' && !(invoice.buyerName || '').toLowerCase().includes('aiyara') && (invoice.invoiceType === 'POPTOP' || (invoice.buyerName || '').toLowerCase().includes('poptop'));
   const currConfig = getCurrencyConfig(invoice.currency);
 
   workbook.creator = invoice.supplierName || 'Four Corners Carpets';
@@ -1043,7 +1043,7 @@ export async function generatePoptopInvoiceExcel(
  * Triggers instant browser download of the PDF-matched Excel file
  */
 export async function downloadPoptopInvoiceExcelFile(
-  invoice: AiyaraInvoice,
+  invoice: ExportInvoice,
   fileNamePrefix: string = 'POPTOP_Commercial_Invoice'
 ): Promise<void> {
   const blob = await generatePoptopInvoiceExcel(invoice);
