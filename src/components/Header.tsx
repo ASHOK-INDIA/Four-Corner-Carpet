@@ -8,11 +8,14 @@ interface HeaderProps {
   adminMode: boolean;
   isSyncing?: boolean;
   onToggleAdmin: () => void;
+  onLogoutAdmin: () => void;
   onOpenCreatePo: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   adminMode,
+  onToggleAdmin,
+  onLogoutAdmin,
   onOpenCreatePo,
 }) => {
   const { language, setLanguage, t } = useLanguage();
@@ -71,6 +74,25 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden xs:inline">AT</span>
             </button>
           </div>
+
+          {/* Admin Login / Logout Button */}
+          {adminMode ? (
+            <button
+              onClick={onLogoutAdmin}
+              className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-400 text-slate-950 hover:bg-amber-300 transition flex items-center gap-1 cursor-pointer shadow-sm"
+              title="Logout Admin Session"
+            >
+              <span>Admin Logout</span>
+            </button>
+          ) : (
+            <button
+              onClick={onToggleAdmin}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/25 hover:bg-white/35 text-white transition flex items-center gap-1 cursor-pointer border border-white/30 shadow-sm"
+              title="Admin Login"
+            >
+              <span>Admin Login</span>
+            </button>
+          )}
 
           {/* Create PO Button (Admin Mode Only) */}
           {adminMode && (

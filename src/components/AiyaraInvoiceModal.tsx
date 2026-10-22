@@ -1510,8 +1510,8 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       totalPallets: 1,
       pcsPerPallet: 10,
 
-      supplierName: exporterMaster.name,
-      supplierAddress: exporterMaster.address,
+      supplierName: 'FOUR CORNER CARPETS',
+      supplierAddress: 'WARD NO. 4 NEHARU NAGAR FATTUPUR NAI BAZAR, BHADOHI 221401, UTTAR PRADESH, INDIA',
       supplierGstin: exporterMaster.gstin,
       supplierContact: exporterMaster.contact,
       supplierAttention: 'Exports Manager',
@@ -1522,13 +1522,13 @@ export const AiyaraInvoiceModal: React.FC<AiyaraInvoiceModalProps> = ({
       supplierIecNo: exporterMaster.iecNo,
       supplierRexNo: exporterMaster.rexNo,
 
-      buyerName: consigneeMaster.name || 'Poptop GmbH',
-      buyerAddress: consigneeMaster.address || 'Mühlbachgasse 18 B/4, 2514 Traiskirchen, Austria',
-      buyerPhone: '', // Omitted for Poptop
-      buyerGstin: '', // Omitted for Poptop
-      buyerEoriVat: '', // Omitted for Poptop
-      buyerEmail: '', // Omitted for Poptop
-      buyerAttention: '', // Omitted for Poptop
+      buyerName: 'POPTOP',
+      buyerAddress: 'Margaretenstraße 121/11, 1050 Vienna, Austria',
+      buyerPhone: '',
+      buyerGstin: '',
+      buyerEoriVat: '',
+      buyerEmail: '',
+      buyerAttention: 'Ashok / Import Desk',
 
       currency: 'USD ($)',
       portOfLoading: 'MUMBAI',

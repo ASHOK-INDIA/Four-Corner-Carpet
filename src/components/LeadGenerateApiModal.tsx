@@ -140,7 +140,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
         body: JSON.stringify({
           query: targetQuery,
           country: targetCountry,
-          category,
+          category: category,
           limit: targetLimit,
           provider,
           companyName: companyNameSearch.trim(),
@@ -199,7 +199,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
     const ws = XLSX.utils.json_to_sheet(worksheetData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Verified_LinkedIn_Leads');
-    XLSX.writeFile(wb, `Aiyara_LinkedIn_Buyer_Leads_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `Ashok_Yadav_LinkedIn_Buyer_Leads_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleExportCsv = () => {
@@ -241,7 +241,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Aiyara_LinkedIn_Leads_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Ashok_Yadav_LinkedIn_Leads_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -394,7 +394,7 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
       });
 
       const safeCountry = country.replace(/[^a-zA-Z0-9]/g, '_');
-      doc.save(`Aiyara_Textile_Target_Buyer_List_${safeCountry}_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`Ashok_Yadav_Target_Buyer_List_${safeCountry}_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (e: any) {
       console.error('PDF export error:', e);
       alert('Failed to generate PDF. Please try again.');
@@ -786,10 +786,15 @@ export const LeadGenerateApiModal: React.FC<LeadGenerateApiModalProps> = ({
                     </label>
                     <select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
+                      onChange={(e) => {
+                        setCategory(e.target.value);
+                        handleGenerateLeads();
+                      }}
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E4002B] cursor-pointer font-mono"
                     >
                       <option value="Rugs & Carpets">Rugs & Carpets (All)</option>
+                      <option value="Bespoke & Custom Rugs">🎨 Bespoke & Custom Rugs (Designer & Trade)</option>
+                      <option value="Kids & Nursery Rugs">🧸 Kids & Nursery Rugs (Washable & Tufted)</option>
                       <option value="Small Retailer / Boutique Rug Store">🏪 Chhote Retailers & Boutique Rug Stores</option>
                       <option value="Independent Rug Gallery">🏬 Independent Rug Galleries & Showrooms</option>
                       <option value="Interior Design & Architecture">Luxury Interior Design Studios</option>

@@ -24,6 +24,8 @@ import { PdfStudioModal } from './components/PdfStudioModal';
 import { QcInspectionModal } from './components/QcInspectionModal';
 import { LeadGenerateApiModal } from './components/LeadGenerateApiModal';
 import { VoiceRugGalleryModal } from './components/VoiceRugGalleryModal';
+import { PoptopDirectInvoiceModal } from './components/PoptopDirectInvoiceModal';
+import { TenderRfqTrackerModal } from './components/TenderRfqTrackerModal';
 import { WindowsTaskbar } from './components/WindowsTaskbar';
 import {
   subscribePurchaseOrders,
@@ -51,7 +53,7 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState<boolean>(true);
 
   // State: Admin Mode
-  const [adminMode, setAdminMode] = useState<boolean>(false);
+  const [adminMode, setAdminMode] = useState<boolean>(() => localStorage.getItem('poptop_admin_session') === 'true');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
 
   // State: Weather
@@ -90,6 +92,7 @@ export default function App() {
   const [isAiyaraInvoiceOpen, setIsAiyaraInvoiceOpen] = useState<boolean>(false);
 
   const [isAiyaraLedgerOpen, setIsAiyaraLedgerOpen] = useState<boolean>(false);
+  const [isWorkerSmsOpen, setIsWorkerSmsOpen] = useState<boolean>(false);
   const [isPdfStudioOpen, setIsPdfStudioOpen] = useState<boolean>(false);
   const [isStartMenuOpen, setIsStartMenuOpen] = useState<boolean>(false);
 
@@ -99,6 +102,8 @@ export default function App() {
   const [qcReports, setQcReports] = useState<QcInspectionReport[]>([]);
   const [isLeadApiOpen, setIsLeadApiOpen] = useState<boolean>(false);
   const [isVoiceGalleryOpen, setIsVoiceGalleryOpen] = useState<boolean>(false);
+  const [isPoptopDirectInvoiceOpen, setIsPoptopDirectInvoiceOpen] = useState<boolean>(false);
+  const [isTenderTrackerOpen, setIsTenderTrackerOpen] = useState<boolean>(false);
 
   const [isARVisualizerOpen, setIsARVisualizerOpen] = useState<boolean>(false);
   const [selectedARSample, setSelectedARSample] = useState<SampleItem | null>(null);
@@ -272,12 +277,14 @@ export default function App() {
     setIsQcModalOpen(false);
     setIsLeadApiOpen(false);
     setIsVoiceGalleryOpen(false);
+    setIsPoptopDirectInvoiceOpen(false);
+    setIsTenderTrackerOpen(false);
   };
 
   // Admin Toggle Handler
   const handleToggleAdmin = () => {
     if (adminMode) {
-      setAdminMode(false);
+      handleLogoutAdmin();
     } else {
       closeAllModals();
       setIsPasswordModalOpen(true);
@@ -286,7 +293,13 @@ export default function App() {
 
   const handlePasswordSuccess = () => {
     setAdminMode(true);
+    localStorage.setItem('poptop_admin_session', 'true');
     setIsPasswordModalOpen(false);
+  };
+
+  const handleLogoutAdmin = () => {
+    setAdminMode(false);
+    localStorage.removeItem('poptop_admin_session');
   };
 
   // PO Detail View
@@ -435,6 +448,7 @@ export default function App() {
         adminMode={adminMode}
         isSyncing={isSyncing}
         onToggleAdmin={handleToggleAdmin}
+        onLogoutAdmin={handleLogoutAdmin}
         onOpenCreatePo={handleOpenCreatePo}
       />
 
@@ -705,6 +719,22 @@ export default function App() {
         adminMode={adminMode}
       />
 
+      {/* Poptop Direct Invoice Studio with Sender & Receiver Addresses */}
+      <PoptopDirectInvoiceModal
+        isOpen={isPoptopDirectInvoiceOpen}
+        onClose={() => setIsPoptopDirectInvoiceOpen(false)}
+        isMinimized={false}
+        onMinimize={() => {}}
+        isMaximized={false}
+        onMaximize={() => {}}
+        zIndex={50}
+        onFocus={() => {}}
+      />
+      <TenderRfqTrackerModal
+        isOpen={isTenderTrackerOpen}
+        onClose={() => setIsTenderTrackerOpen(false)}
+      />
+
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!deleteConfirmOrder}
@@ -729,11 +759,13 @@ export default function App() {
           { id: 'arVisualizer', title: 'AR Room Visualizer', colorClass: 'bg-violet-500', isOpen: isARVisualizerOpen, isMinimized: false },
           { id: 'weaverGraph', title: 'Master Weaver Graph', colorClass: 'bg-teal-500', isOpen: isWeaverGraphOpen, isMinimized: false },
           { id: 'invoice', title: 'Poptop Invoice', colorClass: 'bg-rose-600', isOpen: isAiyaraInvoiceOpen, isMinimized: false },
+          { id: 'poptopDirect', title: 'Poptop Direct Invoice', colorClass: 'bg-indigo-600', isOpen: isPoptopDirectInvoiceOpen, isMinimized: false },
           { id: 'ledger', title: 'Account Ledger', colorClass: 'bg-indigo-600', isOpen: isAiyaraLedgerOpen, isMinimized: false, isAdminOnly: true },
           { id: 'pdfStudio', title: 'Admin PDF Studio', colorClass: 'bg-red-500', isOpen: isPdfStudioOpen, isMinimized: false, isAdminOnly: true },
           { id: 'qc', title: 'Digital QC Audit', colorClass: 'bg-emerald-600', isOpen: isQcModalOpen, isMinimized: false, isAdminOnly: true },
           { id: 'leadApi', title: 'Live Lead API', colorClass: 'bg-amber-600', isOpen: isLeadApiOpen, isMinimized: false, isAdminOnly: true },
           { id: 'voiceGallery', title: 'Voice Rug Gallery', colorClass: 'bg-purple-600', isOpen: isVoiceGalleryOpen, isMinimized: false, isAdminOnly: true },
+          { id: 'tenderTracker', title: 'Tender/RFQ Tracker', colorClass: 'bg-amber-500', isOpen: isTenderTrackerOpen, isMinimized: false },
         ]}
         onToggleWindow={(id) => {
           if (id === 'detail') setDetailModalOpen(!detailModalOpen);
@@ -748,6 +780,7 @@ export default function App() {
           if (id === 'arVisualizer') setIsARVisualizerOpen(!isARVisualizerOpen);
           if (id === 'weaverGraph') setIsWeaverGraphOpen(!isWeaverGraphOpen);
           if (id === 'invoice') setIsAiyaraInvoiceOpen(!isAiyaraInvoiceOpen);
+          if (id === 'poptopDirect') setIsPoptopDirectInvoiceOpen(!isPoptopDirectInvoiceOpen);
           if (id === 'ledger') {
             if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
             setIsAiyaraLedgerOpen(!isAiyaraLedgerOpen);
@@ -768,6 +801,9 @@ export default function App() {
           if (id === 'voiceGallery') {
             if (!adminMode) { alert('Admin access required.'); setIsPasswordModalOpen(true); return; }
             setIsVoiceGalleryOpen(!isVoiceGalleryOpen);
+          }
+          if (id === 'tenderTracker') {
+            setIsTenderTrackerOpen(!isTenderTrackerOpen);
           }
         }}
         onCloseAll={closeAllModals}

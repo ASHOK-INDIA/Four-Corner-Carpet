@@ -89,10 +89,11 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
   const [pdfProgress, setPdfProgress] = useState<number>(0);
   const [pdfStatusText, setPdfStatusText] = useState<string>('');
 
-  // Fancy Customization States
+  // Fancy Customization States (Defaults to Page Saver: 2-column, compact density, maximum Q per page)
   const [themeStyle, setThemeStyle] = useState<'classic' | 'amber' | 'emerald' | 'indigo'>('amber');
-  const [isTwoColumn, setIsTwoColumn] = useState(false);
-  const [fontScale, setFontScale] = useState<'sm' | 'md' | 'lg' | 'xl'>('lg');
+  const [isTwoColumn, setIsTwoColumn] = useState(true);
+  const [compactDensity, setCompactDensity] = useState(true);
+  const [fontScale, setFontScale] = useState<'sm' | 'md' | 'lg' | 'xl'>('sm');
   const [showWatermark, setShowWatermark] = useState(true);
 
   // Initialize with 100 authentic UPSC randomized questions
@@ -103,9 +104,22 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  // Helper to activate page-saver mode: 2-column, compact density, maximum questions per page (saves ~80% pages)
+  const handleEnablePageSaver = () => {
+    setIsTwoColumn(true);
+    setCompactDensity(true);
+    setFontScale('sm');
+    const el = document.getElementById('pdfStudioDocumentPage');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    showToast('🚀 पेज सेवर मोड सक्रिय: 1 पेज पर अधिकतम प्रश्न, न्यूनतम पेज खर्च (80% बचत)!');
+  };
+
   // Helper to activate mobile fit mode: large legible font, 1-column layout, edge-to-edge
   const handleEnableMobileFit = () => {
     setIsTwoColumn(false);
+    setCompactDensity(false);
     setFontScale('lg');
     const el = document.getElementById('pdfStudioDocumentPage');
     if (el) {
@@ -502,7 +516,7 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
 
     setIsGeneratingPdf(true);
     setPdfProgress(0);
-    setPdfStatusText("PDF जनरेटर प्रारंभ हो रहा है...");
+    setPdfStatusText("पेज सेवर PDF इंजन प्रारंभ हो रहा है...");
 
     // Yield to allow UI to show progress modal immediately
     await new Promise(r => setTimeout(r, 60));
@@ -515,55 +529,252 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
         compress: true
       });
 
-      // Split questions into clean A4 pages:
-      // 4 questions per page gives generous vertical room for large 13.5px font, comfortable options, and full Hindi solutions
-      const pages: { questions: Question[]; startIndex: number; isFirst: boolean; isLast: boolean }[] = [];
-      const firstPageQuestions = questionsToExport.slice(0, 4);
-      pages.push({ questions: firstPageQuestions, startIndex: 0, isFirst: true, isLast: questionsToExport.length <= 4 });
+      // Target standard A4 page dimensions at 96 DPI: 794 x 1123 px
+      const A4_WIDTH = 794;
+      const A4_HEIGHT = 1123;
+      const PADDING_Y = 24; // 12px top + 12px bottom
+      const USABLE_PAGE_HEIGHT = A4_HEIGHT - PADDING_Y; // 1099px
 
-      let cursor = 4;
-      while (cursor < questionsToExport.length) {
-        const chunk = questionsToExport.slice(cursor, cursor + 4);
-        const isLastChunk = (cursor + 4) >= questionsToExport.length;
-        pages.push({ questions: chunk, startIndex: cursor, isFirst: false, isLast: isLastChunk });
-        cursor += 4;
+      // Question card HTML renderer for PDF (compact, professional, high density, no wasted space)
+      const renderPdfCard = (q: Question, qNum: number) => {
+        const optionsList = q.options.map((opt, optIdx) => {
+          const letter = ['a', 'b', 'c', 'd'][optIdx] || 'a';
+          const isCorrect = q.ans.toLowerCase() === letter;
+          return `
+            <div style="
+              padding: 2.5px 5px; 
+              border-radius: 4px; 
+              font-size: 8.5px; 
+              display: flex; 
+              align-items: center; 
+              justify-content: space-between;
+              line-height: 1.25;
+              box-sizing: border-box;
+              min-height: 22px;
+              ${isCorrect 
+                ? 'background: #059669; color: white; font-weight: 800; border: 1px solid #047857;' 
+                : 'background: #ffffff; color: #1e293b; font-weight: 600; border: 1px solid #cbd5e1;'}
+            ">
+              <span style="overflow: hidden; text-overflow: ellipsis;">${opt}</span>
+              ${isCorrect ? '<span style="background: white; color: #047857; font-size: 7.5px; font-weight: 900; padding: 0.5px 3px; border-radius: 2px; margin-left: 3px; shrink: 0;">✓</span>' : ''}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div style="
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            padding: 4px 6px; 
+            background-color: #f8fafc; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+          ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="background: #0f172a; color: white; font-size: 8.5px; font-weight: 900; padding: 1px 4.5px; border-radius: 3px;">
+                  प्रश्न ${qNum}
+                </span>
+                <span style="background: #e2e8f0; color: #1e293b; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 3px;">
+                  ${q.type || 'UPSC'}
+                </span>
+                ${q.topic ? `<span style="font-size: 8px; font-weight: 700; color: #475569; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${q.topic}</span>` : ''}
+              </div>
+              <div style="background: #059669; color: white; font-size: 8.5px; font-weight: 900; padding: 1px 5px; border-radius: 3px;">
+                ✓ (${q.ans.toUpperCase()})
+              </div>
+            </div>
+
+            <div style="font-size: 9.5px; color: #020617; font-weight: 800; margin-bottom: 3px; line-height: 1.3;">
+              ${q.hi || q.en}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5px; margin-bottom: ${q.explanation ? '2px' : '0'};">
+              ${optionsList}
+            </div>
+
+            ${q.explanation ? `
+              <div style="background: #ecfdf5; border-left: 2px solid #10b981; padding: 1.5px 4px; font-size: 7.5px; color: #064e3b; font-weight: 600; line-height: 1.25; border-radius: 0 3px 3px 0; margin-top: 1.5px;">
+                <strong style="color: #047857; font-weight: 800;">हल:</strong> ${q.explanation}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      };
+
+      // Headers HTML
+      const firstHeaderHtml = `
+        <div style="position: relative; z-index: 1; text-align: center; border-bottom: 1.5px solid #0f172a; padding-bottom: 5px; margin-bottom: 5px;">
+          <div style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin-bottom: 1px;">
+            🏛️ सिविल सर्विसेज एवं प्रतियोगी परीक्षा मार्गदर्शन केंद्र 🎓
+          </div>
+          <h1 style="font-size: 19px; font-weight: 900; color: #020617; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; line-height: 1.15;">
+            ${instituteName}
+          </h1>
+          <p style="font-size: 9.5px; font-weight: 700; color: #047857; margin: 1px 0;">
+            ${instituteTagline}
+          </p>
+          <div style="font-size: 8.5px; font-weight: 600; color: #334155; margin: 1px 0;">
+            <span>📍 ${instituteAddress}</span> • <span style="font-weight: 800; color: #b45309;">${instituteContact}</span>
+          </div>
+          <div style="font-size: 11px; font-weight: 900; color: #0f172a; margin-top: 2px;">
+            ${docTitle}
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; font-weight: 700; color: #475569; margin-top: 2.5px; padding-top: 2px; border-top: 1px dashed #cbd5e1;">
+            <span>${docExamMeta}</span>
+            <span style="background: #0f172a; color: white; padding: 1px 7px; border-radius: 9999px; font-size: 8px; font-weight: 800;">
+              UPSC 100 संपूर्ण उत्तर कुंजी (Green) • पेज सेवर
+            </span>
+          </div>
+        </div>
+      `;
+
+      const otherHeaderHtml = `
+        <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #0f172a; padding-bottom: 3px; margin-bottom: 5px; font-size: 9px; font-weight: 800; color: #0f172a;">
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <span style="background: #0f172a; color: white; padding: 1px 5px; border-radius: 3px; font-size: 8px;">${instituteName}</span>
+            <span>UPSC 100 महत्वपूर्ण प्रश्न संग्रह (उत्तर कुंजी सहित)</span>
+          </div>
+          <div style="color: #b45309; font-weight: 700;">
+            ${instituteContact}
+          </div>
+        </div>
+      `;
+
+      // Structure rows: 2 questions per row if 2-column mode (default), or 1 question per row
+      type QuestionRow = { q1: Question; idx1: number; q2?: Question; idx2?: number };
+      const rows: QuestionRow[] = [];
+
+      if (isTwoColumn) {
+        for (let i = 0; i < questionsToExport.length; i += 2) {
+          rows.push({
+            q1: questionsToExport[i],
+            idx1: i,
+            q2: i + 1 < questionsToExport.length ? questionsToExport[i + 1] : undefined,
+            idx2: i + 1 < questionsToExport.length ? i + 1 : undefined
+          });
+        }
+      } else {
+        for (let i = 0; i < questionsToExport.length; i++) {
+          rows.push({
+            q1: questionsToExport[i],
+            idx1: i
+          });
+        }
+      }
+
+      // Fast off-screen measurement in a single pass
+      setPdfStatusText("पृष्ठों का गणितीय विभाजन हो रहा है (Zero Waste Packing)...");
+      const measureContainer = document.createElement('div');
+      measureContainer.style.position = 'fixed';
+      measureContainer.style.left = '-9999px';
+      measureContainer.style.top = '0';
+      measureContainer.style.width = `${A4_WIDTH}px`;
+      measureContainer.style.padding = '10px 14px';
+      measureContainer.style.boxSizing = 'border-box';
+      measureContainer.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      document.body.appendChild(measureContainer);
+
+      measureContainer.innerHTML = `
+        <div id="m-first-hdr">${firstHeaderHtml}</div>
+        <div id="m-other-hdr">${otherHeaderHtml}</div>
+        ${rows.map((r, rIdx) => `
+          <div id="m-row-${rIdx}" style="display: grid; grid-template-columns: ${isTwoColumn ? '1fr 1fr' : '1fr'}; gap: 4px; margin-bottom: 4px; box-sizing: border-box;">
+            ${renderPdfCard(r.q1, r.idx1 + 1)}
+            ${r.q2 ? renderPdfCard(r.q2, (r.idx2 || 0) + 1) : (isTwoColumn ? '<div></div>' : '')}
+          </div>
+        `).join('')}
+      `;
+
+      const firstHdrHeight = document.getElementById('m-first-hdr')?.offsetHeight || 105;
+      const otherHdrHeight = document.getElementById('m-other-hdr')?.offsetHeight || 24;
+      const footerEstHeight = 22;
+
+      const rowHeights = rows.map((_, rIdx) => {
+        const el = document.getElementById(`m-row-${rIdx}`);
+        return (el?.offsetHeight || 75) + 4; // row height + gap
+      });
+
+      document.body.removeChild(measureContainer);
+
+      // Dynamically pack rows into pages so NO space is wasted and pages are minimized
+      const pages: { rows: QuestionRow[]; isFirst: boolean; isLast: boolean }[] = [];
+      let currentBatch: QuestionRow[] = [];
+      let currentHeight = 0;
+      let isFirstPage = true;
+
+      for (let rIdx = 0; rIdx < rows.length; rIdx++) {
+        const row = rows[rIdx];
+        const rH = rowHeights[rIdx];
+        const maxPageContentH = isFirstPage
+          ? (USABLE_PAGE_HEIGHT - firstHdrHeight - footerEstHeight - 8)
+          : (USABLE_PAGE_HEIGHT - otherHdrHeight - footerEstHeight - 8);
+
+        if (currentBatch.length > 0 && (currentHeight + rH > maxPageContentH)) {
+          // Page boundary reached! Push completed page
+          pages.push({
+            rows: currentBatch,
+            isFirst: isFirstPage,
+            isLast: false
+          });
+          currentBatch = [row];
+          currentHeight = rH;
+          isFirstPage = false;
+        } else {
+          currentBatch.push(row);
+          currentHeight += rH;
+        }
+      }
+
+      if (currentBatch.length > 0) {
+        pages.push({
+          rows: currentBatch,
+          isFirst: isFirstPage,
+          isLast: true
+        });
+      }
+      if (pages.length > 0) {
+        pages[pages.length - 1].isLast = true;
       }
 
       const totalPages = pages.length;
 
+      // Render each packed page
       for (let pIdx = 0; pIdx < totalPages; pIdx++) {
         const pageData = pages[pIdx];
         setPdfStatusText(`पृष्ठ ${pIdx + 1} / ${totalPages} तैयार हो रहा है...`);
         setPdfProgress(Math.round(((pIdx) / totalPages) * 100));
 
-        // Create temporary offscreen A4 container (A4 dimensions at standard 96 DPI: 794x1123)
         const pageEl = document.createElement('div');
         pageEl.style.position = 'fixed';
         pageEl.style.left = '-9999px';
         pageEl.style.top = '0';
         pageEl.style.width = '794px';
-        pageEl.style.minHeight = '1123px';
+        pageEl.style.height = '1123px';
         pageEl.style.backgroundColor = '#ffffff';
         pageEl.style.color = '#0f172a';
-        pageEl.style.padding = '16px 20px';
+        pageEl.style.padding = '10px 14px';
         pageEl.style.boxSizing = 'border-box';
         pageEl.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         pageEl.style.zIndex = '-9999';
         pageEl.style.display = 'flex';
         pageEl.style.flexDirection = 'column';
-        pageEl.style.justifyContent = 'space-between';
+        pageEl.style.justifyContent = 'flex-start';
+        pageEl.style.overflow = 'hidden';
 
         // 1. Watermark
         let watermarkHtml = '';
         if (showWatermark) {
           watermarkHtml = `
             <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; user-select: none; z-index: 0; overflow: hidden;">
-              <div style="text-align: center; transform: rotate(-22deg); opacity: 0.10;">
-                <div style="font-size: 38px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: 2px;">
+              <div style="text-align: center; transform: rotate(-22deg); opacity: 0.08;">
+                <div style="font-size: 36px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: 2px;">
                   ${instituteName}
                 </div>
-                <div style="font-size: 12.5px; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px;">
-                  UPSC 100 प्रश्नोत्तरी मॉक टेस्ट • ब्राइट कैंपस भदोही (पृष्ठ ${pIdx + 1}/${totalPages})
+                <div style="font-size: 11px; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 3px;">
+                  UPSC 100 प्रश्नोत्तरी • ब्राइट कैंपस भदोही (पृष्ठ ${pIdx + 1}/${totalPages})
                 </div>
               </div>
             </div>
@@ -571,120 +782,31 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
         }
 
         // 2. Header
-        let headerHtml = '';
-        if (pageData.isFirst) {
-          headerHtml = `
-            <div style="position: relative; z-index: 1; text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 8px;">
-              <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #475569; margin-bottom: 2px;">
-                🏛️ सिविल सर्विसेज एवं प्रतियोगी परीक्षा मार्गदर्शन केंद्र 🎓
-              </div>
-              <h1 style="font-size: 23px; font-weight: 900; color: #020617; text-transform: uppercase; margin: 0; letter-spacing: 0.5px;">
-                ${instituteName}
-              </h1>
-              <p style="font-size: 10.5px; font-weight: 700; color: #047857; margin: 2px 0;">
-                ${instituteTagline}
-              </p>
-              <div style="font-size: 10px; font-weight: 600; color: #334155; margin: 2px 0;">
-                <span>📍 ${instituteAddress}</span> • <span style="font-weight: 800; color: #b45309;">${instituteContact}</span>
-              </div>
-              <div style="font-size: 12.5px; font-weight: 900; color: #0f172a; margin-top: 3px;">
-                ${docTitle}
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; font-weight: 700; color: #475569; margin-top: 4px; padding-top: 3px; border-top: 1px dashed #cbd5e1;">
-                <span>${docExamMeta}</span>
-                <span style="background: #0f172a; color: white; padding: 2px 8px; border-radius: 9999px; font-size: 9px; font-weight: 800;">
-                  UPSC 100 संपूर्ण उत्तर कुंजी (Green)
-                </span>
-              </div>
-            </div>
-          `;
-        } else {
-          headerHtml = `
-            <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #0f172a; padding-bottom: 5px; margin-bottom: 8px; font-size: 10px; font-weight: 800; color: #0f172a;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="background: #0f172a; color: white; padding: 1.5px 6px; border-radius: 4px; font-size: 9px;">${instituteName}</span>
-                <span>UPSC 100 महत्वपूर्ण प्रश्न संग्रह (उत्तर कुंजी सहित)</span>
-              </div>
-              <div style="color: #b45309; font-weight: 700;">
-                ${instituteContact}
-              </div>
-            </div>
-          `;
-        }
+        const headerHtml = pageData.isFirst ? firstHeaderHtml : otherHeaderHtml;
 
-        // 3. Questions (Large, bold, high-contrast, perfectly legible on mobile screens)
-        const questionsHtml = pageData.questions.map((q, idx) => {
-          const qNum = pageData.startIndex + idx + 1;
-          const optionsList = q.options.map((opt, optIdx) => {
-            const letter = ['a', 'b', 'c', 'd'][optIdx] || 'a';
-            const isCorrect = q.ans.toLowerCase() === letter;
-            return `
-              <div style="
-                padding: 6px 9px; 
-                border-radius: 6px; 
-                font-size: 11.5px; 
-                display: flex; 
-                align-items: center; 
-                justify-content: space-between;
-                ${isCorrect 
-                  ? 'background: #059669; color: white; font-weight: 800; border: 1.5px solid #047857;' 
-                  : 'background: #ffffff; color: #1e293b; font-weight: 600; border: 1px solid #cbd5e1;'}
-              ">
-                <span style="line-height: 1.35;">${opt}</span>
-                ${isCorrect ? '<span style="background: white; color: #047857; font-size: 9px; font-weight: 900; padding: 1.5px 5px; border-radius: 3px; margin-left: 6px; shrink: 0;">✓ सही उत्तर</span>' : ''}
-              </div>
-            `;
-          }).join('');
+        // 3. Questions grid
+        const questionsGridHtml = `
+          <div style="position: relative; z-index: 1; display: grid; grid-template-columns: ${isTwoColumn ? '1fr 1fr' : '1fr'}; gap: 4px; margin-bottom: 4px;">
+            ${pageData.rows.map(r => `
+              ${renderPdfCard(r.q1, r.idx1 + 1)}
+              ${r.q2 ? renderPdfCard(r.q2, (r.idx2 || 0) + 1) : (isTwoColumn ? '<div></div>' : '')}
+            `).join('')}
+          </div>
+        `;
 
-          return `
-            <div style="position: relative; z-index: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; margin-bottom: 8px; background-color: #f8fafc;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="background: #0f172a; color: white; font-size: 10.5px; font-weight: 900; padding: 2px 7px; border-radius: 4px;">
-                    प्रश्न ${qNum}
-                  </span>
-                  <span style="background: #e2e8f0; color: #1e293b; font-size: 9.5px; font-weight: 800; padding: 1.5px 6px; border-radius: 4px;">
-                    ${q.type || 'UPSC परीक्षा'}
-                  </span>
-                  <span style="font-size: 9.5px; font-weight: 700; color: #475569;">
-                    ${q.topic || ''}
-                  </span>
-                </div>
-                <div style="background: #059669; color: white; font-size: 10.5px; font-weight: 900; padding: 2px 8px; border-radius: 5px;">
-                  ✓ उत्तर: (${q.ans.toUpperCase()})
-                </div>
-              </div>
-
-              <div style="font-size: 13px; color: #020617; font-weight: 800; margin-bottom: 6px; line-height: 1.45;">
-                ${q.hi || q.en}
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 5px;">
-                ${optionsList}
-              </div>
-
-              ${q.explanation ? `
-                <div style="background: #ecfdf5; border-left: 3px solid #10b981; padding: 4px 8px; font-size: 10.5px; color: #064e3b; font-weight: 600; line-height: 1.4; border-radius: 0 4px 4px 0;">
-                  <strong style="color: #047857; font-weight: 800;">व्याख्या / हल:</strong> ${q.explanation}
-                </div>
-              ` : ''}
-            </div>
-          `;
-        }).join('');
-
-        // 4. If Last Page, add official Answer Key Grid summary
+        // 4. Official Answer Key Grid on Last Page
         let lastPageAppendixHtml = '';
         if (pageData.isLast) {
           lastPageAppendixHtml = `
-            <div style="margin-top: 6px; border: 1.5px solid #0f172a; border-radius: 6px; padding: 6px; background: #ffffff;">
-              <div style="font-size: 9.5px; font-weight: 800; color: #0f172a; margin-bottom: 4px; text-align: center; text-transform: uppercase;">
+            <div style="position: relative; z-index: 1; margin-top: auto; border: 1.5px solid #0f172a; border-radius: 5px; padding: 4px; background: #ffffff;">
+              <div style="font-size: 8.5px; font-weight: 900; color: #0f172a; margin-bottom: 3px; text-align: center; text-transform: uppercase;">
                 ✓ उत्तर कुंजी (OFFICIAL ANSWER KEY - COMPLETE 100 QUESTIONS)
               </div>
-              <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; text-align: center; font-size: 8px;">
+              <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; text-align: center; font-size: 7.5px;">
                 ${questionsToExport.slice(0, 100).map((q, aIdx) => `
                   <div style="border: 1px solid #cbd5e1; border-radius: 3px; padding: 1px 0; background: #f0fdf4;">
-                    <div style="font-weight: 600; color: #475569; font-size: 7.5px;">${aIdx + 1}</div>
-                    <div style="font-weight: 900; color: #059669; font-size: 8.5px;">${q.ans.toUpperCase()}</div>
+                    <div style="font-weight: 600; color: #475569; font-size: 7px;">${aIdx + 1}</div>
+                    <div style="font-weight: 900; color: #059669; font-size: 8px;">${q.ans.toUpperCase()}</div>
                   </div>
                 `).join('')}
               </div>
@@ -694,17 +816,17 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
 
         // 5. Footer
         const footerHtml = `
-          <div style="position: relative; z-index: 1; border-top: 1px solid #cbd5e1; padding-top: 4px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; font-weight: 700; color: #64748b;">
+          <div style="position: relative; z-index: 1; border-top: 1px solid #cbd5e1; padding-top: 3px; margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 8px; font-weight: 700; color: #64748b;">
             <span>${instituteName} • Bhadohi (U.P.) • ${instituteContact}</span>
-            <span>पृष्ठ ${pIdx + 1} / ${totalPages}</span>
+            <span>पृष्ठ ${pIdx + 1} / ${totalPages} (पेज सेवर मोड)</span>
           </div>
         `;
 
         pageEl.innerHTML = `
           ${watermarkHtml}
-          <div>
+          <div style="position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column;">
             ${headerHtml}
-            ${questionsHtml}
+            ${questionsGridHtml}
             ${lastPageAppendixHtml}
           </div>
           ${footerHtml}
@@ -712,7 +834,6 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
 
         document.body.appendChild(pageEl);
 
-        // Allow micro-task for layout
         await new Promise(r => setTimeout(r, 10));
 
         const canvas = await html2canvas(pageEl, {
@@ -730,11 +851,9 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
 
         document.body.removeChild(pageEl);
 
-        // Update progress
         const pct = Math.round(((pIdx + 1) / totalPages) * 100);
         setPdfProgress(pct);
 
-        // Yield to event loop to keep browser completely responsive
         await new Promise(r => setTimeout(r, 15));
       }
 
@@ -743,7 +862,7 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
       await new Promise(r => setTimeout(r, 50));
 
       pdf.save('BRIGHT_CAMPUS_BHADOHI_UPSC_100_QNA.pdf');
-      showToast("✅ PDF सफलतापूर्वक डाउनलोड हो गया!");
+      showToast(`✅ PDF तैयार! 100 प्रश्न केवल ${totalPages} पृष्ठों में (पेज सेवर बचत)!`);
     } catch (err: any) {
       console.error("PDF generation error:", err);
       showToast("PDF जनरेशन में समस्या। कृपया 'Print' बटन का उपयोग करें।");
@@ -988,14 +1107,31 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
       {/* Fancy Customization Toolbar */}
       <div className="bg-slate-900/95 border-b border-slate-800 px-2.5 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs text-slate-300 sticky top-[53px] sm:top-[65px] z-30 shadow-md no-print">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Dedicated Page Saver Button */}
+          <button
+            onClick={handleEnablePageSaver}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border shadow-md ${
+              isTwoColumn && compactDensity
+                ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 border-amber-300 ring-2 ring-amber-400/50'
+                : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-amber-500/40'
+            }`}
+            title="1 पेज पर अधिकतम प्रश्न (कम से कम पेज खर्च, 80% पेज बचत)"
+          >
+            <span>⚡</span>
+            <span>पेज सेवर (अधिकतम Q / कम पेज)</span>
+            {isTwoColumn && compactDensity && (
+              <span className="bg-slate-950 text-amber-400 text-[10px] px-1.5 py-0.2 rounded-full font-extrabold">सक्रिय</span>
+            )}
+          </button>
+
           {/* Dedicated Mobile Fit Button */}
           <button
             onClick={handleEnableMobileFit}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 hover:from-emerald-400 hover:to-teal-400 transition cursor-pointer shadow-md text-xs border border-emerald-300"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold bg-slate-800/90 text-teal-300 hover:bg-slate-700 transition cursor-pointer shadow-md text-xs border border-teal-500/40"
             title="मोबाइल स्क्रीन पर 100% फिट और बड़ा फॉन्ट दृश्य सक्रिय करें"
           >
             <span>📱</span>
-            <span>मोबाइल फुल-फिट (Bada & Fit)</span>
+            <span>मोबाइल फुल-फिट</span>
           </button>
 
           <button 
@@ -1032,8 +1168,20 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
             <button 
               onClick={() => setIsTwoColumn(!isTwoColumn)}
               className={`px-2 py-0.5 rounded-md font-bold transition cursor-pointer ${isTwoColumn ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-slate-300'}`}
+              title={isTwoColumn ? '2 कॉलम (पेज बचत)' : '1 कॉलम'}
             >
               {isTwoColumn ? '2 कॉलम' : '1 कॉलम'}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-800/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-slate-700">
+            <span className="font-bold text-white text-[11px] sm:text-xs">डेंसिटी:</span>
+            <button 
+              onClick={() => setCompactDensity(!compactDensity)}
+              className={`px-2 py-0.5 rounded-md font-bold text-[11px] transition cursor-pointer ${compactDensity ? 'bg-emerald-500 text-slate-950 shadow-xs' : 'bg-slate-900 text-slate-300'}`}
+              title={compactDensity ? '⚡ कॉम्पैक्ट (पेज सेवर: कम खाली जगह, ज्यादा प्रश्न)' : 'सामान्य (खुला)'}
+            >
+              {compactDensity ? '⚡ कॉम्पैक्ट (बचत)' : 'सामान्य'}
             </button>
           </div>
 
@@ -1441,7 +1589,7 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
             </div>
 
             {/* Questions Header with Quick Controls */}
-            <div className="flex flex-wrap items-center justify-between mb-4 pb-2 border-b-2 border-slate-900 gap-2">
+            <div className="flex flex-wrap items-center justify-between mb-3 pb-2 border-b-2 border-slate-900 gap-2">
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-wide uppercase">
                   UPSC 100 महत्वपूर्ण प्रश्न संकलन
@@ -1449,6 +1597,11 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                 <span className="text-xs bg-slate-900 text-white px-2.5 py-0.5 rounded-full font-bold">
                   {filteredQuestions.length} प्रश्न
                 </span>
+                {isTwoColumn && compactDensity && (
+                  <span className="text-[11px] bg-amber-500/20 text-amber-900 border border-amber-500/40 px-2 py-0.5 rounded-full font-black">
+                    ⚡ पेज सेवर मोड (1 पेज पर अधिकतम Q)
+                  </span>
+                )}
               </div>
 
               <div className="text-xs text-emerald-800 font-bold bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 flex items-center gap-1.5">
@@ -1457,8 +1610,8 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
               </div>
             </div>
 
-            {/* Questions List (Supports 1 or 2 columns layout) */}
-            <div className={`${isTwoColumn ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'} mb-8`}>
+            {/* Questions List (Supports 1 or 2 columns layout with Zero Waste Spacing) */}
+            <div className={`${isTwoColumn ? (compactDensity ? 'grid grid-cols-1 md:grid-cols-2 gap-2.5' : 'grid grid-cols-1 md:grid-cols-2 gap-4') : (compactDensity ? 'space-y-2.5' : 'space-y-4')} mb-6`}>
               {filteredQuestions.map((q, index) => {
                 const isAnswerRevealed = revealedAnswers[q.id] !== undefined ? revealedAnswers[q.id] : showAllAnswers;
                 const userPick = userAnswers[q.id];
@@ -1467,17 +1620,17 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                 return (
                   <div 
                     key={q.id || index} 
-                    className={`rounded-xl p-4 border transition-all duration-200 shadow-sm ${currentTheme.cardBg} ${
+                    className={`rounded-xl ${compactDensity ? 'p-2.5 sm:p-3' : 'p-4'} border transition-all duration-200 shadow-sm break-inside-avoid print:break-inside-avoid ${currentTheme.cardBg} ${
                       isAnswerRevealed ? 'border-emerald-300 ring-1 ring-emerald-200/50' : 'hover:border-slate-300'
                     }`}
                   >
                     {/* Top Header of Card */}
-                    <div className="flex flex-wrap sm:flex-nowrap items-center justify-between border-b border-slate-200 pb-2 mb-2.5 gap-2">
+                    <div className={`flex flex-wrap sm:flex-nowrap items-center justify-between border-b border-slate-200 ${compactDensity ? 'pb-1.5 mb-1.5' : 'pb-2 mb-2.5'} gap-2`}>
                       <div className="flex items-center gap-2">
-                        <span className="bg-slate-900 text-white text-xs font-bold px-2.5 py-1 rounded-md" contentEditable suppressContentEditableWarning>
+                        <span className="bg-slate-900 text-white text-xs font-bold px-2 py-0.5 rounded-md" contentEditable suppressContentEditableWarning>
                           प्रश्न {index + 1}
                         </span>
-                        <span className={`text-xs font-bold px-2 py-1 rounded-md border ${currentTheme.badgeBg}`} contentEditable suppressContentEditableWarning>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-md border ${currentTheme.badgeBg}`} contentEditable suppressContentEditableWarning>
                           {q.type}
                         </span>
                         {q.topic && (
@@ -1491,7 +1644,7 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                         {/* Interactive Answer Button */}
                         <button
                           onClick={() => handleToggleRevealAnswer(q.id)}
-                          className={`text-xs font-bold px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 ${
+                          className={`text-xs font-bold px-2 py-0.5 rounded-lg transition cursor-pointer flex items-center gap-1 ${
                             isAnswerRevealed
                               ? 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700'
                               : 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
@@ -1520,9 +1673,9 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                     </div>
 
                     {/* Question Text in Pure Hindi (Bigger & High Legibility) */}
-                    <div className="space-y-1.5 mb-3">
+                    <div className={`space-y-1 ${compactDensity ? 'mb-2' : 'mb-3'}`}>
                       <p 
-                        className={`text-slate-950 font-bold leading-relaxed outline-none focus:bg-blue-50 px-1 rounded ${
+                        className={`text-slate-950 font-bold leading-snug outline-none focus:bg-blue-50 px-1 rounded ${
                           fontScale === 'sm' ? 'text-sm sm:text-base' :
                           fontScale === 'lg' ? 'text-lg sm:text-xl font-extrabold' :
                           fontScale === 'xl' ? 'text-xl sm:text-2xl font-black' :
@@ -1535,8 +1688,8 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                       </p>
                     </div>
 
-                    {/* Options Grid (Clickable & Highlights Correct Answer in Green, Big on Mobile) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-bold mb-3">
+                    {/* Options Grid (Clickable & Highlights Correct Answer in Green) */}
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 ${compactDensity ? 'gap-1.5 mb-2' : 'gap-2 mb-3'} font-bold`}>
                       {q.options.map((opt, optIdx) => {
                         const optionLetters = ['a', 'b', 'c', 'd'];
                         const currentOptLetter = optionLetters[optIdx] || 'a';
@@ -1552,7 +1705,7 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                             // SHOW GREEN ON CORRECT ANSWER
                             optionStyle = "bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-400 font-extrabold shadow-md scale-[1.01]";
                             badgeContent = (
-                              <span className="text-xs sm:text-[11px] bg-white text-emerald-800 px-2 py-0.5 rounded font-black tracking-wide uppercase ml-2 shadow-xs shrink-0">
+                              <span className="text-xs sm:text-[11px] bg-white text-emerald-800 px-1.5 py-0.5 rounded font-black tracking-wide uppercase ml-2 shadow-xs shrink-0">
                                 ✓ सही उत्तर
                               </span>
                             );
@@ -1560,7 +1713,7 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                             // SHOW RED ON WRONG PICK
                             optionStyle = "bg-rose-50 text-rose-800 border-2 border-rose-500 font-bold line-through";
                             badgeContent = (
-                              <span className="text-xs sm:text-[11px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold ml-2 shrink-0">
+                              <span className="text-xs sm:text-[11px] bg-rose-600 text-white px-1.5 py-0.5 rounded font-bold ml-2 shrink-0">
                                 ✗ गलत
                               </span>
                             );
@@ -1573,12 +1726,7 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                           <div
                             key={optIdx}
                             onClick={() => handleSelectOption(q.id, currentOptLetter)}
-                            className={`p-3 sm:p-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
-                              fontScale === 'sm' ? 'text-xs sm:text-sm' :
-                              fontScale === 'lg' ? 'text-base sm:text-base' :
-                              fontScale === 'xl' ? 'text-base sm:text-lg' :
-                              'text-sm sm:text-base'
-                            } ${optionStyle}`}
+                            className={`${compactDensity ? 'p-2 sm:p-2 text-xs sm:text-sm' : 'p-3 sm:p-2.5 text-sm sm:text-base'} rounded-lg border flex items-center justify-between transition-all cursor-pointer ${optionStyle}`}
                           >
                             <span contentEditable suppressContentEditableWarning className="outline-none flex-1 leading-snug font-semibold">
                               {opt}
@@ -1590,13 +1738,13 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
                     </div>
 
                     {/* Card Footer: Exam reference and Answer badge */}
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-[11px]">
+                    <div className={`flex items-center justify-between ${compactDensity ? 'pt-1.5' : 'pt-2'} border-t border-slate-200 text-[11px]`}>
                       <span className="text-slate-500 italic outline-none focus:bg-blue-50" contentEditable suppressContentEditableWarning>
                         [{q.exam}]
                       </span>
 
                       {isAnswerRevealed ? (
-                        <span className="text-emerald-800 font-black bg-emerald-100 px-3 py-1 rounded-lg border border-emerald-300 uppercase shadow-xs flex items-center gap-1">
+                        <span className="text-emerald-800 font-black bg-emerald-100 px-2.5 py-0.5 rounded-lg border border-emerald-300 uppercase shadow-xs flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                           सटीक उत्तर: ({q.ans.toUpperCase()})
                         </span>
@@ -1612,10 +1760,8 @@ export const PdfStudioModal: React.FC<PdfStudioModalProps> = ({ isOpen, onClose,
 
                     {/* Explanation Box if revealed */}
                     {isAnswerRevealed && q.explanation && (
-                      <div className={`mt-2.5 pt-2 border-t border-emerald-200/60 bg-emerald-50/80 p-3 sm:p-2.5 rounded-xl text-emerald-950 font-medium leading-relaxed ${
-                        fontScale === 'lg' || fontScale === 'xl' ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'
-                      }`}>
-                        <span className="font-black text-emerald-900 mr-1 block sm:inline mb-1 sm:mb-0">📚 व्याख्या एवं हल:</span>
+                      <div className={`${compactDensity ? 'mt-2 pt-1.5 p-2 text-xs' : 'mt-2.5 pt-2 p-3 text-xs sm:text-sm'} border-t border-emerald-200/60 bg-emerald-50/80 rounded-lg text-emerald-950 font-medium leading-relaxed`}>
+                        <span className="font-black text-emerald-900 mr-1 block sm:inline mb-0.5 sm:mb-0">📚 व्याख्या एवं हल:</span>
                         <span>{q.explanation}</span>
                       </div>
                     )}

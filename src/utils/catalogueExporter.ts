@@ -32,7 +32,7 @@ export async function downloadRugCataloguePptx(items: VoiceRugItem[], title: str
     slide.background = { color: bgColor };
 
     // Watermark Brand Name
-    slide.addText(company, { x: 0, y: 0, w: '100%', h: '100%', fontSize: 60, bold: true, color: 'FFFFFF', opacity: 0.1, align: 'center', valign: 'middle' });
+    slide.addText(company, { x: 0, y: 0, w: '100%', h: '100%', fontSize: 60, bold: true, color: 'FFFFFF', transparency: 90, align: 'center', valign: 'middle' });
 
     // Full Screen Image (takes most of the left/center)
     if (item.photoUrl) {
